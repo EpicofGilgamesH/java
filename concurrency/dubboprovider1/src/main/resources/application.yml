@@ -1,0 +1,14 @@
+server:
+  port: 9191
+  servlet:
+    context-path: /demo
+
+spring:
+  dubbo:
+    application:
+      name: spring-boot-demo-dubbo-provider1
+    registry:
+      address: zookeeper://localhost:2181
+    protocol:
+      name: dubbo
+      port: 20880

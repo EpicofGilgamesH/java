@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <wildcardResourcePatterns>
+      <entry name="!?*.java" />
+      <entry name="!?*.form" />
+      <entry name="!?*.class" />
+      <entry name="!?*.groovy" />
+      <entry name="!?*.scala" />
+      <entry name="!?*.flex" />
+      <entry name="!?*.kt" />
+      <entry name="!?*.clj" />
+    </wildcardResourcePatterns>
+    <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="concurrencytool" />
+        <module name="designpattern" />
+        <module name="dubbo-consumer" />
+        <module name="dubbo-provider1" />
+        <module name="dubbo-provider2" />
+        <module name="dubboapi" />
+        <module name="dubbocommon" />
+        <module name="my-springmvc" />
+        <module name="springboot-provider1" />
+        <module name="transaction" />
+        <module name="volatile" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel target="1.8">
+      <module name="concurrency" target="1.8" />
+      <module name="concurrencytool" target="1.8" />
+      <module name="designpattern" target="1.8" />
+      <module name="dubbo-consumer" target="8" />
+      <module name="dubbo-provider1" target="1.8" />
+      <module name="dubbo-provider2" target="1.8" />
+      <module name="dubbocommon" target="1.8" />
+      <module name="java-hardworking" target="1.8" />
+      <module name="mq" target="1.8" />
+      <module name="my-springmvc" target="1.8" />
+      <module name="simple-algorithm" target="1.8" />
+      <module name="transaction" target="1.8" />
+      <module name="volatile" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="dubbo-consumer" options="" />
+      <module name="dubbo-provider1" options="" />
+      <module name="dubbo-provider2" options="" />
+      <module name="dubbocommon" options="" />
+    </option>
+  </component>
+</project>

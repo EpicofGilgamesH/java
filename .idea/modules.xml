@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/concurrency/concurrency.iml" filepath="$PROJECT_DIR$/concurrency/concurrency.iml" />
+      <module fileurl="file://$PROJECT_DIR$/concurrency/concurrency-tool/concurrencytool.iml" filepath="$PROJECT_DIR$/concurrency/concurrency-tool/concurrencytool.iml" />
+      <module fileurl="file://$PROJECT_DIR$/design-pattern/designpattern.iml" filepath="$PROJECT_DIR$/design-pattern/designpattern.iml" />
+      <module fileurl="file://$PROJECT_DIR$/concurrency/dubboconsumer/dubbo-consumer.iml" filepath="$PROJECT_DIR$/concurrency/dubboconsumer/dubbo-consumer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/concurrency/dubboprovider1/dubbo-provider1.iml" filepath="$PROJECT_DIR$/concurrency/dubboprovider1/dubbo-provider1.iml" />
+      <module fileurl="file://$PROJECT_DIR$/concurrency/dubboprovider2/dubbo-provider2.iml" filepath="$PROJECT_DIR$/concurrency/dubboprovider2/dubbo-provider2.iml" />
+      <module fileurl="file://$PROJECT_DIR$/concurrency/dubbo-common/dubbocommon.iml" filepath="$PROJECT_DIR$/concurrency/dubbo-common/dubbocommon.iml" />
+      <module fileurl="file://$PROJECT_DIR$/java-hardworking.iml" filepath="$PROJECT_DIR$/java-hardworking.iml" />
+      <module fileurl="file://$PROJECT_DIR$/mq/mq.iml" filepath="$PROJECT_DIR$/mq/mq.iml" />
+      <module fileurl="file://$PROJECT_DIR$/my-springmvc/my-springmvc.iml" filepath="$PROJECT_DIR$/my-springmvc/my-springmvc.iml" />
+      <module fileurl="file://$PROJECT_DIR$/simple-algorithm/simple-algorithm.iml" filepath="$PROJECT_DIR$/simple-algorithm/simple-algorithm.iml" />
+      <module fileurl="file://$PROJECT_DIR$/transaction/transaction.iml" filepath="$PROJECT_DIR$/transaction/transaction.iml" />
+      <module fileurl="file://$PROJECT_DIR$/concurrency/volatile/volatile.iml" filepath="$PROJECT_DIR$/concurrency/volatile/volatile.iml" />
+    </modules>
+  </component>
+</project>

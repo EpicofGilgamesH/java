@@ -1,0 +1,9 @@
+DispatcherServlet.class
+annotation\MyAutowired.class
+controller\Contorller.class
+service\impl\TestServiceImpl.class
+service\TestService.class
+annotation\MyController.class
+annotation\MyService.class
+annotation\MyRequestMapping.class
+annotation\MyRequsetParam.class
