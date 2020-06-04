@@ -21,7 +21,7 @@ public class ArrayQueue {
     }
 
     /**
-     * 入队操作 从tail的后一个位置进行入队,tail往后移动一位
+     * 入队操作 从tail的位置进行入队,tail往后移动一位
      * head为出栈位置序列  tail为入栈位置序列
      *
      * @param item
