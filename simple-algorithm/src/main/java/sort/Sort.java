@@ -1,7 +1,6 @@
 package sort;
 
-import java.text.DecimalFormat;
-import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -72,6 +71,7 @@ public class Sort {
             }
         }*/
 
+        //满交换次数
         for (int i = 0; i < array.length; i++) {
             for (int j = 0; j < array.length - 1; j++) {
                 if (array[j] > array[j + 1]) {
@@ -84,6 +84,29 @@ public class Sort {
         }
         outPutArray(array);
         System.out.println("交换次数:" + exchangeCount);
+    }
+
+    public static void bubbleSort1(int[] array) {
+        int n = array.length;
+        if (n <= 1) {
+            return;
+        }
+        for (int i = 0; i < n; ++i) {
+            boolean flag = false;
+            for (int j = 0; j < n - 1 - i; ++j) {
+                if (array[j] > array[j + 1]) {
+                    int temp = array[j];
+                    array[j] = array[j + 1];
+                    array[j + 1] = temp;
+                    flag = true;
+                }
+            }
+            if (!flag) {
+                break;
+            }
+        }
+        outPutArray(array);
+        System.out.println("");
     }
 
 
@@ -124,6 +147,27 @@ public class Sort {
         }
     }
 
+    public static void insertionSort1(int[] array) {
+        int n = array.length;
+        if (n <= 1) return;
+        for (int i = 1; i < n; ++i) {
+            int value = array[i];
+            int j = i - 1;
+            for (; j >= 0; --j) {
+                if (array[j] > value) {
+                    array[j + 1] = array[j];
+                } else {
+                    break;
+                }
+            }
+            //找到插入点
+            array[j + 1] = value;
+        }
+        outPutArray(array);
+        System.out.println("");
+    }
+
+
     private static void outPutArray(int[] array) {
         for (int i = 0; i < array.length; i++) {
             System.out.print(array[i] + "  ");
@@ -134,7 +178,7 @@ public class Sort {
         int[] array = new int[]{8, 10, 9, 2, 5, 7, 6, 20, 1, 32};
         selectSort(array);
 
-        /*List<String> list = null;
+         /*List<String> list = null;
         System.out.println(list.size());*/
         //前三位
         /*ArrayList<Integer> list = new ArrayList<>();
@@ -167,14 +211,15 @@ public class Sort {
         System.out.println("冲突概率：" + l + "%");*/
 
         int[] array1 = new int[]{8, 10, 9, 2, 5, 7, 6, 20, 1, 32};
+        int[] array2 = new int[]{8, 10, 9, 2, 5, 7, 6, 20, 1, 32};
         bubbleSort(array1);
+        bubbleSort1(array2);
+        int[] array3 = new int[]{8, 10, 9, 2, 5, 7, 6, 20, 1, 32};
+        insertionSort1(array3);
 
         /*Map<Integer, Integer> map = new HashMap<>();
         map.put(1,null);
         map.get(1);*/
-
-        Integer a = null;
-        System.out.println(a.equals(1));
     }
 
     private static String generateZeroString(int count) {
