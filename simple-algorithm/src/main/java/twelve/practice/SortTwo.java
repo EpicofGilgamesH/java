@@ -88,6 +88,8 @@ public class SortTwo {
         a[j] = temp;
     }
 
+
+    //从一组数据中心,选择出第K小的数据,要求时间复杂度为O(n)
     private static int select(int[] a, int k, int p, int r) {
         //p+1=k 如果p+1>k 则出现在a[p+1...r]  如果p+1<k 则出现在a[0...p-1]
         int pivot = a[r];
