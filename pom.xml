@@ -14,6 +14,7 @@
         <module>concurrency</module>
         <module>transaction</module>
         <module>design-pattern</module>
+        <module>epic-common</module>
     </modules>
 
     <dependencyManagement>

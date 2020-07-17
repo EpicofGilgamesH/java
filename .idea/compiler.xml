@@ -24,6 +24,7 @@
         <module name="dubbo-provider2" />
         <module name="dubboapi" />
         <module name="dubbocommon" />
+        <module name="epiccommon" />
         <module name="my-springmvc" />
         <module name="springboot-provider1" />
         <module name="transaction" />
@@ -38,6 +39,7 @@
       <module name="dubbo-provider1" target="1.8" />
       <module name="dubbo-provider2" target="1.8" />
       <module name="dubbocommon" target="1.8" />
+      <module name="epiccommon" target="1.8" />
       <module name="java-hardworking" target="1.8" />
       <module name="mq" target="1.8" />
       <module name="my-springmvc" target="1.8" />

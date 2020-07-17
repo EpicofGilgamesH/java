@@ -9,6 +9,7 @@
       <module fileurl="file://$PROJECT_DIR$/concurrency/dubboprovider1/dubbo-provider1.iml" filepath="$PROJECT_DIR$/concurrency/dubboprovider1/dubbo-provider1.iml" />
       <module fileurl="file://$PROJECT_DIR$/concurrency/dubboprovider2/dubbo-provider2.iml" filepath="$PROJECT_DIR$/concurrency/dubboprovider2/dubbo-provider2.iml" />
       <module fileurl="file://$PROJECT_DIR$/concurrency/dubbo-common/dubbocommon.iml" filepath="$PROJECT_DIR$/concurrency/dubbo-common/dubbocommon.iml" />
+      <module fileurl="file://$PROJECT_DIR$/epic-common/epiccommon.iml" filepath="$PROJECT_DIR$/epic-common/epiccommon.iml" />
       <module fileurl="file://$PROJECT_DIR$/java-hardworking.iml" filepath="$PROJECT_DIR$/java-hardworking.iml" />
       <module fileurl="file://$PROJECT_DIR$/mq/mq.iml" filepath="$PROJECT_DIR$/mq/mq.iml" />
       <module fileurl="file://$PROJECT_DIR$/my-springmvc/my-springmvc.iml" filepath="$PROJECT_DIR$/my-springmvc/my-springmvc.iml" />
