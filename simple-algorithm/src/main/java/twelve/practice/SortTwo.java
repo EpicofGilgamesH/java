@@ -1,5 +1,7 @@
 package twelve.practice;
 
+import java.util.Arrays;
+
 /**
  * @Description 快排和归并排序
  * @Date 2020/7/8 11:12
@@ -121,6 +123,7 @@ public class SortTwo {
         /*quick(a, 0, a.length - 1);
         outPutArray(a);*/
         int index = select(a, 4, 0, a.length - 1);
+        Arrays.sort(a);
         System.out.println(a[index]);
     }
 }

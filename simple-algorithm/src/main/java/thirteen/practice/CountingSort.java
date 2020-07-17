@@ -56,7 +56,7 @@ public class CountingSort {
             int ascii = (int) s[i];
             if (ascii >= 65 && ascii <= 90) {
                 //指针b从右往左遍历,当遇到小写字母,则停止遍历
-                //当两个指针都停止遍历时,进行交互
+                //当两个指针都停止遍历时,进行交换
                 for (; j > 0; --j) {
                     int asciis = (int) s[j];
                     if (asciis >= 97 && asciis <= 122) {
