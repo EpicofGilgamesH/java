@@ -23,5 +23,6 @@
     <orderEntry type="library" name="Maven: com.atomikos:atomikos-util:4.0.6" level="project" />
     <orderEntry type="library" name="Maven: javax.transaction:javax.transaction-api:1.2" level="project" />
     <orderEntry type="library" name="Maven: mysql:mysql-connector-java:5.0.8" level="project" />
+    <orderEntry type="library" name="Maven: com.alibaba:fastjson:unknown" level="project" />
   </component>
 </module>

@@ -2,6 +2,7 @@ package com.epic.concurrency.dubboconsumer.Service.serviceImpl;
 
 import api.LogisticsServices;
 import com.alibaba.dubbo.config.annotation.Reference;
+import com.alibaba.fastjson.JSON;
 import com.epic.concurrency.dubboconsumer.Service.OrderService;
 import entity.Order;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +18,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.util.Arrays;
 import java.util.List;
 
 /**

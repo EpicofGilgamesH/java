@@ -27,5 +27,6 @@
     <orderEntry type="library" name="Maven: org.springframework:spring-core:5.1.2.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-jcl:5.1.2.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-expression:5.1.2.RELEASE" level="project" />
+    <orderEntry type="library" name="Maven: com.alibaba:fastjson:unknown" level="project" />
   </component>
 </module>

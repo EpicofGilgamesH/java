@@ -1,3 +1,5 @@
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class Main {
@@ -18,6 +20,5 @@ public class Main {
         System.out.println(value);
 
         //二进制运算的5中运算方式 与,或,异或,左移,右移
-
     }
 }

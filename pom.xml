@@ -16,6 +16,12 @@
         <module>design-pattern</module>
         <module>epic-common</module>
     </modules>
+    <dependencies>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+        </dependency>
+    </dependencies>
 
     <dependencyManagement>
         <dependencies>
