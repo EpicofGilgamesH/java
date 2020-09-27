@@ -95,7 +95,7 @@ public class NPEError {
 		}).get();*/
 		String[] str = new String[]{"a", "b", "c", "d", "1"};
 		//System.out.println(Arrays.toString(str));
-		Optional<String> s = Optional.ofNullable(str).map(x -> x + "1");
+		Optional<String> s = Optional.ofNullable(str).map(x -> x.length + "1");
 		System.out.println(s.get());
 		/*List<String> list = null;
 		list.stream().forEach(x -> x.toCharArray());*/
@@ -145,5 +145,4 @@ public class NPEError {
 			this.gender = gender;
 		}
 	}
-
 }
