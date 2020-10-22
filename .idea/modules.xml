@@ -14,6 +14,7 @@
       <module fileurl="file://$PROJECT_DIR$/mq/mq.iml" filepath="$PROJECT_DIR$/mq/mq.iml" />
       <module fileurl="file://$PROJECT_DIR$/my-springmvc/my-springmvc.iml" filepath="$PROJECT_DIR$/my-springmvc/my-springmvc.iml" />
       <module fileurl="file://$PROJECT_DIR$/simple-algorithm/simple-algorithm.iml" filepath="$PROJECT_DIR$/simple-algorithm/simple-algorithm.iml" />
+      <module fileurl="file://$PROJECT_DIR$/springcloud-test/springcloudtest.iml" filepath="$PROJECT_DIR$/springcloud-test/springcloudtest.iml" />
       <module fileurl="file://$PROJECT_DIR$/transaction/transaction.iml" filepath="$PROJECT_DIR$/transaction/transaction.iml" />
       <module fileurl="file://$PROJECT_DIR$/concurrency/volatile/volatile.iml" filepath="$PROJECT_DIR$/concurrency/volatile/volatile.iml" />
     </modules>

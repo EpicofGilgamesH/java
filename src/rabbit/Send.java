@@ -26,7 +26,6 @@ public class Send {
 		     Channel channel = connection.createChannel()) {
 			channel.queueDeclare(QUEUE_NAME, false, false, false, null);
 			String message = "hello world";
-
 			channel.basicPublish("", QUEUE_NAME, null, message.getBytes());
 			System.out.println("[send] Send '" + message + "'");
 			while (true) {
@@ -47,5 +46,7 @@ public class Send {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
+
 	}
 }

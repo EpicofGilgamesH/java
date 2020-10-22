@@ -53,6 +53,10 @@ public class TxtOperate {
 			index.setS1(split[0]);
 			index.setS2(split[1]);
 			index.setS3(split[2]);
+			if (split.length >= 4)
+				index.setS4(split[3]);
+			else
+				index.setS4("");
 			indexList.add(index);
 		}
 
@@ -70,9 +74,9 @@ public class TxtOperate {
 		for (Index index : indexList) {
 			String s;
 			if (index.getS1() != "" && index.getS1().equals(s1)) {
-				s = getSpan(index.getC1() + index.getS1().length()) + index.getS2() + getSpan(index.getC2()) + index.getS3() + getSpan(index.getC3());
+				s = getSpan(index.getC1() + index.getS1().length()) + index.getS2() + getSpan(index.getC2()) + index.getS3() + getSpan(index.getC3()) + index.getS4();
 			} else {
-				s = index.getS1() + getSpan(index.getC1()) + index.getS2() + getSpan(index.getC2()) + index.getS3() + getSpan(index.getC3());
+				s = index.getS1() + getSpan(index.getC1()) + index.getS2() + getSpan(index.getC2()) + index.getS3() + getSpan(index.getC3()) + index.getS4();
 			}
 			s1 = index.getS1();
 			bufferedWriter.write(s);
@@ -94,6 +98,7 @@ public class TxtOperate {
 		private String s1;
 		private String s2;
 		private String s3;
+		private String s4;
 		private int c1;
 		private int c2;
 		private int c3;
@@ -120,6 +125,14 @@ public class TxtOperate {
 
 		public void setS3(String s3) {
 			this.s3 = s3;
+		}
+
+		public String getS4() {
+			return s4;
+		}
+
+		public void setS4(String s4) {
+			this.s4 = s4;
 		}
 
 		public int getC1() {

@@ -15,6 +15,7 @@
         <module>transaction</module>
         <module>design-pattern</module>
         <module>epic-common</module>
+        <module>springcloud-test</module>
     </modules>
     <dependencies>
         <dependency>

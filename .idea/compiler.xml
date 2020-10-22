@@ -27,6 +27,7 @@
         <module name="epiccommon" />
         <module name="my-springmvc" />
         <module name="springboot-provider1" />
+        <module name="springcloudtest" />
         <module name="transaction" />
         <module name="volatile" />
       </profile>
@@ -44,6 +45,7 @@
       <module name="mq" target="1.8" />
       <module name="my-springmvc" target="1.8" />
       <module name="simple-algorithm" target="1.8" />
+      <module name="springcloudtest" target="1.8" />
       <module name="transaction" target="1.8" />
       <module name="volatile" target="1.8" />
     </bytecodeTargetLevel>
