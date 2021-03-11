@@ -1,6 +1,8 @@
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 
 /**
  * @Description 将txt以空格分隔符进行对齐操作,并对首行进行合并单元格
@@ -10,6 +12,24 @@ import java.util.List;
 public class TxtOperate {
 
 	public static void main(String[] args) throws IOException {
+
+		List<String> testList = Lists.newArrayList();
+		testList.add("cf1");
+		testList.add("cf2");
+		long start = System.currentTimeMillis();
+		CompletableFuture[] cfArr = testList.stream().
+				map(t -> CompletableFuture
+						.supplyAsync(() -> pause(t))
+						.whenComplete((result, th) -> {
+							System.out.println("hello" + result);
+						})).toArray(CompletableFuture[]::new);
+		// 开始等待所有任务执行完成
+		System.out.println("start block");
+		CompletableFuture.allOf(cfArr).join();//join主线程
+		System.out.println("block finish, consume time:" + (System.currentTimeMillis() - start));
+
+
+
 
 		//读
 		List<String> list = new ArrayList();

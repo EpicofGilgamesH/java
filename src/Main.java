@@ -1,7 +1,9 @@
-import cn.hutool.core.util.ObjectUtil;
-import com.sun.deploy.util.StringUtils;
-
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class Main {
 
@@ -70,6 +72,49 @@ public class Main {
 
         System.out.println("耗时:" + (System.currentTimeMillis() - start));
 
+        List<String> list = new ArrayList<>(Arrays.asList("pickNetworkName "
+                , "deliveryTime    "
+                , "collectStaffCode"
+                , "collectStaffName"
+                , "collectTime     "
+                , "customerId      "
+                , "customerCode    "
+                , " customerName    "
+                , " expressTypeId   "
+                , "expressTypeCode "
+                , "expressTypeName "
+                , "dispatchCode    "));
+        /*List<String> collect = list.stream().map(x -> trim(x))
+                .map(x -> test(x)).collect(Collectors.toList());*/
+
+
+        int cap = 256;
+        int n = cap - 1;
+        n |= n >>> 1;
+        n |= n >>> 2;
+        n |= n >>> 4;
+        n |= n >>> 8;
+        n |= n >>> 16;
+
+        System.out.println(n);
+    }
+
+
+    private static String trim(String str) {
+        String trim = str.trim();
+        try {
+            TimeUnit.MILLISECONDS.sleep(200);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println("trim时间:" + System.currentTimeMillis());
+        return trim;
+    }
+
+    private static String test(String str) {
+        str += ";";
+        System.out.println("test时间:" + System.currentTimeMillis());
+        return str;
     }
 
     private static String desensitization(String str) {
