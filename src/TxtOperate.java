@@ -1,8 +1,10 @@
+import com.google.common.collect.Lists;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
+
 
 /**
  * @Description 将txt以空格分隔符进行对齐操作,并对首行进行合并单元格
@@ -12,6 +14,7 @@ import java.util.concurrent.ExecutorService;
 public class TxtOperate {
 
 	public static void main(String[] args) throws IOException {
+
 
 		List<String> testList = Lists.newArrayList();
 		testList.add("cf1");
@@ -27,8 +30,6 @@ public class TxtOperate {
 		System.out.println("start block");
 		CompletableFuture.allOf(cfArr).join();//join主线程
 		System.out.println("block finish, consume time:" + (System.currentTimeMillis() - start));
-
-
 
 
 		//读
@@ -104,6 +105,10 @@ public class TxtOperate {
 		}
 		bufferedWriter.close();
 		System.out.println("成功");
+	}
+
+	private static String pause(String str) {
+		return str + "123";
 	}
 
 	private static String getSpan(int count) {

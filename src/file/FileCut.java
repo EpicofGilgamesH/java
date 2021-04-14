@@ -1,4 +1,4 @@
-package rabbit;
+package file;
 
 import cn.hutool.core.util.StrUtil;
 
