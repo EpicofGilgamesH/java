@@ -107,7 +107,6 @@ Thumbs.db
 ######################
 *.log
 docker/**
-#test
 
 
 
