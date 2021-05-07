@@ -1,22 +1,23 @@
-import com.alibaba.fastjson.JSON;
+import cn.hutool.core.util.StrUtil;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * @Description TODO
  * @Date 2021-04-08 11:06
  * @Created by wangjie
  */
-public class operateJsonStr {
+public class PodTempTranslate {
 
 	public static void main(String[] args) {
 
 
-		String json = "[{\n" +
+		final String[] json = {"[{\n" +
 				"\t\"countryEnum\": \"CN\",\n" +
 				"\t\"operationDesc\": \"到件扫描\",\n" +
 				"\t\"operationType\": \"ARRIVAL_SCAN\",\n" +
@@ -423,9 +424,9 @@ public class operateJsonStr {
 				"\t\"template\": \"快件到达【$[scanNetworkName]】上一站是【$[nextStopName]】，扫描员【$[scanByName]】，任务单号【$[remark2]】\",\n" +
 				"\t\"trackingType\": \"TASKCODE\",\n" +
 				"\t\"trackingTypeCode\": 4\n" +
-				"}]";
+				"}]"};
 
-		String json1 = "[{\n" +
+		String[] json1 = {"[{\n" +
 				"\t\"countryEnum\": \"CN\",\n" +
 				"\t\"operationDesc\": \"快件揽收\",\n" +
 				"\t\"operationType\": \"EXPRESS_COLLECTION\",\n" +
@@ -560,9 +561,9 @@ public class operateJsonStr {
 				"\t\"scanTypeCode\": 130,\n" +
 				"\t\"template\": \"【$[scanNetworkCity]】订单异常，请联系寄件网点【$[remark3]】或者总部客服【400-820-1666】 \",\n" +
 				"\t\"trackingType\": \"WAYBILL\"\n" +
-				"}]";
+				"}]"};
 
-		List<Node> nodes = JSON.parseArray(json, Node.class);
+		/*List<Node> nodes = JSON.parseArray(json, Node.class);
 		List<Node> nodes1 = JSON.parseArray(json1, Node.class);
 		nodes.addAll(nodes1);
 
@@ -585,7 +586,44 @@ public class operateJsonStr {
 		list.removeAll(Collections.singleton(null));
 		list.removeAll(Collections.singleton(""));
 		List<String> collect = list.stream().distinct().collect(Collectors.toList());
-		collect.forEach(System.out::println);
+		collect.forEach(System.out::println);*/
+
+		Path path = Paths.get("C:\\Users\\Administrator\\Desktop", "translate.txt");
+		Map<String, String> map = new HashMap<>();
+		try (Stream<String> lines = Files.lines(path)) {
+			lines.forEach(x -> {
+				if (StrUtil.isNotEmpty(x)) {
+					String[] s = x.split("\\t");
+					String key = s[0];
+					String value = s[s.length - 1];
+					map.put(key, value);
+				}
+			});
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		Map<String, String> map1 = map;
+		map1 = sortMap(map1);
+
+		final String[] a = {json[0]};
+		final String[] b = {json1[0]};
+		map1.forEach((k, v) -> {
+			a[0] = a[0].replace(k, v);
+			b[0] = b[0].replace(k, v);
+		});
+
+		System.out.println(a[0]);
+		System.out.println(b[0]);
+
+	}
+
+	private static Map<String, String> sortMap(Map<String, String> map) {
+		List<String> list = new ArrayList<>(map.keySet());
+		Collections.sort(list, Comparator.comparingInt(String::length).reversed());
+		Map<String, String> map1 = new LinkedHashMap<>();
+		list.forEach(x -> map1.put(x, map.get(x)));
+		return map1;
 	}
 
 	static class Node {

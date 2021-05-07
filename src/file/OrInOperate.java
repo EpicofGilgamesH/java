@@ -15,9 +15,9 @@ import java.util.stream.Stream;
 public class OrInOperate {
 
 	public static void main(String[] args) {
-		Path filePath = Paths.get("C:\\Users\\Administrator\\Downloads\\", "fix.txt");
+		/*Path filePath = Paths.get("C:\\Users\\Administrator\\Downloads\\", "fix.txt");
 		String waybillNos = orInJoin(filePath, "WAYBILL_NO");
-		System.out.println(waybillNos);
+		System.out.println(waybillNos);*/
 	}
 
 	public static String orInJoin(Path filePath, String filed) {

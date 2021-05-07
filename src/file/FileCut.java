@@ -127,4 +127,16 @@ public class FileCut {
 		}
 	}
 
+	private static void getFilesNew(List<File> list, String path) {
+		File file = new File(path);
+		if (file.isFile()) {
+			list.add(file);
+		} else {
+			File[] files = file.listFiles();
+			for (File fi : files) {
+				getFilesNew(list, fi.getPath());
+			}
+		}
+	}
+
 }

@@ -2,8 +2,10 @@ import com.google.common.collect.Lists;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
@@ -14,7 +16,6 @@ import java.util.concurrent.CompletableFuture;
 public class TxtOperate {
 
 	public static void main(String[] args) throws IOException {
-
 
 		List<String> testList = Lists.newArrayList();
 		testList.add("cf1");
