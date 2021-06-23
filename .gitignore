@@ -29,6 +29,8 @@ local.properties
 .loadpath
 .factorypath
 /src/main/resources/rebel.xml
+mvnw*
+.mvn/
 
 # External tool builders
 .externalToolBuilders/**
