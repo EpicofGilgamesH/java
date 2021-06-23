@@ -1,5 +1,8 @@
 package map;
 
+import com.alibaba.fastjson.JSON;
+
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.List;
@@ -80,8 +83,57 @@ public class LinkedListMap {
 	 * @param l
 	 */
 	public List<Integer> nearLimit(int s, int l) {
+		List<Integer> list = new ArrayList<>();
+		if (l == 0) {
+			list.add(s);
+			return list;
+		}
+		Queue<Node> queue = new LinkedList<>();
+		boolean[] visited = new boolean[v];
+		queue.add(new Node(s, 0));
+		while (queue.size() != 0) {
+			Node w = queue.poll();
+			if (w.getLevel() < l) {
+				for (int i = 0; i < ll[w.getValue()].size(); i++) {
+					Integer a = ll[w.getValue()].get(i);
+					if (!visited[a]) {
+						list.add(a);
+						visited[a] = true;
+						queue.add(new Node(a, w.getLevel() + 1));
+					}
+				}
+			} else {
+				return list;
+			}
+			//某个节点的临近节点遍历完成后
+		}
+		return list;
+	}
 
-		return null;
+	static class Node {
+		private int value; //节点值
+		private int level; //节点的度
+
+		public Node(int value, int level) {
+			this.value = value;
+			this.level = level;
+		}
+
+		public int getValue() {
+			return value;
+		}
+
+		public void setValue(int value) {
+			this.value = value;
+		}
+
+		public int getLevel() {
+			return level;
+		}
+
+		public void setLevel(int level) {
+			this.level = level;
+		}
 	}
 
 	/**
@@ -172,6 +224,7 @@ public class LinkedListMap {
 		map.add(7, 6);
 
 		//map.bfs(0, 6);
-		map.dfs(0, 6);
+		//map.dfs(0, 6);
+		System.out.println(JSON.toJSONString(map.nearLimit(0, 3)));
 	}
 }

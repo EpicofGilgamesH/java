@@ -177,7 +177,7 @@ public class HalfFind {
 		}
 		String ss = aa.substring(0, index + 1);
 		System.out.println(ss);*/
-		double d = sqrt(5, 0.0000001);
+		double d = sqrt(5, 0.001);
 		System.out.println(d);
 	}
 }

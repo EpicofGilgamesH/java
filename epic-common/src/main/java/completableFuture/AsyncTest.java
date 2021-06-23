@@ -40,14 +40,14 @@ public class AsyncTest {
 			end.countDown();
 		}
 		start.await();
-        stopWatch.stop();
+		stopWatch.stop();
         System.out.println(stopWatch.getLastTaskTimeMillis());
 		System.out.println("结果为:" + atomicInteger.get());
 	}
 
 	private static void incream(AtomicInteger integer, CountDownLatch end) throws InterruptedException {
+		System.out.println("开始计算,end="+end.getCount());
 		end.await();
 		integer.getAndIncrement();
-		System.out.println("开始计算,end="+end.getCount());
 	}
 }

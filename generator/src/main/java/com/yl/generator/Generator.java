@@ -46,7 +46,7 @@ public class Generator {
 		// 全局配置
 		GlobalConfig gc = new GlobalConfig();
 		String projectPath = System.getProperty("user.dir");
-		gc.setOutputDir(projectPath + "/src/main/java");
+		gc.setOutputDir(projectPath + "/generator/src/main/java");
 		gc.setAuthor("wangjie");
 		gc.setOpen(false);
 		// gc.setSwagger2(true); 实体属性 Swagger2 注解
@@ -54,11 +54,11 @@ public class Generator {
 
 		// 数据源配置
 		DataSourceConfig dsc = new DataSourceConfig();
-		dsc.setUrl("jdbc:oracle:thin:@10.33.100.27:1521/yinni");
-		// dsc.setSchemaName("public");
+		dsc.setUrl("jdbc:oracle:thin:@10.33.10.28:1521:orcl");
+		//dsc.setSchemaName("public");
 		dsc.setDriverName("oracle.jdbc.driver.OracleDriver");
-		dsc.setUsername("jmsidn_center");
-		dsc.setPassword("oracle");
+		dsc.setUsername("jms_uat");
+		dsc.setPassword("uat_test");
 		mpg.setDataSource(dsc);
 
 		// 包配置
