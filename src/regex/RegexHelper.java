@@ -1,5 +1,9 @@
 package regex;
 
+import com.alibaba.fastjson.JSON;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 /**
@@ -39,7 +43,7 @@ public class RegexHelper {
 		// \B 非字边界匹配.
 		// \d 数字字符匹配.等效于 [0-9]
 		// \D 非数字字符匹配.等效于 [^0-9]
-
+		// \\w匹配字母、数字、下划线。等价于 [A-Za-z0-9_]
 		Pattern pattern1 = Pattern.compile("(\\D*)(\\d+)(.*)");
 
 		{
@@ -74,7 +78,8 @@ public class RegexHelper {
 			//System.out.println(group);
 		}
 		{
-			String regex = "^[0-9a-zA-Z]{12,13}+(-100|-[0][0-9][0-9])?$";
+			String regex = "^[0-9a-zA-Z]{12,13}+(-100|-[0][0-9][0-" +
+					"9])?$";
 
 			String str1 = "12345678912141";
 			String str2 = "123456789121";
@@ -89,5 +94,49 @@ public class RegexHelper {
 			System.out.println("");
 		}
 
+		{
+			//子单规则:-[002-100] 00-99 []
+			String regex = "^(UTE|JTE)[0-9]{12}(-100|-[0][0][2-9]|-[0][1-9][0-9])?$";
+			String regex2 = "^(UTE|JTE)[0-9]{12}(-[2-100]{3})?$";
+			String str = "UT0000015348631";
+			String str1 = "JTE123456789012-111";
+
+			String str2 = "UTE12345678901";
+			String str3 = "UTE12345678901-001";
+			boolean matches = str.matches(regex);
+			boolean matches1 = str1.matches(regex);
+
+			boolean matches2 = str2.matches(regex);
+			boolean matches3 = str3.matches(regex);
+			System.out.println("");
+		}
+
+		{
+			String regex = "^([12]\\d{11})|([2]\\d{11}([0][0][2-9]|[0][1-9][0-9]|[1-9][0-9][0-9]))|([R]\\d{8})$";
+			String regex1 = "^([12]\\d{11}|[2]\\d{11}([0][0][2-9]|[0][1-9][0-9]|[1-9][0-9][0-9])|[R]\\d{8})$";
+			String regex2 = "^[12]\\d{11}|[2]\\d{11}([0][0][2-9]|[0][1-9][0-9]|[1-9][0-9][0-9])|[R]\\d{8}$";
+			String str = "abcR12345678";
+			String str1 = "R12345678";
+			boolean matches = str.matches(regex);
+			boolean matches1 = str1.matches(regex);
+
+			boolean matches2 = str.matches(regex1);
+			boolean matches3 = str1.matches(regex1);
+
+			boolean matches4 = str.matches(regex2);
+			boolean matches5 = str1.matches(regex2);
+			System.out.println("");
+		}
+		{
+			List<String> waybillNos = new ArrayList<>();
+			waybillNos.add("200000046665");
+			System.out.println(JSON.toJSONString(waybillNos));
+		}
+
+	}
+
+	public static void get(final List<String> list) {
+		/*list = new ArrayList<>();
+		list.add("123");*/
 	}
 }

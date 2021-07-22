@@ -99,6 +99,15 @@ public class Main {
         n |= n >>> 16;
 
         System.out.println(n);
+
+
+        int aa = 1;
+        int aaa = 1;
+        int bb = aa++;
+        int cc = ++aaa;
+
+        System.out.println("bb:" + bb);
+        System.out.println("cc:" + cc);
     }
 
 

@@ -10,18 +10,18 @@ import java.util.stream.Stream;
 /**
  * Class Description
  *
- * @author <a href="498711346@qq.com">Swain Wong</ a>
+ * @author
  * @version 1.0.0
  * @date 2020-05-11 10:04
  */
 public enum ModuleNameEnums {
 
-	arrival("arrival"),                                     //到件扫描
-	/*deliveryout("deliveryout"),                             //派件出仓
+	arrival("arrival"),
+	/*deliveryout("deliveryout"),
 	sign("sign"),
-	collection_proxy("collection_proxy"),                   //代理点代收
-	cabinet_entering("cabinet_entering"),                   //快递柜入库
-	cabinet_deliveryout("cabinet_deliveryout"),             //快递柜取出
+	collection_proxy("collection_proxy"),
+	cabinet_entering("cabinet_entering"),
+	cabinet_deliveryout("cabinet_deliveryout"),
 	cabinet_sign("cabinet_sign"),*/;
 
 	ModuleNameEnums(String name) {
