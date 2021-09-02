@@ -1,6 +1,7 @@
 package worktool;
 
 import cn.hutool.core.util.StrUtil;
+import collection.MyArrayList;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.time.LocalDateTime;
@@ -42,6 +43,15 @@ public class ListTest {
 							&& x.getC().isEqual(y.getC()));
 		}
 		System.out.println("耗时3:" + (System.currentTimeMillis() - start4) + "ms");
+
+		long start5 = System.currentTimeMillis();
+		for (int i = 0; i < 100000; i++) {
+			DiffListUtils.subtract2(getMyList1(now), getMyList2(now),
+					(x, y) -> x.getC().equals(y.getC())
+							&& x.getB().equals(y.getB())
+							&& x.getC().isEqual(y.getC()));
+		}
+		System.out.println("耗时4:" + (System.currentTimeMillis() - start5) + "ms");
 
 		TimeUnit.SECONDS.sleep(10);
 	}
@@ -142,6 +152,46 @@ public class ListTest {
 
 	public static List<Node> getList2(LocalDateTime now) {
 		List<Node> list = new ArrayList<>();
+		list.add(new Node("7", "8", now));
+		list.add(new Node("8", "9", now));
+		return list;
+	}
+
+	public static MyArrayList<Node> getMyList1(LocalDateTime now) {
+		MyArrayList<Node> list1 = new MyArrayList<>();
+		list1.add(new Node("1", "2", now));
+		list1.add(new Node("2", "3", now));
+		list1.add(new Node("3", "4", now));
+		list1.add(new Node("4", "5", now));
+		list1.add(new Node("5", "6", now));
+		list1.add(new Node("6", "7", now));
+		list1.add(new Node("7", "7", now));
+		list1.add(new Node("8", "7", now));
+		list1.add(new Node("9", "7", now));
+		list1.add(new Node("10", "7", now));
+		list1.add(new Node("11", "7", now));
+		list1.add(new Node("12", "7", now));
+		list1.add(new Node("6", "7", now));
+		list1.add(new Node("6", "7", now));
+		list1.add(new Node("6", "7", now));
+		list1.add(new Node("6", "7", now));
+		list1.add(new Node("12", "7", now));
+		list1.add(new Node("6", "7", now));
+		list1.add(new Node("6", "7", now));
+		list1.add(new Node("6", "7", now));
+		list1.add(new Node("6", "7", now));
+		list1.add(new Node("12", "7", now));
+		list1.add(new Node("6", "7", now));
+		list1.add(new Node("6", "7", now));
+		list1.add(new Node("6", "7", now));
+		list1.add(new Node("6", "7", now));
+		list1.add(new Node("7", "8", now));
+		list1.add(new Node("8", "9", now));
+		return list1;
+	}
+
+	public static MyArrayList<Node> getMyList2(LocalDateTime now) {
+		MyArrayList<Node> list = new MyArrayList<>();
 		list.add(new Node("7", "8", now));
 		list.add(new Node("8", "9", now));
 		return list;

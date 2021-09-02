@@ -1,7 +1,10 @@
 package regex;
 
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 
+import java.math.BigDecimal;
+import java.sql.Struct;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -132,7 +135,50 @@ public class RegexHelper {
 			waybillNos.add("200000046665");
 			System.out.println(JSON.toJSONString(waybillNos));
 		}
+		{
+			String regex = "^(\\d{1,12})|(\\d{1,12}.\\d{1,2})$";
+			String num = "0.00";
+			String num1 = "0.001";
+			String num2 = "2.00";
+			String num3 = "2.010";
+			String num4 = "2000000000000.010";
 
+			String num5 = "123456789";
+			String num6 = "132456.10";
+			String num7 = "0.03";
+
+			boolean matches = num.matches(regex);
+			boolean matches1 = num1.matches(regex);
+			boolean matches2 = num2.matches(regex);
+			boolean matches3 = num3.matches(regex);
+			boolean matches4 = num4.matches(regex);
+			boolean matches5 = num5.matches(regex);
+			boolean matches6 = num6.matches(regex);
+			boolean matches7 = num7.matches(regex);
+
+			BigDecimal bigDecimal = new BigDecimal(0);
+			System.out.println("saaa" + bigDecimal);
+
+			System.out.println("");
+
+			{
+				int i = 0;
+				int j = 0;
+				System.out.println(i++);
+				System.out.println(++j);
+			}
+			{
+				String x = " 内部系统错误";
+				if (StrUtil.isEmpty(x)) {
+					System.out.println("");
+				}
+				x = x.trim();
+				if ((x = x.trim()).isEmpty()) {
+					System.out.println("");
+				}
+				System.out.println("");
+			}
+		}
 	}
 
 	public static void get(final List<String> list) {
