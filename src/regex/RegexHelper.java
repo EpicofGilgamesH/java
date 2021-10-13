@@ -4,7 +4,6 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 
 import java.math.BigDecimal;
-import java.sql.Struct;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -176,6 +175,24 @@ public class RegexHelper {
 				if ((x = x.trim()).isEmpty()) {
 					System.out.println("");
 				}
+				System.out.println("");
+			}
+
+			{
+				String regex1 = "^[A-Za-z0-9]{10}$";
+				String regex2 = "^[^\\u4e00-\\u9fa5]{0,30}$";
+				String str = "qw243312^%&',;=><M|}{去";
+				boolean matches8 = str.matches(regex2);
+				String str1 = null;
+				boolean matches9 = str1.matches(regex2);
+				System.out.println("");
+			}
+
+			{
+				//限制最大9个字符；只可输入数字和-；输入第五位时自动加杠；邮编示例：40301–110
+				String regex11 = "^[0-9]{5}-[0-9]{1,3}$";
+				String aa = "40301-110";
+				boolean matches8 = aa.matches(regex11);
 				System.out.println("");
 			}
 		}
