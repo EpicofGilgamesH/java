@@ -46,6 +46,8 @@ public abstract class RSABase {
 				RSAPrivateKey rsaPrivateKey = (RSAPrivateKey) keyPair.getPrivate();
 				key = new Key(Base64.encodeBase64String(rsaPublicKey.getEncoded()),
 						Base64.encodeBase64String(rsaPrivateKey.getEncoded()));
+				//key = new Key(Base64.getEncoder().encodeToString(rsaPublicKey.getEncoded()),
+				//		Base64.getEncoder().encodeToString(rsaPrivateKey.getEncoded()));
 			} catch (NoSuchAlgorithmException e) {
 				log.error("RSA初始化失败:{}", e.getMessage());
 			}
@@ -63,10 +65,12 @@ public abstract class RSABase {
 		String result = "";
 		try {
 			byte[] decode = Base64.decodeBase64(key.getPrivateKey());
+			//byte[] decode = Base64.getDecoder().decode(key.getPrivateKey().getBytes());
 			RSAPrivateKey priKey = (RSAPrivateKey) KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(decode));
 			Cipher cipher = Cipher.getInstance("RSA");
 			cipher.init(Cipher.ENCRYPT_MODE, priKey);
 			result = Base64.encodeBase64String(cipher.doFinal(str.getBytes(StandardCharsets.UTF_8)));
+			//result = Base64.getEncoder().encodeToString(cipher.doFinal(str.getBytes(StandardCharsets.UTF_8)));
 		} catch (Exception ex) {
 			log.error("私钥加密错误:{}", ex.getMessage());
 		}
@@ -85,8 +89,10 @@ public abstract class RSABase {
 		try {
 			//对需要解密的密文进行Base64解码
 			byte[] bytes = Base64.decodeBase64(str.getBytes(StandardCharsets.UTF_8));
+			//byte[] bytes = Base64.getDecoder().decode(str.getBytes(StandardCharsets.UTF_8));
 			//Base64私钥
 			byte[] decode = Base64.decodeBase64(key.getPrivateKey());
+			//byte[] decode = Base64.getDecoder().decode(key.getPrivateKey());
 			RSAPrivateKey priKey = (RSAPrivateKey) KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(decode));
 			Cipher cipher = Cipher.getInstance("RSA");
 			cipher.init(Cipher.DECRYPT_MODE, priKey);
@@ -109,12 +115,15 @@ public abstract class RSABase {
 		String result = "";
 		try {
 			byte[] decode = Base64.decodeBase64(publicKey);
+			//byte[] decode = Base64.getDecoder().decode(publicKey);
 			RSAPublicKey priKey = (RSAPublicKey) KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(decode));
 			Cipher cipher = Cipher.getInstance("RSA");
 			cipher.init(Cipher.ENCRYPT_MODE, priKey);
 			result = Base64.encodeBase64String(cipher.doFinal(str.getBytes(StandardCharsets.UTF_8)));
+			//result = Base64.getEncoder().encodeToString(cipher.doFinal(str.getBytes(StandardCharsets.UTF_8)));
 		} catch (Exception ex) {
 			log.error("公钥加密错误:{}", ex.getMessage());
+			System.out.println("");
 		}
 		return result;
 	}
@@ -130,8 +139,10 @@ public abstract class RSABase {
 		try {
 			//对需要解密的密文进行Base64解码
 			byte[] bytes = Base64.decodeBase64(str.getBytes(StandardCharsets.UTF_8));
+			//byte[] bytes = Base64.getDecoder().decode(str.getBytes(StandardCharsets.UTF_8));
 			//Base64私钥
 			byte[] decode = Base64.decodeBase64(publicKey);
+			//byte[] decode = Base64.getDecoder().decode(publicKey);
 			RSAPublicKey pubKey = (RSAPublicKey) KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(decode));
 			Cipher cipher = Cipher.getInstance("RSA");
 			cipher.init(Cipher.DECRYPT_MODE, pubKey);

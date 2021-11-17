@@ -43,5 +43,6 @@ public class PredicateJava8 {
 		System.out.println(function1.compose(function2).apply(5));
 		//先执行调用者,再执行参数 即 2*5  10*10
 		System.out.println(function1.andThen(function2).apply(5));
+
 	}
 }

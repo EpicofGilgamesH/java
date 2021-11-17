@@ -42,9 +42,7 @@ public class CountingSort {
             b[a[i]]--;
         }
         //将数组c拷贝到数组a中
-        for (int i = 0; i < n; ++i) {
-            a[i] = c[i];
-        }
+        System.arraycopy(c, 0, a, 0, n);
     }
 
     //两层for循环,在j的判断和退出循环上有点繁琐,寻找更优的方法

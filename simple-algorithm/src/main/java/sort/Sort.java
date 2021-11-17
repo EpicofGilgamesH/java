@@ -60,17 +60,6 @@ public class Sort {
     public static void bubbleSort(int[] array) {
         int exchangeCount = 0;
         //每一轮比较时,将最小的值交换到第一位 类似于选择排序的思路
-        /*for (int i = 0; i < array.length; i++) {
-            for (int j = i + 1; j < array.length; j++) {
-                if (array[i] > array[j]) {
-                    int temp = array[i];
-                    array[i] = array[j];
-                    array[j] = temp;
-                    exchangeCount++;
-                }
-            }
-        }*/
-
         //满交换次数
         for (int i = 0; i < array.length; i++) {
             for (int j = 0; j < array.length - 1; j++) {

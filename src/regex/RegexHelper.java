@@ -183,8 +183,8 @@ public class RegexHelper {
 				String regex2 = "^[^\\u4e00-\\u9fa5]{0,30}$";
 				String str = "qw243312^%&',;=><M|}{去";
 				boolean matches8 = str.matches(regex2);
-				String str1 = null;
-				boolean matches9 = str1.matches(regex2);
+				/*String str1 = null;
+				boolean matches9 = str1.matches(regex2);*/
 				System.out.println("");
 			}
 
@@ -193,6 +193,20 @@ public class RegexHelper {
 				String regex11 = "^[0-9]{5}-[0-9]{1,3}$";
 				String aa = "40301-110";
 				boolean matches8 = aa.matches(regex11);
+				System.out.println("");
+			}
+
+			{
+				//UAT环境：UTE + 12 位数字，共计15位（UTE00至UTE19开头）
+				//PRO环境：JTE + 12 位数字，共计15位（JE00至JTE19开头）
+
+				String regex11 = "^UTE[0-1]{1}[0-9]{1}[0-9]{10}$";
+				String regex12 = "^JTE[0-1]{1}[0-9]{1}[0-9]{10}$";
+
+				String a = "UTE121234567890";
+				String b = "UTE221234567890";
+				boolean matches8 = a.matches(regex11);
+				boolean matches9 = b.matches(regex11);
 				System.out.println("");
 			}
 		}
