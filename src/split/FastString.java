@@ -1,9 +1,11 @@
 package split;
 
 import cn.hutool.core.collection.CollectionUtil;
-import com.yl.locker.api.dto.TimeConditionDTO;
+import lombok.Data;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -337,10 +339,27 @@ public class FastString {
             if (myEndTime.isAfter(endTime)) {
                 myEndTime = endTime;
             }
-            String startTimeStr = DateUtils.dateTime2Str(myStartTime);
-            String endTimeStr = DateUtils.dateTime2Str(myEndTime);
+            String startTimeStr = myStartTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            String endTimeStr = myEndTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
             list.add(new TimeConditionDTO(startTimeStr, endTimeStr));
         }
         return list;
+    }
+
+    @Data
+    public static class TimeConditionDTO implements Serializable {
+        private static final long serialVersionUID = 3864350252302352983L;
+
+        private String startTime;
+        private String endTime;
+
+        public TimeConditionDTO(String startTime, String endTime) {
+            this.startTime = startTime;
+            this.endTime = endTime;
+        }
+
+        public String toString() {
+            return "[" + this.startTime + "-" + this.endTime + "]";
+        }
     }
 }
