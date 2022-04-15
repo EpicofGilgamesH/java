@@ -1,0 +1,19 @@
+package base;
+
+import java.io.Serializable;
+
+/**
+ * @Description TODO
+ * @Date 2021-12-31 14:49
+ * @Created by wangjie
+ */
+public class TestLamlook {
+
+
+	static class TestVo implements Serializable {
+		private static final long serialVersionUID = 1573758848744025102L;
+		private float piece;
+		private String scanDate;
+
+	}
+}

@@ -15,6 +15,8 @@ public class MatchStr {
 			'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
 	public final static Map<Character, Integer> MAP = new HashMap<>(26);
 
+	public final static long A = 'a';
+
 	/**
 	 * bf Brute Force暴力匹配算法
 	 * 从主串(a 长度m)中依次查找是否存在匹配的模式串(b 长度n) 主串从i=0开始 匹配 [i,i+n] i+n<=m
@@ -91,7 +93,6 @@ public class MatchStr {
 			MAP.put(ALPHABETS[i], PRIMES[i]);
 		}
 	}
-
 
 	/**
 	 * 主串                模式串
@@ -192,8 +193,9 @@ public class MatchStr {
 
 	public static void main(String[] args) {
 
-		/*String a = "aabbccddeeff";
+		String a = "aabbccddeeff";
 		String b = "abcd";
+		/*
 		long start = System.currentTimeMillis();
 		int bf = -1;
 		for (int i = 0; i < 10000; i++) {
@@ -214,10 +216,14 @@ public class MatchStr {
 		System.out.println(i1);*/
 
 
-		char[][] a = {{'d', 'e', 'c', 'd'}, {'a', 'f', 'c', 'e'}, {'b', 'a', 'a', 'f'}, {'c', 'd', 'f', 'c'}};
+		/*char[][] a = {{'d', 'e', 'c', 'd'}, {'a', 'f', 'c', 'e'}, {'b', 'a', 'a', 'f'}, {'c', 'd', 'f', 'c'}};
 		char[][] b = {{'c', 'e'}, {'a', 'f'}};
 
 		int[] ints = arrayRk(a, b);
-		System.out.println(ints);
+		System.out.println(ints);*/
+
+		long asc = 'a';
+		long ascA = 'A';
+		long ca = 'b' - asc;
 	}
 }

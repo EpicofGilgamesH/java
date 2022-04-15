@@ -103,6 +103,25 @@ public abstract class RSABase {
 		return result;
 	}
 
+	protected String decryptStaic(String str,String pKey) {
+		String result = "";
+		try {
+			//对需要解密的密文进行Base64解码
+			byte[] bytes = Base64.decodeBase64(str.getBytes(StandardCharsets.UTF_8));
+			//byte[] bytes = Base64.getDecoder().decode(str.getBytes(StandardCharsets.UTF_8));
+			//Base64私钥
+			byte[] decode = Base64.decodeBase64(pKey);
+			//byte[] decode = Base64.getDecoder().decode(key.getPrivateKey());
+			RSAPrivateKey priKey = (RSAPrivateKey) KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(decode));
+			Cipher cipher = Cipher.getInstance("RSA");
+			cipher.init(Cipher.DECRYPT_MODE, priKey);
+			result = new String(cipher.doFinal(bytes));
+		} catch (Exception ex) {
+			log.error("私钥解密错误:{}", ex.getMessage());
+		}
+		return result;
+	}
+
 	/**
 	 * 接收方用公钥进行加密
 	 *

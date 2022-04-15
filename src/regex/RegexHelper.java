@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSON;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.regex.Pattern;
 
 /**
@@ -82,6 +83,9 @@ public class RegexHelper {
 		{
 			String regex = "^[0-9a-zA-Z]{12,13}+(-100|-[0][0-9][0-" +
 					"9])?$";
+
+			String regex1 = "^\\d{4}-(0[1-9]|1[0-2])-([0-3][1-9]|3[0-1])(\\s|T)([0-1][1-9]|2[0-4]):[0-5]\\d:[0-5]\\d$";
+
 
 			String str1 = "12345678912141";
 			String str2 = "123456789121";
@@ -209,11 +213,16 @@ public class RegexHelper {
 				boolean matches9 = b.matches(regex11);
 				System.out.println("");
 			}
+
+			{
+				System.out.println(System.currentTimeMillis());
+			}
 		}
 	}
 
 	public static void get(final List<String> list) {
 		/*list = new ArrayList<>();
 		list.add("123");*/
+		//JT074601
 	}
 }

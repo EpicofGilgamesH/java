@@ -19,6 +19,9 @@ public class PredicateJava8 {
 		List<Integer> list = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9);
 		//有一个T类型参数返回bool类型值的泛型委托
 		Predicate<Integer> predicate1 = x -> x > 7;
+
+		String s="13242342";
+		s.contains("2");
 		//常规示例
 		System.out.println(predicate1.test(1));
 		System.out.println(predicate1.test(8));

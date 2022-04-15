@@ -54,11 +54,11 @@ public class Generator {
 
 		// 数据源配置
 		DataSourceConfig dsc = new DataSourceConfig();
-		dsc.setUrl("jdbc:oracle:thin:@10.33.10.28:1521:orcl");
+		dsc.setUrl("jdbc:oracle:thin:@10.86.4.118:1521/orcl");
 		//dsc.setSchemaName("public");
 		dsc.setDriverName("oracle.jdbc.driver.OracleDriver");
-		dsc.setUsername("jms_uat");
-		dsc.setPassword("uat_test");
+		dsc.setUsername("litemain_uat");
+		dsc.setPassword("ntEMbD7rXd%WBFhV");
 		mpg.setDataSource(dsc);
 
 		// 包配置
