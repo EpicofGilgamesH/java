@@ -30,12 +30,12 @@ public class Lottery {
         int indicatorsCount = scanner.nextInt();
         //连续10次
         int totaltime = 0;
-        for (int i = 0; i < 50; i++) {
+        for (int i = 0; i < 10; i++) {
             int value = test(count, indicatorsCount);
             totaltime += value;
             System.out.println("第" + (i + 1) + "次摇中期数:" + value);
         }
-        System.out.println("10次摇中平均期数为:" + totaltime / 50);
+        System.out.println("10次摇中平均期数为:" + totaltime / 10);
     }
 
     private static int test(int total, int get) {
