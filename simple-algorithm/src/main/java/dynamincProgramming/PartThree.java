@@ -98,11 +98,79 @@ public class PartThree {
 
 	//计算最长公共子串长度,即比较时只能删除和新增元素时
 
+
+	//一个数字序列包含 n 个不同的数字,如何求出这个序列中的最长递增子序列长度 ?
+
+
+	public static int maxL = 0;
+	public static final int[] arr = new int[]{10, 9, 2, 5, 3, 7, 101, 18};
+
+	/**
+	 * 最长递增子序列长度,动态规划思路分析
+	 * 设定dp数组,当数组只有一个元素时,dp[1]=1
+	 * dp[n]表示以n为结尾的递增子序列最大长度,可得出状态转移表达式:dp[n]=max(dp[s]...dp[e])+1 其中(s...n)为 < n 元素的所有元素
+	 *
+	 * @param arr 目标数组
+	 * @return 返回最大有序子序列
+	 */
+	public static int find(int[] arr) {
+		int n = arr.length;
+		if (n == 0) return 0;
+		int[] dp = new int[n];
+		dp[0] = 1;
+		int ma = 1;
+		for (int i = 1; i < n; i++) {
+			int max = 0;
+			int e = arr[i];
+			for (int j = 0; j < i; j++) {
+				if (arr[j] < e && max < dp[j]) { //找到所有比e小的dp值,取最大
+					max = dp[j];
+				}
+			}
+			dp[i] = max + 1;
+			if (dp[i] > ma) ma = dp[i];
+		}
+		return ma;
+	}
+
+	/**
+	 * 通过二分查找获取最长有序子序列长度
+	 *
+	 * @param arr
+	 * @return
+	 */
+	public static int find1(int[] num) {
+		int[] tails = new int[num.length]; //dp数组中,index下标+1表示有序子序列长度,value值表示子序列的尾字符值
+		int res = 0;//当前子序列长度
+		for (int n = 0; n < num.length; n++) {
+			int i = 0, j = res;
+			while (i < j) { //通过二分在有序数组中获取临界点
+				int m = (i + j) / 2; //中位数
+				if (tails[m] < num[n])
+					i = m + 1;
+				else j = m;
+			}
+			tails[i] = num[n];
+			if (res == j) res++;
+		}
+		return res;
+	}
+
+
 	public static void main(String[] args) {
 		//compare(0, 0, 0);
 		//System.out.println("莱文斯坦距离:" + mV);
 
-		int i = compare_dp();
-		System.out.println("莱文斯坦距离:" + i);
+		//int i = compare_dp();
+		//System.out.println("莱文斯坦距离:" + i);
+
+		//int[] a = {1, 3, 6, 7, 9, 4, 10, 5, 6};
+		//System.out.println(find(a));
+
+		//int i = 0, j = 1;
+		//System.out.println((i+j)/2);
+
+		int[] num = {1, 3, 6, 7, 9, 4, 10, 5, 6};
+		System.out.println(find1(num));
 	}
 }
