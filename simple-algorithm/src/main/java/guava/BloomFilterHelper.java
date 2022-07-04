@@ -16,7 +16,6 @@ import java.util.stream.Stream;
  */
 public class BloomFilterHelper {
 
-
 	private static final long expe = 100000;
 	private static final double fpp = 0.001;
 
@@ -46,5 +45,4 @@ public class BloomFilterHelper {
 		//stringStream.forEach(System.out::println);
 		//peek 一般做debug使用
 	}
-
 }
