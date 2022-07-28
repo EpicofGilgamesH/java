@@ -1,6 +1,5 @@
 package com.yl.generator;
 
-import com.baomidou.mybatisplus.core.exceptions.MybatisPlusException;
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import com.baomidou.mybatisplus.generator.AutoGenerator;
 import com.baomidou.mybatisplus.generator.InjectionConfig;
@@ -25,7 +24,7 @@ public class Generator {
 	 * 读取控制台内容
 	 * </p>
 	 */
-	public static String scanner(String tip) {
+	public static String scanner(String tip) throws Exception {
 		Scanner scanner = new Scanner(System.in);
 		StringBuilder help = new StringBuilder();
 		help.append("请输入" + tip + "：");
@@ -36,10 +35,10 @@ public class Generator {
 				return ipt;
 			}
 		}
-		throw new MybatisPlusException("请输入正确的" + tip + "！");
+		throw new Exception("请输入正确的" + tip + "！");
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		// 代码生成器
 		AutoGenerator mpg = new AutoGenerator();
 

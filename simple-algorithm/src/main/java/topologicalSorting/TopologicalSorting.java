@@ -123,7 +123,6 @@ public class TopologicalSorting {
 
 		//通过拓扑算法来确认依赖关系中是否有环
 		//通过kahn完成后输入顶点的个数不等于总顶点个数,表明此时还存在顶点出度不为0的情况,即存在环.
-
 	}
 
 	public static void main(String[] args) {
@@ -138,5 +137,6 @@ public class TopologicalSorting {
 
 		graph.topoSortByDFS();
 		System.out.println("end.");
+
 	}
 }

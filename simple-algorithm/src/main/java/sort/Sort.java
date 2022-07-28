@@ -206,7 +206,7 @@ public class Sort {
         int[] array3 = new int[]{8, 10, 9, 2, 5, 7, 6, 20, 1, 32};
         insertionSort1(array3);
 
-        /*Map<Integer, Integer> map = new HashMap<>();
+        /*Map<Integer, Integer> map = new SimpleHashMap<>();
         map.put(1,null);
         map.get(1);*/
     }

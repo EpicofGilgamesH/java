@@ -70,6 +70,12 @@
             <artifactId>orika-core</artifactId>
             <version>1.5.2</version>
         </dependency>
+        <dependency>
+            <groupId>com.sun</groupId>
+            <artifactId>tools</artifactId>
+            <scope>system</scope>
+            <systemPath>${JAVA_HOME}/lib/tools.jar</systemPath>
+        </dependency>
     </dependencies>
 
     <dependencyManagement>

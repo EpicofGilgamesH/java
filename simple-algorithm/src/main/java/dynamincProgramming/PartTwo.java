@@ -176,7 +176,6 @@ public class PartTwo {
 		return min;
 	}
 
-
 	/**
 	 * 动态规划,转移数组标识法
 	 *

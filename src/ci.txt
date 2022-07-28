@@ -1,0 +1,62 @@
+name: CI
+
+#on: [push]
+
+# 在master分支发生push事件时触发。
+on:
+  push:
+    branches:
+      - master
+
+env: # 设置环境变量
+  TZ: Asia/Shanghai # 时区（设置时区可使页面中的`最近更新时间`使用时区时间）
+
+jobs:
+  build: # 自定义名称
+    runs-on: ubuntu-latest # 运行在虚拟机环境ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [12.x]
+
+    steps:
+      # 1.检出仓库
+      - name: Checkout
+        uses: actions/checkout@master # 使用的动作。格式：userName/repoName。 官方actions库：https://github.com/actions
+        with:
+          persist-credentials: false
+
+      # 2.安装nodejs
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      # 3.生成静态文件
+      - name: Build
+        run: npm install && npm run build
+
+      #      # 4.部署到 GitHub Pages
+      #      - name: Deploy
+      #        uses: JamesIves/github-pages-deploy-action@releases/v3
+      #        with:
+      #          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+      #          REPOSITORY_NAME: 954118124/blog
+      #          BRANCH: gh-pages
+      #          FOLDER: docs/.vuepress/dist #注意这里是 npm run build 生成静态资源的路径：docs/.vuepress/dist
+
+      # 4. 部署到腾讯云服务器
+      - name: Deploy to Server
+        uses: easingthemes/ssh-deploy@v2.0.7
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.WJ_ACCESS }} # 私钥
+          # 复制操作的参数。"-avzr --delete"意味部署时清空服务器目标目录下的文件
+          ARGS: "-avzr --delete"
+          # 源目录，相对于$GITHUB_WORKSPACE根目录的路径
+          SOURCE: "docs/.vuepress/dist/"
+          # 服务器域名
+          REMOTE_HOST: "106.13.30.216" # 公网ip
+          # 腾讯云默认用户名为root
+          REMOTE_USER: "root"
+          # 目标目录
+          TARGET: "" #/usr/local/software/blog

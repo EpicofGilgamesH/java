@@ -205,6 +205,23 @@ public class ShortestPath {
 		short a = 8;
 		int i = a << 1;
 		System.out.println(i);
+
+		long l = 5000 - System.currentTimeMillis() % 1000;
+		System.out.println(l);
+
+
+		boolean m = false, n = true, o = false;
+		if ((!m || !n) && !o) {
+			System.out.println("");
+		}
+
+		if ((!m || !n) && !o) {
+			System.out.println("");
+		}
+
+		// !((m && n) or o) => (!m || !n) or !o
+		//       !((trigger_code in (0, 200) and handle_code = 0) OR(handle_code = 200))
+		//等价于  (trigger_code not in (0, 200) or handle_code !=0) and handle_code!=200
 	}
 
 }
