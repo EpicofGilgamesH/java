@@ -4,10 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 代码实现那里，有几个关键的变量的声明，感觉不是很精确，比如：
- * “update 更名为 preNodes ，即 待插新节点在每一层的pre 结点数组；
- * forwards 更名为 nextNodes，即 当前节点在每一层的next节点数组”
- *
+ * 跳表实现范围查找、top K 查找、top [K-L] 范围查找
+ * 跳表在索引节点加range字段,记录原链表到该节点的个数,实现top K 和top K-L
+ * 新增、删除时,如果操作*************待实现 todo...
  * @Date 2022-07-28 13:48
  * @Created by wangjie
  */

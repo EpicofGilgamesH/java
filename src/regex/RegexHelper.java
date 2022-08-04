@@ -53,7 +53,7 @@ public class RegexHelper {
 			String pattern = "zo*";
 			String str = "z";
 			boolean matches = str.matches(pattern);
-			//System.out.println(matches);
+			System.out.println(matches);
 		}
 		{
 			String pattern = "zo+";
@@ -216,6 +216,12 @@ public class RegexHelper {
 
 			{
 				System.out.println(System.currentTimeMillis());
+			}
+
+			{
+				String regex1="^[A-Za-z]{3}\\w*$";
+				boolean matches8 = "abc12dfdafa42fdsafdsafafbgcvcxFFDSFD34".matches(regex1);
+				System.out.println("");
 			}
 		}
 	}

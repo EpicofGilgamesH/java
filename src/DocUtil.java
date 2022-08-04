@@ -60,6 +60,6 @@ public class DocUtil {
 	}
 
 	public static void main(String[] args) {
-		execute("")
+		execute("");
 	}
 }
