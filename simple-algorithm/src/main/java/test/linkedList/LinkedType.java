@@ -1,7 +1,4 @@
-package test.LinkedList;
-
-import java.util.ArrayList;
-import java.util.List;
+package test.linkedList;
 
 /**
  * @Description 链表类型 实现单链表、循环链表、双向链表，支持增删操作
@@ -217,14 +214,14 @@ public class LinkedType {
 		/**
 		 * 头结点
 		 */
-		private Node<E> head;
+		public Node<E> head;
 
 		/**
 		 * 尾结点
 		 */
-		private Node<E> tail;
+		public Node<E> tail;
 
-		private int size;
+		public int size;
 
 		static class Node<E> {
 			E item;
