@@ -223,6 +223,18 @@ public class RegexHelper {
 				boolean matches8 = "abc12dfdafa42fdsafdsafafbgcvcxFFDSFD34".matches(regex1);
 				System.out.println("");
 			}
+
+			{
+				String regex3 = "^(([a-zA-Z\\s]*[\\s]*)|[\\s]*)$";
+				boolean matches8 = "".matches(regex3);
+				boolean matches9 = "   ".matches(regex3);
+				boolean matches10 = "1234ffff".matches(regex3);
+				boolean matches11 = "23343".matches(regex3);
+				boolean matches12 = "fadflafa ".matches(regex3);
+				boolean matches13 = "fdafafd".matches(regex3);
+				boolean matches14 = "fafaf  fadfaf".matches(regex3);
+				System.out.println("");
+			}
 		}
 	}
 
