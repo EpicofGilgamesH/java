@@ -6,7 +6,7 @@ server:
 spring:
   dubbo:
     application:
-      name: spring-boot-demo-dubbo-provider2
+      name: springlearn-boot-demo-dubbo-provider2
     registry:
       address: zookeeper://localhost:2181
     protocol:

@@ -28,7 +28,7 @@ public enum ModuleNameEnums {
 		this.name = name;
 	}
 
-	public final static String URL = "http://10.33.60.190:31034/opsappendapi/repair/bywaybillids";
+	public final static String URL = "";
 
 	private String name;
 

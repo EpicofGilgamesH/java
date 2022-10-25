@@ -6,7 +6,7 @@ server:
 spring:
   dubbo:
     application:
-      name: spring-boot-demo-dubbo-consumer
+      name: springlearn-boot-demo-dubbo-consumer
     registry:
       address: zookeeper://127.0.0.1:2181
   datasource:

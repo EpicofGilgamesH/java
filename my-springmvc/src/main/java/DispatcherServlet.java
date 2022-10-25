@@ -248,7 +248,7 @@ public class DispatcherServlet extends HttpServlet {
             } else if (type.equals(Long.class) || type.equals(long.class)) {
                 return (T) new Long(obj.toString());
             } else if (type.equals(Boolean.class) || type.equals(boolean.class)) {
-                return (T) new Boolean(obj.toString());
+                return (T) Boolean.valueOf(obj.toString());
             } else if (type.equals(Short.class) || type.equals(short.class)) {
                 return (T) new Short(obj.toString());
             } else if (type.equals(Float.class) || type.equals(float.class)) {

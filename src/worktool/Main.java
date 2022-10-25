@@ -2,10 +2,9 @@ package worktool;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class Main {
 

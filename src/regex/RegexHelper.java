@@ -6,7 +6,6 @@ import com.alibaba.fastjson.JSON;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.regex.Pattern;
 
 /**
@@ -219,7 +218,7 @@ public class RegexHelper {
 			}
 
 			{
-				String regex1="^[A-Za-z]{3}\\w*$";
+				String regex1 = "^[A-Za-z]{3}\\w*$";
 				boolean matches8 = "abc12dfdafa42fdsafdsafafbgcvcxFFDSFD34".matches(regex1);
 				System.out.println("");
 			}
@@ -233,6 +232,12 @@ public class RegexHelper {
 				boolean matches12 = "fadflafa ".matches(regex3);
 				boolean matches13 = "fdafafd".matches(regex3);
 				boolean matches14 = "fafaf  fadfaf".matches(regex3);
+				System.out.println("");
+			}
+
+			{
+				String regex4 = "^\\d*$";
+				boolean matches8 = "1016276".matches(regex4);
 				System.out.println("");
 			}
 		}
