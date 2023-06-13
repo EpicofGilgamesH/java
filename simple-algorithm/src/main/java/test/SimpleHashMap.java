@@ -198,7 +198,7 @@ public class SimpleHashMap<K, V> {
 	 * @param key
 	 * @return
 	 */
-	public V get(Object key) {
+	public V get(K key) {
 		int hash = hash(key);
 		Node<K, V>[] tab;
 		Node<K, V> first, e;
@@ -297,6 +297,8 @@ public class SimpleHashMap<K, V> {
 		//制造hash碰撞
 		simpleHashMap.put("20220728100", 90);
 		simpleHashMap.put("202207281000", 90);
+
+		//simpleHashMap.get(10);
 
 		Integer integer = simpleHashMap.get("202207281000");
 		System.out.println("");

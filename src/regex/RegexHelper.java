@@ -240,6 +240,11 @@ public class RegexHelper {
 				boolean matches8 = "1016276".matches(regex4);
 				System.out.println("");
 			}
+
+			{
+				String regex5 = "\\$\\{(.*?)\\}";
+				boolean matches9 = "lkfjafj${abc}eedd${dbf}111".matches(regex5);
+			}
 		}
 	}
 

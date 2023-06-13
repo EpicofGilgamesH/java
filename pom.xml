@@ -16,6 +16,8 @@
         <module>design-pattern</module>
         <module>epic-common</module>
         <module>springcloud-test</module>
+        <module>java-agent</module>
+        <module>java-agent-example</module>
     </modules>
     <properties>
         <java.version>1.8</java.version>

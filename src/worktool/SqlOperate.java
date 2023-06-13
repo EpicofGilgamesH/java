@@ -1,5 +1,9 @@
 package worktool;
 
+import base.BaseType;
+
+import java.math.BigDecimal;
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,5 +41,12 @@ public class SqlOperate {
 			i++;
 		}
 		System.out.println(insert);
+
+
+		BigDecimal bigDecimal = new BigDecimal("10.00");
+		System.out.println();
+
+		Date date = new Date();
+		System.out.println(date);
 	}
 }

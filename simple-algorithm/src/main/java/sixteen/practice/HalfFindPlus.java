@@ -8,7 +8,7 @@ package sixteen.practice;
 public class HalfFindPlus {
 
 	/**
-	 * @param [a, n, v]
+	 * @param \\[a, n, v]
 	 * @return int
 	 * @date 2020/7/24 9:49
 	 * @author wangjie
