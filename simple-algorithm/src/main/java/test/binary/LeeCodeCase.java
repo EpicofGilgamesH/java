@@ -1,5 +1,7 @@
 package test.binary;
 
+import com.alibaba.fastjson.JSON;
+
 /**
  * @Description 二分 LeeCode 案例
  * @Date 2022-08-11 17:12
@@ -37,6 +39,7 @@ public class LeeCodeCase {
 				return poivt;
 			}
 		}
+		Math.sqrt(2);
 		return r;
 	}
 
@@ -62,5 +65,8 @@ public class LeeCodeCase {
 	public static void main(String[] args) {
 		int i = mySqrt1(2147395599);
 		System.out.println(i);
+
+		String s = JSON.toJSONString(null);
+		System.out.println(s);
 	}
 }

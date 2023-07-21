@@ -39,7 +39,6 @@ public class SortArray {
 	 * @param v    当前元素值
 	 * @param low  查找起始位置
 	 * @param high 查找结束位置
-	 * @param pos  查找到的值
 	 * @return
 	 */
 	private int getPos(int v, int low, int high) {
