@@ -53,10 +53,10 @@ public class Generator {
 
 		// 数据源配置
 		DataSourceConfig dsc = new DataSourceConfig();
-		dsc.setUrl("jdbc:mysql://10.250.160.52/user_center");
+		dsc.setUrl("jdbc:mysql://10.250.160.100:3306/user_center");
 		//dsc.setSchemaName("public");
 		dsc.setDriverName("com.mysql.cj.jdbc.Driver");
-		dsc.setUsername("admin");
+		dsc.setUsername("adminSuper");
 		dsc.setPassword("pmostc@123");
 		mpg.setDataSource(dsc);
 
