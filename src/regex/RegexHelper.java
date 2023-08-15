@@ -7,6 +7,9 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * @Description 正则表达式入门
@@ -21,10 +24,10 @@ public class RegexHelper {
 
 			String str = "runNNboo123-2_";
 			boolean matches = str.matches(pattern);
-			//System.out.println("是否匹配:" + matches);
+			// System.out.println("是否匹配:" + matches);
 		}
-		//在 Java 中，\\ 表示：我要插入一个正则表达式的反斜线，所以其后的字符具有特殊的意义
-		//表示一位数字的正则表达式是\\d 表示一个普通反斜杠是\\
+		// 在 Java 中，\\ 表示：我要插入一个正则表达式的反斜线，所以其后的字符具有特殊的意义
+		// 表示一位数式字的正则表达是\\d 表示一个普通反斜杠是\\
 		// \ 将下一字符标记为特殊字符、文本、反向引用或八进制转移符 eg: n匹配字符n ; \n匹配换行符; \\\\ 匹配\\; \\ (匹配 （
 		// ^ 匹配输入字符串开始的位置.如果设置了 RegExp 对象的 Multiline 属性，^ 还会与"\n"或"\r"之后的位置匹配
 		// $ 匹配输入字符结尾的位置.如果设置了 RegExp 对象的 Multiline 属性，$ 还会与"\n"或"\r"之前的位置匹配
@@ -244,6 +247,14 @@ public class RegexHelper {
 			{
 				String regex5 = "\\$\\{(.*?)\\}";
 				boolean matches9 = "lkfjafj${abc}eedd${dbf}111".matches(regex5);
+			}
+
+			{
+				String firstName = "fhalkjfa dfnkjf123&)d";
+				int l = firstName.length();
+				StringBuffer sb = new StringBuffer();
+				IntStream.range(0, l).forEach(x -> sb.append('*'));
+				System.out.println("replace:" + sb.toString());
 			}
 		}
 	}

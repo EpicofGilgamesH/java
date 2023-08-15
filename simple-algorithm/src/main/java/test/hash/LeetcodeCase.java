@@ -1,6 +1,5 @@
 package test.hash;
 
-import java.io.Serializable;
 import java.util.*;
 
 public class LeetcodeCase {
@@ -434,6 +433,288 @@ public class LeetcodeCase {
 		public static void main(String[] args) {
 			boolean b = canConstruct("aac", "aab");
 			System.out.println(b);
+		}
+	}
+
+	/**
+	 * 15. 三数之和
+	 * 给你一个整数数组 nums ，判断是否存在三元组 [nums[i], nums[j], nums[k]] 满足 i != j、i != k 且 j != k ，同时还满足 nums[i] + nums[j] + nums[k] == 0。
+	 * 请你返回所有和为 0 且不重复的三元组。
+	 * <p>
+	 * 注意：答案中不可以包含重复的三元组。
+	 * <p>
+	 * <p>
+	 * 示例 1：
+	 * <p>
+	 * 输入：nums = [-1,0,1,2,-1,-4]
+	 * 输出：[[-1,-1,2],[-1,0,1]]
+	 * 解释：
+	 * nums[0] + nums[1] + nums[2] = (-1) + 0 + 1 = 0 。
+	 * nums[1] + nums[2] + nums[4] = 0 + 1 + (-1) = 0 。
+	 * nums[0] + nums[3] + nums[4] = (-1) + 2 + (-1) = 0 。
+	 * 不同的三元组是 [-1,0,1] 和 [-1,-1,2] 。
+	 * 注意，输出的顺序和三元组的顺序并不重要。
+	 * 示例 2：
+	 * <p>
+	 * 输入：nums = [0,1,1]
+	 * 输出：[]
+	 * 解释：唯一可能的三元组和不为 0 。
+	 * 示例 3：
+	 * <p>
+	 * 输入：nums = [0,0,0]
+	 * 输出：[[0,0,0]]
+	 * 解释：唯一可能的三元组和为 0 。
+	 * <p>
+	 * <p>
+	 * 提示：
+	 * <p>
+	 * 3 <= nums.length <= 3000
+	 * -105 <= nums[i] <= 105
+	 */
+	static class ThreeSum {
+
+		/**
+		 * 个人思路:
+		 * 1.首先通过题意的分析,i,j,k不能有任意一个相同,则说明数组中的元素不能重复使用
+		 * 2.其次[答案中不可以包含重复的三元组],则说明三元组不能完全一样
+		 * 现将前两个元素两两组合,得到最后一个元素的值,当最后一个元素有多个时,也只能算一种
+		 * 两两组合元素时,会重复,需要去重处理
+		 * <p>
+		 * 思路错误,量来组合匹配第三个数时,重复场景问题没法解决,需要大量处理来实现,增加了很多工作量
+		 *
+		 * @param nums
+		 * @return
+		 */
+		public static List<List<Integer>> threeSum(int[] nums) {
+			List<List<Integer>> list = new ArrayList<>();
+			Map<String, Integer> map = new HashMap<>();
+			Map<Integer, Integer> set = new HashMap<>();
+			for (int i = 0; i < nums.length; i++) {
+				for (int j = i + 1; j < nums.length; j++) {
+					String key = getKey(nums[i], nums[j]);
+					if (!map.containsKey(key)) {
+						map.put(key, (nums[i] + nums[j]));
+					}
+				}
+				set.put(nums[i], set.getOrDefault(nums[i], 0) + 1);
+			}
+			for (Map.Entry<String, Integer> entry : map.entrySet()) {
+				String key = entry.getKey();
+				String[] s = key.split("\\|");
+				Integer n1 = Integer.valueOf(s[0]);
+				Integer n2 = Integer.valueOf(s[1]);
+				set.put(n1, set.getOrDefault(n1, 0) - 1);
+				set.put(n2, set.getOrDefault(n2, 0) - 1);
+				Integer v = -entry.getValue();
+				Integer v1;
+				if ((v1 = set.get(v)) != null && v1 > 0) {
+					list.add(Arrays.asList(n1, n2, v));
+					set.put(v1, set.getOrDefault(v1, 0) - 1);
+				}
+				set.put(n1, set.getOrDefault(n1, 0) + 1);
+				set.put(n2, set.getOrDefault(n2, 0) + 1);
+
+			}
+			return list;
+		}
+
+		private static String getKey(Integer i, Integer j) {
+			String key;
+			if (i >= j) {
+				key = i + "|" + j;
+			} else {
+				key = j + "|" + i;
+			}
+			return key;
+		}
+
+		/**
+		 * 官方
+		 * 正确的思路应该是双指针,但是关键在于思路的分析,如果想到这样做?为什么这样做是对的?思路的推导过程是怎样的?
+		 * 按常规思路,先知道到所有的前两个元素的2元祖,然后匹配剩下的元素,找到匹配的三元组,最后进行去重,题意要求,三元组的元素不能重复.
+		 * 官方思路是声明二元组时,将第三个元素定位在数组的末端,数组是升序的,三个元素分别设为 a,b,c
+		 * -(a+b) = x c从右往左移动到c'时,有c >= c',排序后c从大往小遍历,能容易的避免重复
+		 * 1.如果c < x 则[a,b] 找不到匹配的c,二元组变成 [a,b']
+		 * 2.如果c > x 则要找到c' < c 满足情况
+		 * 3.如果c = x 则直接将二元组变成 [a,b']
+		 * 以上情况,需要判断b != b' c != c' 来排除重复场景 还有最重要的一点,就是a和b在移动时,c不需要重新回位到尾部
+		 * 当[a,b]元祖移动到 [a,b'] 时,有 a+b < a+b',之前是-(a+b) < c 那么 -(a+b) 变小,则c'变小才能符合,所以c'在之前c的基础上
+		 * 向左移动
+		 * <p>
+		 * 官方示例节省时间的原因是,控制c位置的while循环体中,处理逻辑很少
+		 *
+		 * @param nums
+		 * @return
+		 */
+		public static List<List<Integer>> threeSumOfficial(int[] nums) {
+			List<List<Integer>> list = new ArrayList<>();
+			Arrays.sort(nums);
+			for (int i = 0; i < nums.length; i++) {
+				if (nums[i] > 0) {
+					break;
+				}
+				if (i > 0 && nums[i] == nums[i - 1]) {
+					continue;
+				}
+				int k = nums.length - 1;
+				for (int j = i + 1; j < nums.length; j++) {
+					if (j > i + 1 && nums[j] == nums[j - 1]) {
+						continue;
+					}
+					int v = -(nums[i] + nums[j]);
+					while (j < k) {
+						if (nums[k] > v) {
+							k--;
+						} else if (nums[k] < v) {
+							break;
+						} else {
+							List<Integer> l = new ArrayList<>();
+							l.add(nums[i]);
+							l.add(nums[j]);
+							l.add(nums[k]);
+							list.add(l);
+							k--;
+							break;
+						}
+					}
+				}
+			}
+			return list;
+		}
+
+		public static List<List<Integer>> threeSumOfficialII(int[] nums) {
+			List<List<Integer>> list = new ArrayList<>();
+			Arrays.sort(nums);
+			for (int i = 0; i < nums.length; i++) {
+				if (nums[i] > 0) {
+					break;
+				}
+				if (i > 0 && nums[i] == nums[i - 1]) {
+					continue;
+				}
+				int k = nums.length - 1;
+				for (int j = i + 1; j < nums.length; j++) {
+					if (j > i + 1 && nums[j] == nums[j - 1]) {
+						continue;
+					}
+					int v = -(nums[i] + nums[j]);
+					while (j < k && nums[k] > v) {  // while循环只来确定k的位置
+						k--;
+					}
+					if (j == k) break;
+					if (nums[k] == v) {
+						List<Integer> l = new ArrayList<>();
+						l.add(nums[i]);
+						l.add(nums[j]);
+						l.add(nums[k]);
+						list.add(l);
+					}
+				}
+			}
+			return list;
+		}
+
+		public static void main(String[] args) {
+			List<List<Integer>> lists = threeSumOfficialII(new int[]{-1, 0, 1, 2, -1, -4});
+			System.out.println();
+
+			Long a = null, b = 20L;
+			long l = a - b;
+			System.out.println(l);
+		}
+	}
+
+	/**
+	 * 18. 四数之和
+	 * 给你一个由 n 个整数组成的数组 nums ，和一个目标值 target 。请你找出并返回满足下述全部条件且不重复的四元组
+	 * [nums[a], nums[b], nums[c], nums[d]] （若两个四元组元素一一对应，则认为两个四元组重复）：
+	 * <p>
+	 * 0 <= a, b, c, d < n
+	 * a、b、c 和 d 互不相同
+	 * nums[a] + nums[b] + nums[c] + nums[d] == target
+	 * 你可以按 任意顺序 返回答案 。
+	 * <p>
+	 * 示例 1：
+	 * <p>
+	 * 输入：nums = [1,0,-1,0,-2,2], target = 0
+	 * 输出：[[-2,-1,1,2],[-2,0,0,2],[-1,0,0,1]]
+	 * 示例 2：
+	 * <p>
+	 * 输入：nums = [2,2,2,2,2], target = 8
+	 * 输出：[[2,2,2,2]]
+	 * <p>
+	 * <p>
+	 * 提示：
+	 * <p>
+	 * 1 <= nums.length <= 200
+	 * -109 <= nums[i] <= 109
+	 * -109 <= target <= 109
+	 */
+	static class fourSum {
+
+		/**
+		 * 个人思路:
+		 * 跟三数之和一样的思路,三数之和是确认前两个元素,然后第三个元素中数组的尾部往左推动,当二元组向后推动时,第三个元素无需回到尾部.
+		 * 四数之和的思路是,先声明前三个元素的三元组,在三元组向右移动时,第四个元素从尾部向左推动.
+		 *
+		 * @param nums
+		 * @param target
+		 * @return
+		 */
+		public static List<List<Integer>> fourSum(int[] nums, int target) {
+			int n = nums.length;
+			List<List<Integer>> re = new ArrayList<>();
+			if (n < 4) {
+				return re;
+			}
+			Arrays.sort(nums);
+			for (int i = 0; i <= n - 4; i++) { // i的位置后面得保留最少4个元素
+				if (i > 0 && nums[i] == nums[i - 1]) {
+					continue;
+				}
+				if ((long) nums[i] + nums[i + 1] + nums[i + 2] + nums[i + 3] > target) { // 如果连续四个元数的和已经比target大,则不需要再找了,已经不符合条件
+					break;
+				}
+				if ((long) nums[i] + nums[n - 3] + nums[n - 2] + nums[n - 1] < target) { //如果i元组+最后的3个元素还比target小,那么对于这个i不可能存在答案,继续寻找下一个i
+					continue;
+				}
+				for (int j = i + 1; j <= n - 3; j++) { // j的位置后面得保留最少3个元素
+					if (j > i + 1 && nums[j] == nums[j - 1]) {
+						continue;
+					}
+					if ((long) nums[i] + nums[j] + nums[j + 1] + nums[j + 2] > target) { // 对于[i,j]二元组,后面连续两个元素之和比target大,那么不需要再遍历,需要换个i才行
+						break;
+					}
+					if ((long) nums[i] + nums[j] + nums[n - 2] + nums[n - 1] < target) { //对于[i,j]二元组,加上最后的两个元素都比target小,那么这个j需要往右移动
+						continue;
+					}
+					for (int k = j + 1; k <= n - 2; k++) {
+						if (k > j + 1 && nums[k] == nums[k - 1]) {
+							continue;
+						}
+						long v = (long) target - ((long) nums[i] + nums[j] + nums[k]);
+						int l = n - 1;
+						while (l > k && nums[l] > v) {
+							l--;
+						}
+						if (l == k) break; // k和l重合了,则三元组需要移动
+						if (nums[l] == v) {
+							List<Integer> list = new ArrayList<>();
+							list.add(nums[i]);
+							list.add(nums[j]);
+							list.add(nums[k]);
+							list.add(nums[l]);
+							re.add(list);
+						}
+					}
+				}
+			}
+			return re;
+		}
+
+		public static void main(String[] args) {
+			List<List<Integer>> lists = fourSum(new int[]{1, 0, -1, 0, -2, 2}, 0);
+			System.out.println(lists);
 		}
 	}
 }
