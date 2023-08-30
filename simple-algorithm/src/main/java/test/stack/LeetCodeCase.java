@@ -988,4 +988,168 @@ public class LeetCodeCase {
 			System.out.println(Arrays.toString(arr1));
 		}
 	}
+
+	/**
+	 * 由上一题衍生出来的求topK元素
+	 * 215. 数组中的第K个最大元素
+	 * 给定整数数组 nums 和整数 k，请返回数组中第 k 个最大的元素。
+	 * <p>
+	 * 请注意，你需要找的是数组排序后的第 k 个最大的元素，而不是第 k 个不同的元素。
+	 * <p>
+	 * 你必须设计并实现时间复杂度为 O(n) 的算法解决此问题。
+	 * <p>
+	 * 示例 1:
+	 * <p>
+	 * 输入: [3,2,1,5,6,4], k = 2
+	 * 输出: 5
+	 * 示例 2:
+	 * <p>
+	 * 输入: [3,2,3,1,2,4,5,5,6], k = 4
+	 * 输出: 4
+	 * <p>
+	 * 提示：
+	 * <p>
+	 * 1 <= k <= nums.length <= 105
+	 * -104 <= nums[i] <= 104
+	 */
+	public static class FindKthLargest {
+
+		/**
+		 * top k ,快排的分成3部分的有序区域,当pivot=k-1时,说明pivot就是第k大的元素
+		 */
+		public static int findKthLargest(int[] nums, int k) {
+			return fastSort(nums, k, 0, nums.length - 1);
+		}
+
+		public static int fastSort(int[] nums, int k, int p, int r) {
+			int pivot = nums[r];
+			int i = p, j = p;
+			for (; j < r; ++j) {
+				if (nums[j] > pivot) {
+					swap(nums, i, j);
+					i++;
+				}
+			}
+			swap(nums, i, r);
+			if (i > k - 1) { // 说明第k大的元素在左边已排区中,需要在已排区中继续分区,找到pivot=k-1
+				return fastSort(nums, k, p, i - 1);
+			} else if (i < k - 1) { // 说明第k大的元素在右边较小区,需要在右边继续分区,找到pivot=k-1
+				return fastSort(nums, k, i + 1, r);
+			} else {
+				return nums[i];  // 那么,如何确定一定会存在pivot=k-1的场景呢? 当元素总数<k时,根本不存在第k大的元素,则需要递归终止出口
+			}
+		}
+
+
+		public static int findKthLargestII(int[] nums, int k) {
+			return fastSortII(nums, k, 0, nums.length - 1);
+		}
+
+		/**
+		 * 防止最后一个元素每次都最小,时间复杂度退化到O(n^2) 加入随机区分点
+		 */
+		public static int fastSortII(int[] nums, int k, int p, int r) {
+			int v = (int) (Math.random() * (r - p + 1)) + p;
+			int pivot = nums[v];
+			swap(nums, v, r);
+			int i = p, j = p;
+			for (; j < r; ++j) {
+				if (nums[j] > pivot) {
+					swap(nums, i, j);
+					i++;
+				}
+			}
+			swap(nums, i, r);
+			if (i > k - 1) { // 说明第k大的元素在左边已排区中,需要在已排区中继续分区,找到pivot=k-1
+				return fastSort(nums, k, p, i - 1);
+			} else if (i < k - 1) { // 说明第k大的元素在右边较小区,需要在右边继续分区,找到pivot=k-1
+				return fastSort(nums, k, i + 1, r);
+			} else {
+				return nums[i];  // 那么,如何确定一定会存在pivot=k-1的场景呢? 当元素总数<k时,根本不存在第k大的元素,则需要递归终止出口
+			}
+		}
+
+		private static void swap(int[] arr, int i, int j) {
+			int temp = arr[i];
+			arr[i] = arr[j];
+			arr[j] = temp;
+		}
+
+		/**
+		 * 使用小顶堆来实现,堆的元素个数为k,比堆顶小的元素直接过滤,比堆顶大的元素入堆;适合总数据量大,但是k比较小的场景
+		 * 时间复杂度分析:堆化是(k-2)/2 * Log k ;入堆是 (n-k) Log k ;总复杂度应该是n log k ;此时如果k远小于n,复杂度将会接近 n
+		 */
+		public static int findKthLargestByPriorityQueue(int[] nums, int k) {
+			// 拿前k个元素进行堆化,当然也可以使用插入的方式进行堆化;下标[0,k-1]
+			// 插入的方式进行堆化 从下至上,子节点与父节点比较;直接堆化的方式,从上至下,所有的非叶子节点倒序堆化,父节点与两个字节点进行比较
+			for (int i = (k - 2) / 2; i >= 0; --i) {
+				heapify(nums, i, k - 1);
+			}
+
+			for (int i = k; i < nums.length; ++i) {
+				if (nums[i] > nums[0]) { // 比堆顶元素小,则忽略;比堆顶元素大,替换堆顶,重新堆化;保持小顶堆始终存放得前k大的元素
+					nums[0] = nums[i];
+					heapify(nums, 0, k - 1);
+				}
+			}
+			// 小顶堆排序,堆顶就是当前元素中最小的,而对的元素个数为k,则堆顶为第k大的元素
+			return nums[0];
+		}
+
+		/**
+		 * 堆化数组
+		 *
+		 * @param nums 数组
+		 * @param s    需要堆化的开始下标
+		 * @param r    需要堆化的结束下标
+		 */
+		public static void heapifyNums(int[] nums, int s, int r) {
+			// 从上到下进行堆化,最后一个非叶子节点下标 (r-s)/2
+			int k = (r - s) / 2;
+			for (int i = k; i >= 0; --i) {
+				while (true) {
+					int minPos = i;
+					if (2 * i + 1 <= r && nums[2 * i + 1] < nums[i]) {
+						minPos = 2 * i + 1;
+					}
+					if (2 * i + 2 <= r && nums[2 * i + 2] < nums[i]) {
+						minPos = 2 * i + 2;
+					}
+					if (minPos == i) break; // k节点比其两个字节点,都小;则该节点已堆化完成,这就是非叶子节点倒序堆化的原因
+					swap(nums, i, minPos);
+					i = minPos;
+				}
+			}
+		}
+
+		/**
+		 * 从上到下堆化操作
+		 *
+		 * @param nums 数组
+		 * @param s    要堆化的元素下标
+		 * @param n    堆的最后一个元素下标
+		 */
+		public static void heapify(int[] nums, int s, int n) {
+			while (true) {
+				int minPos = s;
+				if (2 * s + 1 <= n && nums[2 * s + 1] < nums[minPos]) {
+					minPos = 2 * s + 1;
+				}
+				if (2 * s + 2 <= n && nums[2 * s + 2] < nums[minPos]) {
+					minPos = 2 * s + 2;
+				}
+				if (minPos == s) break; // k节点比其两个字节点,都小;则该节点已堆化完成,这就是非叶子节点倒序堆化的原因
+				swap(nums, s, minPos);
+				s = minPos;
+			}
+		}
+
+		public static void main(String[] args) {
+			int[] arr = new int[]{3, 2, 1, 5, 6, 4, 7, 8, 23};
+			// int kthLargest = findKthLargestII(arr, 3);
+			// System.out.println(kthLargest);
+			int kthLargestByPriorityQueue = findKthLargestByPriorityQueue(arr, 5);
+			System.out.println(kthLargestByPriorityQueue);
+		}
+	}
 }
