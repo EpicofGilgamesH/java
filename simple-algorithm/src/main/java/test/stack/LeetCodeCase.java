@@ -1,6 +1,7 @@
 package test.stack;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 栈的使用
@@ -624,6 +625,367 @@ public class LeetCodeCase {
 		public static void main(String[] args) {
 			int i = evalRPN(new String[]{"10", "6", "9", "3", "+", "-11", "*", "/", "*", "17", "+", "5", "+"});
 			System.out.println(i);
+		}
+	}
+
+	/**
+	 * 239. 滑动窗口最大值
+	 * <p>
+	 * 给你一个整数数组 nums，有一个大小为 k 的滑动窗口从数组的最左侧移动到数组的最右侧。你只可以看到在滑动窗口内的 k 个数字。
+	 * 滑动窗口每次只向右移动一位。
+	 * <p>
+	 * 返回 滑动窗口中的最大值 。
+	 * <p>
+	 * 示例 1：
+	 * <p>
+	 * 输入：nums = [1,3,-1,-3,5,3,6,7], k = 3
+	 * 输出：[3,3,5,5,6,7]
+	 * 解释：
+	 * 滑动窗口的位置                最大值
+	 * ---------------               -----
+	 * [1  3  -1] -3  5  3  6  7      3
+	 * 1 [3  -1  -3] 5  3  6  7       3
+	 * 1  3 [-1  -3  5] 3  6  7       5
+	 * 1  3  -1 [-3  5  3] 6  7       5
+	 * 1  3  -1  -3 [5  3  6] 7       6
+	 * 1  3  -1  -3  5 [3  6  7]      7
+	 * 示例 2：
+	 * <p>
+	 * 输入：nums = [1], k = 1
+	 * 输出：[1]
+	 * <p>
+	 * <p>
+	 * 提示：
+	 * <p>
+	 * 1 <= nums.length <= 105
+	 * -104 <= nums[i] <= 104
+	 * 1 <= k <= nums.length
+	 */
+	public static class MaxSlidingWindow {
+
+		/**
+		 * 个人思路:
+		 * 只需要获取最大值,跟排序还是很大区别的;
+		 *
+		 * @param nums
+		 * @param k
+		 * @return
+		 */
+		public static int[] maxSlidingWindow(int[] nums, int k) {
+			if (nums.length == 1) {
+				return nums;
+			}
+			if (k == 1) {
+				return nums;
+			}
+			int[] arr = new int[nums.length - k + 1];
+			Deque<Integer> queue = new LinkedList<>();
+			if (nums[0] > nums[1]) {
+				queue.add(nums[1]);
+				queue.add(nums[0]);
+			} else {
+				queue.add(nums[0]);
+				queue.add(nums[1]);
+			}
+			if (nums.length == 2) {
+				return new int[]{queue.getLast()};
+			}
+			for (int i = 2; i < nums.length; i++) {
+				if (nums[i] > queue.getLast()) {
+					queue.add(nums[i]);
+					queue.pollFirst();
+				}
+				if (i - k >= 0 && nums[i - k] > queue.getFirst()) {
+					queue.pollFirst();
+					queue.addFirst(nums[i - k]);
+				}
+				if (i - k + 1 >= 0)
+					arr[i - k + 1] = queue.getLast();
+			}
+			return arr;
+		}
+
+		/**
+		 * 优先级队列应该比较容易实现,但是双端队列的思路,只能通过官方的解释正向理解,自己思考完全没有那个理解 xd
+		 * <p>
+		 * 思路详解:
+		 * 1.用队列存放滑动窗口中元素的下标,但是这些下标的元素在队列中应递减排列,但下标值应递增;这样就可以从队尾找到最大值,则滑动窗口时,
+		 * 移除掉左边界的元素,并加入右边界的元素. 那么如果做到这样的效果呢?
+		 * 2.理论依据,窗口中的[i],[j]两个元素,当i < j 即[i]在[j]的左边;此时如果[i] < [j],那么只要[j]元素存在队列中,[i]就是可以丢弃的.
+		 * 所以,一旦入队的元素比队尾大,队尾元素就可以丢弃了
+		 * <p>
+		 * 输入: nums = [1,3,-1,-3,5,3,6,7], 和 k = 3
+		 * 输出: [3,3,5,5,6,7]
+		 * 初始状态：L=R=0,队列:{}
+		 * i=0,nums[0]=1。队列为空,直接加入。队列：{1}
+		 * i=1,nums[1]=3。队尾值为1，3>1，弹出队尾值，加入3。队列：{3}
+		 * i=2,nums[2]=-1。队尾值为3，-1<3，直接加入。队列：{3,-1}。此时窗口已经形成，L=0,R=2，result=[3]
+		 * i=3,nums[3]=-3。队尾值为-1，-3<-1，直接加入。队列：{3,-1,-3}。队首3对应的下标为1，L=1,R=3，有效。result=[3,3]
+		 * i=4,nums[4]=5。队尾值为-3，5>-3，依次弹出后加入。队列：{5}。此时L=2,R=4，有效。result=[3,3,5]
+		 * i=5,nums[5]=3。队尾值为5，3<5，直接加入。队列：{5,3}。此时L=3,R=5，有效。result=[3,3,5,5]
+		 * i=6,nums[6]=6。队尾值为3，6>3，依次弹出后加入。队列：{6}。此时L=4,R=6，有效。result=[3,3,5,5,6]
+		 * i=7,nums[7]=7。队尾值为6，7>6，弹出队尾值后加入。队列：{7}。此时L=5,R=7，有效。result=[3,3,5,5,6,7]
+		 * <p>
+		 * R=i L=k-i ,队列中的值递减排列,窗口滑动时,判断左边界元素是否还在,即队首的i值是否 < L,进行弹出
+		 * 队列中存储元素下标值,方便窗口滑动时的元素移除
+		 * 最终队列中元素的效果,元素值从大到小排列,下标值按原序排列
+		 *
+		 * @param nums
+		 * @param k
+		 * @return
+		 */
+		public static int[] maxSlidingWindowOfficial(int[] nums, int k) {
+			if (nums.length == 1) {
+				return nums;
+			}
+			int[] arr = new int[nums.length - k + 1];
+			Deque<Integer> deque = new LinkedList<>();
+			for (int i = 0; i < nums.length; ++i) {
+				while (!deque.isEmpty() && nums[i] > nums[deque.peekLast()]) {
+					deque.pollLast();
+				}
+				deque.addLast(i);
+				// 判断滑动窗口是否形成,是否需要移除左边界元素
+				if (k - i - 1 <= 0) {
+					if (deque.peekFirst() <= i - k) {
+						deque.pollFirst();
+					}
+					arr[i - k + 1] = nums[deque.peekFirst()];
+				}
+			}
+			return arr;
+		}
+
+		public static void main(String[] args) {
+			int[] nums = new int[]{1, 3, -1, -3, 5, 3, 6, 7};
+			int[] ints = maxSlidingWindowOfficial(nums, 3);
+			System.out.println(Arrays.toString(ints));
+		}
+	}
+
+	/**
+	 * 347. 前 K 个高频元素
+	 * <p>
+	 * 给你一个整数数组 nums 和一个整数 k ，请你返回其中出现频率前 k 高的元素。你可以按 任意顺序 返回答案。
+	 * <p>
+	 * 示例 1:
+	 * <p>
+	 * 输入: nums = [1,1,1,2,2,3], k = 2
+	 * 输出: [1,2]
+	 * 示例 2:
+	 * <p>
+	 * 输入: nums = [1], k = 1
+	 * 输出: [1]
+	 * <p>
+	 * 提示：
+	 * <p>
+	 * 1 <= nums.length <= 105
+	 * k 的取值范围是 [1, 数组中不相同的元素的个数]
+	 * 题目数据保证答案唯一，换句话说，数组中前 k 个高频元素的集合是唯一的
+	 * <p>
+	 * 进阶：你所设计算法的时间复杂度 必须 优于 O(n log n) ，其中 n 是数组大小。
+	 */
+	public static class TopKFrequent {
+
+		/**
+		 * 个人思路:
+		 * 典型的TopK问题的变换,最优解有快排求TopK 和 大小顶堆求TopK 时间复杂度都是O(n*Log n)
+		 * 当然还有借助HashMap的方式,遍历完后,比较出TopK元素
+		 */
+		public static int[] topKFrequentByHash(int[] nums, int k) {
+			Map<Integer, Integer> map = new HashMap<>();
+			for (int i = 0; i < nums.length; i++) {
+				map.put(nums[i], map.getOrDefault(nums[i], 0) + 1);
+			}
+			List<Map.Entry<Integer, Integer>> list = new ArrayList<>(map.entrySet());
+			list.sort((o1, o2) -> o2.getValue() - o1.getValue());
+			int[] arr = new int[k];
+			for (int i = 0; i < k; i++) {
+				arr[i] = list.get(i).getKey();
+			}
+			return arr;
+		}
+
+		/**
+		 * 使用大顶堆求TopK 发现之前学的数据结构知识已经忘干净了
+		 * 1.堆的定义
+		 * 2.堆化的过程
+		 * 3.堆排序的过程
+		 * <p>
+		 * 跌跌撞撞,终于把堆排序的代码手写出来了,为什么之前学得关于堆排序解决TopK、中位数、百分比等问题都忘得非常干净呢?
+		 * 最终的原因是,当时解决完全是顺着别人的思路来思考,而并不是自己主动思考到的答案,所以下一次自己在思考时,根本没有思路.
+		 */
+		public static int[] topKFrequentByPriorityQueue(int[] nums, int k) {
+			Map<Integer, Integer> map = new HashMap<>();
+			for (int i = 0; i < nums.length; i++) {
+				map.put(nums[i], map.getOrDefault(nums[i], 0) + 1);
+			}
+			// 构建小顶堆
+			Map.Entry<Integer, Integer>[] arr = new Map.Entry[k + 1];
+			int i = 1;
+			for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
+				if (i <= k) {  // 堆中元素少于k时,继续入堆,从下往上堆化
+					arr[i] = entry;
+					int j = i;
+					while (j / 2 >= 1) {
+						if (arr[j].getValue() < arr[j / 2].getValue()) {
+							swap(arr, j, j / 2);
+						}
+						j = j / 2;
+					}
+				} else { // 堆中已有k个元素,不能继续增加;如果该元素比对顶元素小则丢弃;比对顶元素大,则淘汰对顶元素,从上之下进行一次堆化
+					if (entry.getValue() > arr[1].getValue()) {
+						arr[1] = entry;
+						int j = 1;
+						while (true) {
+							int minPos = j;
+							if (j * 2 <= k && arr[j].getValue() > arr[j * 2].getValue()) {
+								minPos = j * 2;
+							}
+							if (j * 2 + 1 <= k && arr[minPos].getValue() > arr[j * 2 + 1].getValue()) {
+								minPos = j * 2 + 1;
+							}
+							if (minPos == j) break;  // 从上往下堆化和从下往上堆化思路不一样,前者需要比较两个叶子节点,如果都不满足条件则停止
+							swap(arr, j, minPos);
+							j = minPos;
+						}
+					}
+				}
+				i++;
+			}
+			int[] r = new int[k];
+			for (int j = 0; j < k; j++) {
+				r[j] = arr[j + 1].getKey();
+			}
+			return r;
+		}
+
+		private static void swap(Map.Entry<Integer, Integer>[] arr, int i, int j) {
+			Map.Entry<Integer, Integer> temp = arr[i];
+			arr[i] = arr[j];
+			arr[j] = temp;
+		}
+
+		/**
+		 * 当然还有快排求TopK的思路
+		 * 快排的思路,数组arr[0,r] 设r为pivot点,将大的数放在左边,小的数放在右边
+		 * 然后查看放在左边的元素个数n,如果n>=k-1,那么输出左边的k个元素即可
+		 * 如果n<k-1,则继续在[p,r]中寻找,重复之前的操作
+		 * 先通过新建数组的方式来实现分隔
+		 * <p>
+		 * 普通的数组移动的方法,都调试了老半天才通过;可见快排的编码细节还是要多注意,并且最后还超出执行时间限制了。。。
+		 * 还是借鉴官方的思路吧。。。。
+		 */
+		public static int[] topKFrequentByFastSort(int[] nums, int k) {
+			Map<Integer, Integer> map = new HashMap<>();
+			for (int i = 0; i < nums.length; i++) {
+				map.put(nums[i], map.getOrDefault(nums[i], 0) + 1);
+			}
+			Map.Entry<Integer, Integer>[] arr = new Map.Entry[map.size()];
+			int m = 0;
+			for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
+				arr[m++] = entry;
+			}
+			if (arr.length == k) {
+				int[] re = new int[k];
+				for (int o = 0; o < k; o++) {
+					re[o] = arr[o].getKey();
+				}
+				return re;
+			}
+			return pivot(arr, k, 0, arr.length - 1);
+		}
+
+		public static int[] pivot(Map.Entry<Integer, Integer>[] arr, int k, int p, int r) {
+			int pivot = arr[r].getValue();
+			Map.Entry<Integer, Integer>[] left = new Map.Entry[r - p + 1];
+			Map.Entry<Integer, Integer>[] right = new Map.Entry[r - p + 1];
+			int a = 0, b = 0;
+			for (int i = p; i < r; i++) {
+				if (arr[i].getValue() >= pivot) {
+					left[a++] = arr[i];
+				} else {
+					right[b++] = arr[i];
+				}
+			}
+			// 填充回原arr数组
+			int s = p;
+			for (int i = 0; i < a; i++) {
+				arr[s++] = left[i];
+			}
+			arr[s++] = arr[r];
+			for (int j = 0; j < b; j++) {
+				arr[s++] = right[j];
+			}
+			if (p + a > k - 1 && p <= a - 1) {  // 如果比较出来的左边数组的元素个数 >= k-1 则前k个元素都在pivot的左边
+				return pivot(arr, k, p, a - 1);
+			} else if (p + a < k - 1 && r >= a + 1) {
+				return pivot(arr, k, a + 1, r); // 继续在后面的元素中寻找
+			} else {
+				int[] re = new int[k];
+				for (int o = 0; o < k; o++) {
+					re[o] = arr[o].getKey();
+				}
+				return re;
+			}
+		}
+
+		/**
+		 * 回顾下快排中原地区别分3部分的思路
+		 * 想要原地将数组进行分区,则肯定设计到元素的交换;
+		 * 1.用i作为已排区位置的索引,j作为遍历元素的索引;
+		 * 2.当遍历元素[j] > pivot 时,i,j元素进行交换,那么较大的元素[j]被交换到了已排区;而未排区的元素[i]有两种场景
+		 * -- 1) i < j 则i已经遍历过了,但还处理未排区,肯定是较小的元素
+		 * -- 2) i=j 正在遍历的元素[j]刚好是未排区的开始元素,直接称为已排区的结束元素
+		 * 3.当遍历元素[j] < pivot 时,已排区元素不增加,继续往后遍历
+		 * 4.当遍历元素[j]到了队列尾部时,交换i,j;i是未排区的开始,即元素[i]肯定 < pivot,与pivot进行交换,最终得到3部分按序排列-->
+		 * 已排区 > pivot > 未排区
+		 */
+		public static int pivot(int[] arr, int p, int r) {
+			int pivot = arr[r];
+			int i = p, j = p;
+			for (; j < r; ++j) {
+				if (arr[j] > pivot) {
+					swap(arr, i, j);
+					i++;
+				}
+			}
+			swap(arr, i, j);
+			return i;
+		}
+
+		public static void fastSort(int[] arr) {
+			fastSort(arr, 0, arr.length - 1);
+		}
+
+		/**
+		 * 借此场景,回顾一下快排
+		 */
+		public static void fastSort(int[] arr, int p, int r) {
+			if (p >= r) return;  // 递归的终止条件非常重要,直到p=r时,有序三部分无法拆分变成1,则终止;而由于递归中的区间取值,会出现p>r的情况,同样需要终止
+			int pivot = pivot(arr, p, r); // 分成有序三部分
+			fastSort(arr, p, pivot - 1);  // 将左部分再次分成有序三部分
+			fastSort(arr, pivot + 1, r); // 将右部分再次分成有序三部分
+		}
+
+		private static void swap(int[] arr, int i, int j) {
+			int temp = arr[i];
+			arr[i] = arr[j];
+			arr[j] = temp;
+		}
+
+		public static void main(String[] args) {
+			// int[] ints = topKFrequentByPriorityQueue(new int[]{-1,1,4,-4,3,5,4,-2,3,-1}, 3);
+			// int[] ints = topKFrequentByHash(new int[]{-1, 1, 4, -4, 3, 5, 4, -2, 3, -1}, 3);
+			/*int[] ints = topKFrequentByFastSort(new int[]{-1, 1, 4, -4, 3, 5, 4, -2, 3, -1}, 3);
+			System.out.println(Arrays.toString(ints));*/
+			int[] arr = new int[]{5, 3, 2, 1, 6, 4};
+			pivot(arr, 0, arr.length - 1);
+			System.out.println(Arrays.toString(arr));
+
+			int[] arr1 = new int[]{5, 3, 2, 1, 6, 4, 0, 9, 7, -1};
+			fastSort(arr1);
+			System.out.println(Arrays.toString(arr1));
 		}
 	}
 }
