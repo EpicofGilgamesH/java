@@ -1,18 +1,15 @@
 import cn.hutool.http.HttpRequest;
-import com.alibaba.fastjson.JSON;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 
 import java.io.IOException;
 import java.util.concurrent.*;
 
-public class PressureTest {
+public class PressureTest2 {
 
 
 	static class RequestTask implements Runnable {

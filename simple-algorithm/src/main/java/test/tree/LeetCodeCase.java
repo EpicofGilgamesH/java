@@ -1,10 +1,17 @@
 package test.tree;
 
+import com.alibaba.fastjson.JSON;
+import com.sun.org.apache.xml.internal.utils.StringComparable;
+import org.apache.commons.codec.StringEncoderComparator;
 import org.omg.CORBA.INTERNAL;
 import sun.misc.Perf;
 import sun.reflect.generics.tree.Tree;
 
+import javax.transaction.TransactionRequiredException;
+import java.lang.reflect.Array;
+import java.security.interfaces.RSAPublicKey;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 二叉树的使用
@@ -1414,6 +1421,82 @@ public class LeetCodeCase {
 			return false;
 		}
 
+		/**
+		 * 迭代法,其实也是对比根节点的左右子树;常规来说需要借助队列
+		 * 队列入队之后,只能确认顺序,无法知晓其是否完全对称,必须明确比较当前节点N的左右子节点是否完全对称;
+		 * 如果当前节点N的左右子树完全镜像对称了,那么左右子树放入队列也是完全对称的结构
+		 */
+		public static boolean isSymmetricIterator(TreeNode root) {
+			if (root == null) return true;
+			Deque<TreeNode> leftQueue = new LinkedList<>();
+			Deque<TreeNode> rightQueue = new LinkedList<>();
+			// 根节点的左右节点也需要比较
+			if (root.left != null && root.right != null) {
+				if (root.left.val != root.right.val) {
+					return false;
+				}
+				leftQueue.add(root.left);
+				rightQueue.add(root.right);
+			} else if (!(root.left == null && root.right == null)) {
+				return false;
+			}
+			// 超过情况的注意,这里如果为null,入队之后,会引起空指针异常;一定要多注意为空的情况
+			if (root.right != null) while (!leftQueue.isEmpty() && !rightQueue.isEmpty()) {
+				int ls = leftQueue.size();
+				int rs = rightQueue.size();
+				if (ls != rs) return false;
+				for (; ls > 0; --ls) {
+					TreeNode ln = leftQueue.poll();
+					TreeNode rn = rightQueue.poll();
+					if (ln.left != null && rn.right != null) { // 都不为空比较是否为镜像对称
+						if (ln.left.val != rn.right.val) {
+							return false;
+						}
+						leftQueue.add(ln.left);
+						rightQueue.add(rn.right);
+					} else if (!(ln.left == null && rn.right == null)) {
+						return false;
+					}
+					if (ln.right != null && rn.left != null) {
+						if (ln.right.val != rn.left.val) {
+							return false;
+						}
+						leftQueue.add(ln.right);
+						rightQueue.add(rn.left);
+					} else if (!(ln.right == null && rn.left == null)) {
+						return false;
+					}
+				}
+			}
+			return leftQueue.isEmpty() && rightQueue.isEmpty();
+		}
+
+		/**
+		 * 迭代法,借鉴官方的思路,只需要一个队列,同时把互为镜像的节点入队;注意空节点也应该入队,这样才能比较对称性
+		 * 也就是说,上面借助两个队列的迭代方法,也是可以不需要比较N节点的左右节点的
+		 */
+		public static boolean isSymmetricIteratorOfficial(TreeNode root) {
+			if (root == null) return true;
+			// 根节点不存在镜像节点,入队两次
+			Deque<TreeNode> deque = new LinkedList<>();
+			deque.add(root);
+			deque.add(root);
+			while (!deque.isEmpty()) {
+				TreeNode n1 = deque.poll();
+				TreeNode n2 = deque.poll();
+				if (n1 != null && n2 != null) {
+					if (n1.val != n2.val) return false;
+					deque.add(n1.left);
+					deque.add(n2.right);
+					deque.add(n1.right);
+					deque.add(n2.left);
+				} else if (!(n1 == null && n2 == null)) {
+					return false;
+				}
+			}
+			return true;
+		}
+
 		public static void main(String[] args) {
 			TreeNode n1 = new TreeNode(1);
 			TreeNode n2 = new TreeNode(2);
@@ -1429,9 +1512,7 @@ public class LeetCodeCase {
 			TreeNode n7 = new TreeNode(7);
 			TreeNode n8 = new TreeNode(8);
 			TreeNode n7_1 = new TreeNode(7);
-			n6.left = n7;
-			n6.right = n8;
-			n6_1.right = n7_1;
+			TreeNode n8_1 = new TreeNode(8);
 			n1.left = n2;
 			n1.right = n2_1;
 			n2.left = n3;
@@ -1442,8 +1523,853 @@ public class LeetCodeCase {
 			n3.right = n6;
 			n3_1.left = n6_1;
 			n3_1.right = n5_1;
-			boolean symmetric = isSymmetric(n1);
-			System.out.println(symmetric);
+			n6.left = n7;
+			n6.right = n8;
+			n6_1.right = n7_1;
+			n6_1.left = n8_1;
+
+			/*TreeNode n1 = new TreeNode(1);
+			TreeNode n2 = new TreeNode(2);
+			TreeNode n2_1 = new TreeNode(2);
+			TreeNode n3 = new TreeNode(3);
+			TreeNode n3_1 = new TreeNode(3);
+			TreeNode n4 = new TreeNode(4);
+			TreeNode n4_1 = new TreeNode(4);
+			n1.left = n2;
+			n1.right = n2_1;
+			n2.left = n3;
+			n2_1.right = n3_1;
+			n2.right = n4;
+			n2_1.left = n4_1;*/
+
+			/*TreeNode n1 = new TreeNode(1);
+			TreeNode n0 = new TreeNode(0);
+			n1.left = n0;*/
+			// System.out.println(isSymmetricIterator(n1));
+			String key = "电子设备,配件,音响及音乐设备,计算机配件,计算机硬件,电脑显示器,耳机,手提电脑及电脑,网络产品,相机和摄像机,打印机和扫描仪,电视及DVD设备,适配器,功放,音频和音乐,电池,电缆,译码器,台式电脑,数码相机,无人驾驶飞机,单反相机,DVD播放器,闪存,游戏机,硬盘驱动器,耳机,家庭影院系统,键盘,笔记本电脑,内存,麦克风,调制解调器,混音器,网络,新的显示器,照相机&摄像机,打印机$扫描仪,打印机和扫描仪,投影仪,路由器,安全与监控,音响系统,演讲者,固态硬盘,工作室显示器,开关,电视和DVD,机顶盒,电视,备用电源,二手显示器,视频摄像头,网络摄像头";
+			String[] split = key.split(",");
+			// List<String> collect = Arrays.stream(split).distinct().collect(Collectors.toList());
+			HashSet<String> set = new HashSet<>();
+			for (int i = 0; i < split.length; i++) {
+				if (set.contains(split[i])) {
+					System.out.println("重复:" + split[i]);
+				} else {
+					set.add(split[i]);
+				}
+			}
+			System.out.println();
+		}
+
+
+	}
+
+	/**
+	 * 559. N 叉树的最大深度
+	 * 给定一个 N 叉树，找到其最大深度。
+	 * <p>
+	 * 最大深度是指从根节点到最远叶子节点的最长路径上的节点总数。
+	 * <p>
+	 * N 叉树输入按层序遍历序列化表示，每组子节点由空值分隔（请参见示例）。
+	 * 示例 1：
+	 * 输入：root = [1,null,3,2,4,null,5,6]
+	 * 输出：3
+	 * 示例 2：
+	 * 输入：root = [1,null,2,3,4,5,null,null,6,7,null,8,null,9,10,null,null,11,null,12,null,13,null,null,14]
+	 * 输出：5
+	 * 提示：
+	 * <p>
+	 * 树的深度不会超过 1000 。
+	 * 树的节点数目位于 [0, 104] 之间。
+	 */
+	public static class MaxDepth {
+
+		/**
+		 * N叉数的最大深度,其实通过层序遍历很容易得到,要求用两种方式求解
+		 * 1.dfs深度优先遍历、
+		 * 2.bfs层序遍历
+		 * 返回值的递归怎么写?还是需要多理解 这里的深度递归时,并不是到最后一层就退出,而是完全递归完,返回最大值
+		 */
+		public static int maxDepth(Node root) {
+			if (root == null) return 0;
+			int maxDepth = 0;
+			List<Node> children = root.children;
+			if (children != null && children.size() > 0) {  // 实际上递归的流程跟想象的思路是反向的,递归找到最底层,然后一层层回去的时候深度+1
+				for (Node child : children) {
+					maxDepth = Math.max(maxDepth(child), maxDepth); // 每个递归方法栈中都有一个maxDepth,当让发退出时,实际上就在比较出最大的深度
+				}
+			}
+			return maxDepth + 1;
+		}
+
+		/**
+		 * 层序遍历
+		 */
+		public static int maxDepthIterator(Node root) {
+			if (root == null) return 0;
+			Deque<Node> deque = new LinkedList<>();
+			deque.add(root);
+			int i = 0;
+			while (!deque.isEmpty()) {
+				i++;
+				int size = deque.size();
+				for (; size > 0; --size) {
+					Node node = deque.poll();
+					if (node.children != null) {
+						for (Node c : node.children) {
+							if (c != null) deque.add(c);
+						}
+					}
+				}
+			}
+			return i;
+		}
+
+		public static void main(String[] args) {
+			Node node1 = new Node(1);
+			Node node2 = new Node(2);
+			Node node3 = new Node(3);
+			Node node4 = new Node(4);
+			Node node5 = new Node(5);
+			node1.children = Arrays.asList(node2, node3, node4, node5);
+			Node node6 = new Node(6);
+			Node node7 = new Node(7);
+			Node node8 = new Node(8);
+			Node node9 = new Node(9);
+			Node node10 = new Node(10);
+			node3.children = Arrays.asList(node6, node7);
+			node4.children = Arrays.asList(node8);
+			node5.children = Arrays.asList(node9, node10);
+			Node node11 = new Node(11);
+			Node node12 = new Node(12);
+			Node node13 = new Node(13);
+			node7.children = Arrays.asList(node11);
+			node8.children = Arrays.asList(node12);
+			node9.children = Arrays.asList(node13);
+			Node node14 = new Node(14);
+			node11.children = Arrays.asList(node14);
+			// int i = maxDepth(node1);
+			int i = maxDepthIterator(node1);
+			System.out.println(i);
+		}
+	}
+
+	/**
+	 * 111. 二叉树的最小深度
+	 * 给定一个二叉树，找出其最小深度。
+	 * 最小深度是从根节点到最近叶子节点的最短路径上的节点数量。
+	 * 说明：叶子节点是指没有子节点的节点。
+	 * 示例 1：
+	 * 输入：root = [3,9,20,null,null,15,7]
+	 * 输出：2
+	 * 示例 2：
+	 * 输入：root = [2,null,3,null,4,null,5,null,6]
+	 * 输出：5
+	 * 提示：
+	 * 树中节点数的范围在 [0, 105] 内
+	 * -1000 <= Node.val <= 1000
+	 */
+	public static class MinDepth {
+
+		/**
+		 * dfs深度优先遍历,二叉树,寻找其左右子树的最小高度
+		 * 要理解题意,最小深度是从根节点到最近叶子节点的最短路径上的节点数量,如果根节点没有左右子节点,那么根节点就是叶子节点,则返回1;
+		 * 如果根节点只有一个子节点,那么根节点不算叶子节点,则是找有'子节点'的那边子树的最小高度
+		 */
+		public static int minDepth(TreeNode root) {
+			if (root == null) return 0;
+			if (root.left == null && root.right == null) return 1;
+			int min;
+			if (root.left != null && root.right != null) {
+				min = Math.min(minDepth(root.left), minDepth(root.right)); // 从代码的走向可以判断,minDepth方法的左右节点,至少会执行一次,可以优化
+			} else if (root.left == null) {
+				min = minDepth(root.right);
+			} else {
+				min = minDepth(root.left);
+			}
+			return min + 1;
+		}
+
+		public static int minDepthII(TreeNode root) {
+			if (root == null) return 0;
+			if (root.left == null && root.right == null) return 1;
+			int ml = minDepthII(root.left);
+			int mr = minDepthII(root.right);
+			// 如果左右子树有一个为null,则ml和mr有一个为0;实际上左右子树都为null和都不为null可以合并成三元表达式
+			if (root.left == null || root.right == null) return ml + mr + 1;
+			return Math.min(ml, mr) + 1;
+		}
+
+		public static int minDepthIII(TreeNode root) {
+			if (root == null) return 0;
+			if (root.left == null && root.right == null) return 1;
+			int ml = minDepthIII(root.left);
+			int mr = minDepthIII(root.right);
+			// 如果左右子树有一个为null,则ml和mr有一个为0;实际上左右子树都为null和都不为null可以合并成三元表达式
+			return (root.left == null || root.right == null) ? ml + mr + 1 : Math.min(ml, mr) + 1;
+		}
+
+		/**
+		 * 层序遍历
+		 */
+		public static int minDepthIterator(TreeNode root) {
+			if (root == null) return 0;
+			Deque<TreeNode> deque = new LinkedList<>();
+			if (root.left != null) deque.add(root.left);
+			if (root.right != null) deque.add(root.right);
+			if (deque.size() == 0) return 1;
+			int min = 1;
+			while (!deque.isEmpty()) {
+				min++;
+				int size = deque.size();
+				for (; size > 0; --size) {
+					TreeNode node = deque.poll();
+					// 每层中其中有一个为叶子节点,即没有左右子节点时,这层就是最小深度
+					if (node.left == null && node.right == null) {
+						return min;
+					}
+					if (node.left != null) deque.add(node.left);
+					if (node.right != null) deque.add(node.right);
+
+				}
+			}
+			return min;
+		}
+
+		public static void main(String[] args) {
+			TreeNode n1 = new TreeNode(3);
+			TreeNode n9 = new TreeNode(9);
+			TreeNode n20 = new TreeNode(20);
+			TreeNode n15 = new TreeNode(15);
+			TreeNode n7 = new TreeNode(7);
+			n1.left = n9;
+			n1.right = n20;
+			n20.left = n15;
+			n20.right = n7;
+			// int i = minDepth(n1);
+			// int i = minDepthII(n1);
+			int i = minDepthIterator(n1);
+			System.out.println(i);
+		}
+	}
+
+	/**
+	 * 222. 完全二叉树的节点个数
+	 * 给你一棵 完全二叉树 的根节点 root ，求出该树的节点个数。
+	 * <p>
+	 * 完全二叉树 的定义如下：在完全二叉树中，除了最底层节点可能没填满外，其余每层节点数都达到最大值，
+	 * 并且最下面一层的节点都集中在该层最左边的若干位置。若最底层为第 h 层，则该层包含 1~ 2h 个节点。
+	 * 示例 1：
+	 * 输入：root = [1,2,3,4,5,6]
+	 * 输出：6
+	 * 示例 2：
+	 * 输入：root = []
+	 * 输出：0
+	 * 示例 3：
+	 * 输入：root = [1]
+	 * 输出：1
+	 * 提示：
+	 * 树中节点的数目范围是[0, 5 * 104]
+	 * 0 <= Node.val <= 5 * 104
+	 * 题目数据保证输入的树是 完全二叉树
+	 * 进阶：遍历树来统计节点是一种时间复杂度为 O(n) 的简单解决方案。你可以设计一个更快的算法吗？
+	 */
+	public static class CountNodes {
+
+		/**
+		 * 个人思路:
+		 * 首先要明确完全二叉树的定义:除了最底层节点可能没填满外,其余每层的节点都是满的,同时最底层的节点都集中在该层的最左边位置
+		 * 首先得到完全二叉树的层数,其次找出最底层的从哪个节点结束,就是找上一层中哪个节点没有子节点
+		 * 完全二叉树的层数,通过最左边节点分支可以求出
+		 * 1.dfs深度优先遍历(利用完全二叉树的特性)
+		 * 2.层序遍历
+		 */
+		public static int countNodes(TreeNode root) {
+			if (root == null) return 0;
+			Deque<TreeNode> deque = new LinkedList<>();
+			deque.add(root);
+			int count = 1;
+			while (!deque.isEmpty()) {
+				int size = deque.size();
+				for (; size > 0; --size) {
+					TreeNode node1 = deque.poll();
+					if (node1.left != null) {
+						deque.add(node1.left);
+						count++;
+					}
+					if (node1.right != null) {
+						deque.add(node1.right);
+						count++;
+					}
+					if (node1.left == null || node1.right == null) return count;
+				}
+			}
+			return count;
+		}
+
+		/**
+		 * 官方思路,dfs深度优先遍历方式
+		 * 深度优先遍历都可以分解为遍历一个节点的左右子树;现在记录遍历当前节点的左右子树高度分别为left和right
+		 * 1.当left==right,则说明左、右子树的高度相同,那左子树一定是完全二叉树,右子树则不一定;所以我们可以确定左子树的节点数:sl=2^left
+		 * 2.当left!=right,则说明左、右子树的高度不相同,那我们可以得到右子树一定是完全二叉树,所以我们可以确定右子树的节点数:sr=2^right
+		 * 一般二叉树的高度,需要通过递归左右子树的高度,取最大的那个来获取;而完全二叉树的高度,则通过最左边一条树枝一直往下遍历即可
+		 */
+		public static int countNodesOfficial(TreeNode root) {
+			if (root == null) return 0;
+			int sl = getLevel(root.left);
+			int sr = getLevel(root.right);
+			if (sl == sr) {
+				return countNodesOfficial(root.right) + (1 << sl);
+			} else {
+				return countNodesOfficial(root.left) + (1 << sr);
+			}
+		}
+
+		public static int getLevel(TreeNode node) {
+			int level = 0;
+			while (node != null) {
+				level++;
+				node = node.left;
+			}
+			return level;
+		}
+
+		public static void main(String[] args) {
+			TreeNode n1 = new TreeNode(1);
+			TreeNode n2 = new TreeNode(2);
+			TreeNode n3 = new TreeNode(3);
+			TreeNode n4 = new TreeNode(4);
+			TreeNode n5 = new TreeNode(5);
+			TreeNode n6 = new TreeNode(6);
+			n1.left = n2;
+			n1.right = n3;
+			n2.left = n4;
+			n2.right = n5;
+			n3.left = n6;
+			int i = countNodesOfficial(n1);
+			System.out.println(i);
+		}
+	}
+
+	/**
+	 * 110. 平衡二叉树
+	 * 给定一个二叉树，判断它是否是高度平衡的二叉树。
+	 * 本题中，一棵高度平衡二叉树定义为：
+	 * 一个二叉树每个节点 的左右两个子树的高度差的绝对值不超过 1 。
+	 * 示例 1：
+	 * 输入：root = [3,9,20,null,null,15,7]
+	 * 输出：true
+	 * 示例 2：
+	 * 输入：root = [1,2,2,3,3,null,null,4,4]
+	 * 输出：false
+	 * 示例 3：
+	 * 输入：root = []
+	 * 输出：true
+	 * 提示：
+	 * 树中的节点数在范围 [0, 5000] 内
+	 * -104 <= Node.val <= 104
+	 */
+	public static class IsBalanced {
+
+		/**
+		 * 个人思路:
+		 * 平衡二叉树定义:二叉树中的每个节点,其左右两个子树的高度差的绝对值不能超过1,这是典型的dfs递归思路
+		 * 如果不是平衡二叉树,是不是根节点就能判断出来呢?? 不行,[1,2,2,3,null,null,3,4,null,null,4] 这个案例可以说明*****
+		 * 如果是满二叉树,高度遍历时时间复杂度是O(n),高度遍历的同时,还需要遍历每一个节点,时间复杂度为O(n^2)
+		 * 从顶向叶子节点的遍历,level函数求高度时,会重复调用
+		 */
+		public static boolean isBalanced(TreeNode root) {
+			if (root == null) return true;
+			int abs = Math.abs(level(root.left) - level(root.right));
+			if (abs > 1) {
+				return false;
+			} else {
+				return isBalanced(root.left) && isBalanced(root.right);
+			}
+		}
+
+		public static int level(TreeNode root) {
+			if (root == null) return 0;
+			return Math.max(level(root.left), level(root.right)) + 1;
+		}
+
+		/**
+		 * 官方给出的从叶子节点向数顶节点遍历的方式,避免了level函数的重复调用
+		 * 树的后续遍历,先遍历左右子节点,再遍历顶节点;则先判断左右子树是否平衡,再判断以当前节点为根的树是否平衡
+		 * 如果一颗子树是平衡的,则返回其高度,否者返回-1
+		 * <p>
+		 * 这种思路是如何想到的呢???
+		 */
+		public static boolean isBalancedII(TreeNode root) {
+			if (root == null) return true;
+			return height(root) != -1;
+		}
+
+		public static int height(TreeNode root) {
+			if (root == null) return 0;
+			int left = height(root.left);
+			int right = height(root.right);
+			// 左子树不平衡 或者 右子树不平衡 或者当前遍历节点为根的树不平衡,则直接返回false
+			if (left == -1 || right == -1 || Math.abs(left - right) > 1) {
+				return -1;
+			}
+			// 如果当前遍历节点为根的树平衡,则返回其高度
+			return Math.max(left, right) + 1;
+		}
+
+
+		public static void main(String[] args) {
+			TreeNode n1 = new TreeNode(1);
+			TreeNode n2 = new TreeNode(2);
+			TreeNode n2_2 = new TreeNode(2);
+			TreeNode n3 = new TreeNode(3);
+			TreeNode n3_3 = new TreeNode(3);
+			TreeNode n4 = new TreeNode(4);
+			TreeNode n4_4 = new TreeNode(4);
+			n1.left = n2;
+			n1.right = n2_2;
+			n2.left = n3;
+			n2_2.right = n3_3;
+			n3.left = n4;
+			n3_3.right = n4_4;
+			boolean balanced = isBalancedII(n1);
+			System.out.println(balanced);
+		}
+	}
+
+	/**
+	 * 404. 左叶子之和
+	 * 给定二叉树的根节点 root ，返回所有左叶子之和。
+	 * 示例 1：
+	 * 输入: root = [3,9,20,null,null,15,7]
+	 * 输出: 24
+	 * 解释: 在这个二叉树中，有两个左叶子，分别是 9 和 15，所以返回 24
+	 * 示例 2:
+	 * 输入: root = [1]
+	 * 输出: 0
+	 * <p>
+	 * 提示:
+	 * 节点数在 [1, 1000] 范围内
+	 * -1000 <= Node.val <= 1000
+	 */
+	public static class SumOfLeftLeaves {
+
+		/**
+		 * 左叶子的定义:即其为叶子节点-没有左右子节点,且他是父节点的左子节点
+		 * 深度优先遍历
+		 */
+		public static int sumOfLeftLeaves(TreeNode root) {
+			return sum(root, false);
+		}
+
+		/**
+		 * 简单的递归思路,竟如此难写出来;最重要的还是要理清晰每一个子过程的步骤;按子过程的详细步骤来进行
+		 * 从上到下的前序遍历,会有很多重复递归部分,考虑后续遍历 先遍历左右子节点再遍历父节点
+		 */
+		public static int sum(TreeNode root, boolean isLeft) {
+			// 总数为左子树+右子树
+			// 当前节点的左节点
+			if (root == null) return 0;
+			if (root.left == null && root.right == null) { // 叶子节点,且为左节点
+				if (isLeft)
+					return root.val;
+				else return 0;
+			}
+			return sum(root.left, true) + sum(root.right, false);
+		}
+
+		/**
+		 * 从下到上递归,后续遍历
+		 */
+		public static int sumOfLeftLeavesII(TreeNode root) {
+			return sumII(root, false);
+		}
+
+		public static int sumII(TreeNode root, boolean isLeft) {
+			if (root == null) return 0;
+			// 先遍历左右节点,再处理顶节点
+			int left = sumII(root.left, true);
+			int right = sumII(root.right, false);
+			if (root.left == null && root.right == null) {
+				if (isLeft) return root.val;
+				else return 0;
+			}
+			return left + right;
+		}
+
+		/**
+		 * 层序遍历方式
+		 */
+		public static int sumOfLeftLeavesIterator(TreeNode root) {
+			if (root == null) return 0;
+			Deque<TreeNode> deque = new LinkedList<>();
+			deque.add(root);
+			int sum = 0;
+			while (!deque.isEmpty()) {
+				int size = deque.size();
+				for (; size > 0; --size) {
+					TreeNode node = deque.poll();
+					if (node.left != null) {
+						deque.add(node.left);
+						if (node.left.left == null && node.left.right == null) {
+							sum += node.left.val;
+						}
+					}
+					if (node.right != null) deque.add(node.right);
+				}
+			}
+			return sum;
+		}
+
+		public static void main(String[] args) {
+			TreeNode n3 = new TreeNode(3);
+			TreeNode n9 = new TreeNode(9);
+			TreeNode n20 = new TreeNode(20);
+			TreeNode n15 = new TreeNode(15);
+			TreeNode n7 = new TreeNode(7);
+			n3.left = n9;
+			n3.right = n20;
+			n20.left = n15;
+			n20.right = n7;
+			// int i = sumOfLeftLeaves(n3);
+			// int i = sumOfLeftLeavesII(n3);
+			int i = sumOfLeftLeavesIterator(n3);
+			System.out.println(i);
+		}
+	}
+
+	/**
+	 * 513. 找树左下角的值
+	 * 给定一个二叉树的 根节点 root，请找出该二叉树的 最底层 最左边 节点的值。
+	 * <p>
+	 * 假设二叉树中至少有一个节点。
+	 * 示例 1:
+	 * 输入: root = [2,1,3]
+	 * 输出: 1
+	 * 示例 2:
+	 * 输入: [1,2,3,4,null,5,6,null,null,7]
+	 * 输出: 7
+	 * 提示:
+	 * 二叉树的节点个数的范围是 [1,104]
+	 * -231 <= Node.val <= 231 - 1
+	 */
+	public static class FindBottomLeftValue {
+
+		/**
+		 * 个人思路:
+		 * 最底层、最左边的节点定义:深度最大的左叶子节点???? 深度:从根节点到叶子节点路径上所包含的节点数
+		 * 题意理解错误,但是可以作为一个新题来解,还可以将时间负责度降低到O(n) 现在两层递归是O(n^2)
+		 */
+		public static int findBottomLeftValue(TreeNode root) {
+			if (root == null) return 0;
+			info info = find(root, false);
+			return info.getVal();
+		}
+
+		/**
+		 * 分解成子问题:每个节点的 左子树最底层左叶子节点和 右子树最底层左叶子节点中,深度更深的节点值
+		 */
+		public static info find(TreeNode node, boolean isLeft) {
+			if (node == null) return new info(0, 0);
+			// 先得到左右子树的最深左叶子节点值
+			info left = find(node.left, true);
+			info right = find(node.right, false);
+			if (node.left == null && node.right == null) { // 叶子节点
+				if (isLeft) {
+					return new info(level(node), node.val);
+				}
+			}
+			return level(node.left) > level(node.right) ? left : right;
+		}
+
+		static class info {
+			private int level;
+			private int val;
+
+			public info(int level, int val) {
+				this.level = level;
+				this.val = val;
+			}
+
+			public int getLevel() {
+				return level;
+			}
+
+			public void setLevel(int level) {
+				this.level = level;
+			}
+
+			public int getVal() {
+				return val;
+			}
+
+			public void setVal(int val) {
+				this.val = val;
+			}
+		}
+
+		/**
+		 * 节点深度 左右子树的深度较大值+1
+		 */
+		public static int level(TreeNode node) {
+			if (node == null) return 0;
+			int l = level(node.left);
+			int r = level(node.right);
+			return Math.max(l, r) + 1;
+		}
+
+		private static int curVal = 0;
+		private static int curLevel = 0;
+
+		/**
+		 * 正确的题意:左下角值,是指最下一层,最左边的节点值;即中序比遍历遍历时,每一层第一个遍历的节点肯定是最左侧节点
+		 */
+		public static int findBottomLeftValueII(TreeNode root) {
+			dfs(root, 0);
+			return curVal;
+		}
+
+		/**
+		 * 重复子问题,先遍历左节点 中序遍历;需要复习的递归思路
+		 */
+		public static void dfs(TreeNode root, int level) {
+			if (root == null) return;
+			level++;
+			dfs(root.left, level);
+			if (level > curLevel) { // 当新遍历到下一层时,记录当前节点值和当前的层数;其余情况不更新数据
+				curLevel = level;
+				curVal = root.val;
+			}
+			dfs(root.right, level);
+		}
+
+		/**
+		 * 层序遍历 每一层元素从右向左遍历
+		 */
+		public static int findBottomLeftValueIII(TreeNode root) {
+			if (root == null) return 0;
+			Deque<TreeNode> deque = new LinkedList<>();
+			deque.add(root);
+			TreeNode node = null;
+			while (!deque.isEmpty()) {
+				int size = deque.size();
+				for (; size > 0; --size) {
+					node = deque.poll(); // 拿队头元素
+					if (node.right != null) deque.add(node.right);
+					if (node.left != null) deque.add(node.left);
+				}
+			}
+			return node.val;
+		}
+
+		/**
+		 * 前序遍历
+		 */
+		private static void preOrder(TreeNode root) {
+			if (root == null) return;
+			System.out.print(root.val + " ");
+			preOrder(root.left);
+			preOrder(root.right);
+		}
+
+		/**
+		 * 中序遍历
+		 */
+		private static void inOrder(TreeNode root) {
+			if (root == null) return;
+			inOrder(root.left);
+			System.out.print(root.val + " ");
+			inOrder(root.right);
+		}
+
+		/**
+		 * 后序遍历
+		 */
+		private static void postOrder(TreeNode root) {
+			if (root == null) return;
+			postOrder(root.left);
+			postOrder(root.right);
+			System.out.print(root.val + " ");
+		}
+
+		public static void main(String[] args) {
+			TreeNode n1 = new TreeNode(1);
+			TreeNode n2 = new TreeNode(2);
+			TreeNode n3 = new TreeNode(3);
+			TreeNode n4 = new TreeNode(4);
+			TreeNode n5 = new TreeNode(5);
+			TreeNode n6 = new TreeNode(6);
+			TreeNode n7 = new TreeNode(7);
+			n1.left = n2;
+			n1.right = n3;
+			n2.left = n4;
+			n3.left = n5;
+			n3.right = n6;
+			n5.left = n7;
+			// int bottomLeftValue = findBottomLeftValue(n1);
+			// System.out.println(bottomLeftValue);
+			preOrder(n1);
+			System.out.println();
+			inOrder(n1);
+			System.out.println();
+			postOrder(n1);
+			System.out.println();
+			// int bottomLeftValueII = findBottomLeftValueII(n1);
+			int bottomLeftValueII = findBottomLeftValueIII(n1);
+			System.out.println(bottomLeftValueII);
+
+		}
+	}
+
+	/**
+	 * 257. 二叉树的所有路径
+	 * 给你一个二叉树的根节点 root ，按 任意顺序 ，返回所有从根节点到叶子节点的路径。
+	 * <p>
+	 * 叶子节点 是指没有子节点的节点。
+	 * 示例 1：
+	 * 输入：root = [1,2,3,null,5]
+	 * 输出：["1->2->5","1->3"]
+	 * 示例 2：
+	 * 输入：root = [1]
+	 * 输出：["1"]
+	 * 提示：
+	 * 树中节点的数目在范围 [1, 100] 内
+	 * -100 <= Node.val <= 100
+	 */
+	public static class BinaryTreePaths {
+
+		/**
+		 * 个人思路:
+		 * 这是典型的回溯逻辑,怎么实现回溯呢?每次从根节点到达叶子节点后,需要回到根节点,继续下一次遍历
+		 * 针对每一个节点,其都有两种遍历方式,走往左节点的路径和走往右节点的路径
+		 */
+		public static List<String> binaryTreePaths(TreeNode root) {
+			List<String> list = new ArrayList<>();
+			dfs(root, list, "");
+			return list;
+		}
+
+		/**
+		 * 前序遍历 根->左->右  根->左遍历完了,如何回到根继续往右呢????
+		 */
+		public static void dfs(TreeNode root, List<String> list, String path) {
+			if (root != null) {
+				StringBuilder sb = new StringBuilder(path);
+				sb.append(root.val).append("->");
+				if (root.left == null && root.right == null) {// 当前节点是叶子节点
+					list.add(sb.substring(0, sb.length() - 2));
+				}
+				dfs(root.left, list, sb.toString());
+				// 回溯是指,遍历子树之后,需要退回到当前节点,怎么退回呢??
+				// 当前遍历节点为1时,当没有回溯操作时,遍历完左子节点后,得到路径'1->2->4',在遍历右子节点时,路径还是1->2->4
+				// 此时要将原路径存储的信息回溯到1->,则要把遍历左子节点的后续遍历全部退回;
+				// 核心在左子树遍历直到叶子节点,然后回到当前节点时,路径字符串,应该记录当时栈中的值;所以不能在遍历到叶子节点时return;
+				// 如果在 dfs_left后return,进入到dfs_right时,路径字符串不会回溯
+
+				dfs(root.right, list, sb.toString());
+			}
+		}
+
+		public static List<String> binaryTreePaths1(TreeNode root) {
+			List<String> list = new ArrayList<>();
+			dfs1(root, list, "");
+			return list;
+		}
+
+		/**
+		 * 为什么这样return没有回溯呢????
+		 * 分析递归树
+		 *      1
+		 *     / \
+		 *   2    3
+		 *  /    / \
+		 * 4    5   6
+		 *     /
+		 *    7
+		 * 1 -> 2 -> 4 -> 左null ->
+		 *           4 -> 右null ->
+		 *      2->右null
+		 * 1 -> 3 -> 5 -> 7 -> 左null ->
+		 *                7 -> 右null ->
+		 *           5 -> 右null ->
+		 *      3 -> 6 -> 左null ->
+		 *           6 -> 右null ->
+		 *
+		 * 当root走到节点4时,进入左节点的递归栈,节点4的左子节点为null,直接return;此时进入节点4的递归栈;继续下一步,进入右节点的
+		 * 递归栈,直接return;此时回到节点2的递归栈,节点2的右子节点为null,直接return;此时回到节点1的递归栈,进入其右节点3的递归栈;
+		 * 以此递归栈的调用,可实现回溯;此时可以看出,深度优先遍历就是回溯************
+		 *
+		 * 回溯很多时候应用在搜索这类问题上,类似于没有搜索;有规律的枚举所有可能的解,避免遗漏和重复.
+		 */
+		public static void dfs1(TreeNode root, List<String> list, String path) {
+			if (root == null) return;
+			StringBuilder sb = new StringBuilder(path);
+			sb.append(root.val).append("->");
+			if (root.left == null && root.right == null) {// 当前节点是叶子节点
+				list.add(sb.substring(0, sb.length() - 2));
+			}
+			dfs1(root.left, list, sb.toString());
+			// 回溯是指,遍历子树之后,需要退回到当前节点,怎么退回呢??
+			// 当前遍历节点为1时,当没有回溯操作时,遍历完左子节点后,得到路径'1->2->4',在遍历右子节点时,路径还是1->2->4
+			// 此时要将原路径存储的信息回溯到1->,则要把遍历左子节点的后续遍历全部退回;
+			// 核心在左子树遍历直到叶子节点,然后回到当前节点时,路径字符串,应该记录当时栈中的值;所以不能在遍历到叶子节点时return;
+			// 如果在 dfs_left后return,进入到dfs_right时,路径字符串不会回溯
+			dfs1(root.right, list, sb.toString());
+		}
+
+		/**
+		 * 通过层序遍历
+		 * 层序遍历思路是一层层的遍历节点元素,那么如何才能记录每一层元素的路径呢?
+		 * 显然我们需要一个数据结构来记录每个元素的路径,首先想到的是hash,节点为key,路径为value;
+		 * 当然我们也可以用一个队列,跟元素的队列保持一样的操作,这样就达到了一一对应的效果
+		 */
+		public static List<String> binaryTreePathsIterator(TreeNode root) {
+			List<String> list = new ArrayList<>();
+			if (root == null) return list;
+			Deque<TreeNode> nodeDeque = new LinkedList<>();
+			nodeDeque.add(root);
+			Deque<String> pathDeque = new LinkedList<>();
+			pathDeque.add(root.val + "->");
+			while (!nodeDeque.isEmpty()) {
+				int size = nodeDeque.size();
+				for (; size > 0; --size) {
+					TreeNode node = nodeDeque.poll();
+					String path = pathDeque.poll();
+					if (node.left != null) {
+						nodeDeque.add(node.left);
+						pathDeque.add(path + node.left.val + "->");
+					}
+					if (node.right != null) {
+						nodeDeque.add(node.right);
+						pathDeque.add(path + node.right.val + "->");
+					}
+					if (node.left == null && node.right == null) {
+						list.add(path.substring(0, path.length() - 2));
+					}
+				}
+			}
+			return list;
+		}
+
+		public static void main(String[] args) {
+			TreeNode n1 = new TreeNode(1);
+			TreeNode n2 = new TreeNode(2);
+			TreeNode n3 = new TreeNode(3);
+			TreeNode n4 = new TreeNode(4);
+			TreeNode n5 = new TreeNode(5);
+			TreeNode n6 = new TreeNode(6);
+			TreeNode n7 = new TreeNode(7);
+			n1.left = n2;
+			n1.right = n3;
+			n2.left = n4;
+			n3.left = n5;
+			n3.right = n6;
+			n5.left = n7;
+			List<String> strings1 = binaryTreePaths1(n1);
+			System.out.println(strings1);
+			List<String> strings = binaryTreePaths(n1);
+			System.out.println(strings);
+			List<String> strings2 = binaryTreePathsIterator(n1);
+			System.out.println(strings2);
 		}
 	}
 }
