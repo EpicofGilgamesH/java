@@ -425,7 +425,7 @@ public class LeetCodeCase {
 		 * 个人思路:
 		 * 个人思路，通过画出二叉搜索树，然后找到终止的条件；其中每个节点的子节点遍历范围是借助队列来实现。
 		 * 由于叶子节点都是单节点存在，所以递归树只到倒数第二层就终止。
-		 *
+		 * 总感觉这个思路有点繁琐,集合类型反复的转来转去
 		 */
 		public static List<List<Integer>> permute(int[] nums) {
 			List<List<Integer>> res = new ArrayList<>();
@@ -456,10 +456,49 @@ public class LeetCodeCase {
 			}
 		}
 
-	public static void main(String[] args) {
-		int[] nums = new int[]{1, 2, 3};
-		List<List<Integer>> permute = permute(nums);
-		System.out.println(permute);
+
+		public static List<List<Integer>> permuteI(int[] nums) {
+			List<List<Integer>> list = new ArrayList<>();
+			if (nums.length <= 0) return list;
+			if (nums.length == 1) {
+				list.add(Collections.singletonList(nums[0]));
+				return list;
+			}
+			boolean[] use = new boolean[nums.length];
+			Deque<Integer> path = new ArrayDeque<>(nums.length);
+			dfsI(nums, path, use, list);
+			return list;
+		}
+
+		/**
+		 * 官方思路:
+		 * 不使用队列,通过一个数组来记录指定下标的元素是否已经被搜索过了
+		 * 终止条件是已经遍历到叶子节点;叶子节点都是单节点(即叶子节点的根节点只有一个子节点)
+		 * <p>
+		 * 为什么自己思考的思路,只搜索到倒数第二层呢?实际上终止条件是当前节点的子节点范围,然后在for循环中进行遍历;
+		 * 所以当叶子节点遍历完后进行回退后,这个节点已经没有子节点可以遍历了,所以实际上是一个优化的点
+		 */
+		public static void dfsI(int[] nums, Deque<Integer> path, boolean[] use, List<List<Integer>> res) {
+			if (path.size() == nums.length) {
+				res.add(new ArrayList<>(path));
+				return;
+			}
+			for (int i = 0; i < nums.length; i++) {
+				if (!use[i]) {
+					path.addLast(nums[i]);
+					use[i] = true;
+					dfsI(nums, path, use, res);
+					path.removeLast(); // 回溯,FILO 栈特性
+					use[i] = false;
+				}
+			}
+		}
+
+		public static void main(String[] args) {
+			int[] nums = new int[]{1};
+			List<List<Integer>> permute = permuteI(nums);
+			System.out.println(permute);
 	}
-}
+
+  }
 }
