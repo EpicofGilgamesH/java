@@ -498,7 +498,101 @@ public class LeetCodeCase {
 			int[] nums = new int[]{1};
 			List<List<Integer>> permute = permuteI(nums);
 			System.out.println(permute);
+		}
+
 	}
 
-  }
+	/**
+	 * 47. 全排列 II
+	 * 给定一个可包含重复数字的序列 nums ，按任意顺序 返回所有不重复的全排列。
+	 * 示例 1：
+	 * 输入：nums = [1,1,2]
+	 * 输出：
+	 * [[1,1,2],
+	 * [1,2,1],
+	 * [2,1,1]]
+	 * 示例 2：
+	 * 输入：nums = [1,2,3]
+	 * 输出：[[1,2,3],[1,3,2],[2,1,3],[2,3,1],[3,1,2],[3,2,1]]
+	 * 提示：
+	 * 1 <= nums.length <= 8
+	 * -10 <= nums[i] <= 10
+	 */
+	public static class PermuteUnique {
+
+		/**
+		 * 有无重复数据应该是一样的解法,要求不重复
+		 * 重点在于,当前节点遍历其子节点时,子节点需要去重复;那么在遍历当前节点时,记录已经遍历过的节点,
+		 * 当遍历重复节点时,直接跳过
+		 */
+		public static List<List<Integer>> permuteUnique(int[] nums) {
+			List<List<Integer>> res = new ArrayList<>();
+			if (nums == null || nums.length == 0) return res;
+			Deque<Integer> path = new ArrayDeque<>(nums.length);
+			boolean[] use = new boolean[nums.length];
+			dfs(nums, use, path, res);
+			return res;
+		}
+
+		public static void dfs(int[] nums, boolean[] use, Deque<Integer> path, List<List<Integer>> res) {
+			if (path.size() == nums.length) {
+				res.add(new ArrayList<>(path));
+				return;
+			}
+			HashSet<Integer> layerUse = new HashSet<>(nums.length); // 每个节点在遍历子节点时,都会创建已经遍历过的节点集合
+			for (int i = 0; i < nums.length; i++) {            // 当前节点的子节点个数(遍历当前节点的子节点)
+				if (!use[i] && !layerUse.contains(nums[i])) {
+					path.addLast(nums[i]);
+					use[i] = true;
+					layerUse.add(nums[i]);
+					dfs(nums, use, path, res);
+					path.removeLast();
+					use[i] = false;
+				}
+			}
+			layerUse.clear();
+		}
+
+		public static List<List<Integer>> permuteUniqueI(int[] nums) {
+			List<List<Integer>> res = new ArrayList<>();
+			if (nums == null || nums.length == 0) return res;
+			Deque<Integer> path = new ArrayDeque<>(nums.length);
+			boolean[] use = new boolean[nums.length];
+			Arrays.sort(nums);
+			dfsI(nums, use, path, res);
+			return res;
+		}
+
+
+		/**
+		 * 官方思路,将nums数组进行排序,然后每次当前节点的子节点时,判断是否跟前一个元素是否相同
+		 * 重复遍历到子节点的条件 -> 当前节点与上一个节点相同,并且
+		 */
+		public static void dfsI(int[] nums, boolean[] use, Deque<Integer> path, List<List<Integer>> res) {
+			if (path.size() == nums.length) {
+				res.add(new ArrayList<>(path));
+				return;
+			}
+			for (int i = 0; i < nums.length; i++) {
+				// 我们要达到的目的是,在当前节点遍历其子节点时,过滤掉重复的节点;但是一旦过滤掉重复的节点后,
+				// 一次深度优先遍历根本没法到达叶子节点
+				// 但我们的重点是,遍历当前节点的子节点时,过滤重复,也就是同一层的for循环中,不能重复****;
+				// 那么第一次dfs肯定能到达叶子节点,然后回溯之后,到倒数第二层时,选择叶子节点时,不能与第一次dfs遍历的叶子节点相同,
+				// 实际上就是要控制dfs往下一个节点遍历的顺序,起到去重的作用
+				if (use[i] || (i > 0 && nums[i] == nums[i - 1] && !use[i - 1])) {
+					continue;
+				}
+				path.addLast(nums[i]);
+				use[i] = true;
+				dfsI(nums, use, path, res);
+				path.removeLast();
+				use[i] = false;
+			}
+		}
+
+		public static void main(String[] args) {
+			List<List<Integer>> lists = permuteUnique(new int[]{1, 1, 2});
+			System.out.println(lists);
+		}
+	}
 }
