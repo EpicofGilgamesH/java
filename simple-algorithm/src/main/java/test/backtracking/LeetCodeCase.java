@@ -456,7 +456,6 @@ public class LeetCodeCase {
 			}
 		}
 
-
 		public static List<List<Integer>> permuteI(int[] nums) {
 			List<List<Integer>> list = new ArrayList<>();
 			if (nums.length <= 0) return list;
@@ -592,6 +591,98 @@ public class LeetCodeCase {
 
 		public static void main(String[] args) {
 			List<List<Integer>> lists = permuteUnique(new int[]{1, 1, 2});
+			System.out.println(lists);
+		}
+	}
+
+	/**
+	 * 39. 组合总和
+	 * 给你一个 无重复元素 的整数数组 candidates 和一个目标整数 target ，找出 candidates 中可以使数字和为目标数 target 的
+	 * 所有 不同组合 ，并以列表形式返回。你可以按 任意顺序 返回这些组合。
+	 * candidates 中的 同一个 数字可以 无限制重复被选取 。如果至少一个数字的被选数量不同，则两种组合是不同的。
+	 * 对于给定的输入，保证和为 target 的不同组合数少于 150 个。
+	 * 示例 1：
+	 * 输入：candidates = [2,3,6,7], target = 7
+	 * 输出：[[2,2,3],[7]]
+	 * 解释：
+	 * 2 和 3 可以形成一组候选，2 + 2 + 3 = 7 。注意 2 可以使用多次。
+	 * 7 也是一个候选， 7 = 7 。
+	 * 仅有这两种组合。
+	 * 示例 2：
+	 * 输入: candidates = [2,3,5], target = 8
+	 * 输出: [[2,2,2,2],[2,3,3],[3,5]]
+	 * 示例 3：
+	 * 输入: candidates = [2], target = 1
+	 * 输出: []
+	 * 提示：
+	 * 1 <= candidates.length <= 30
+	 * 2 <= candidates[i] <= 40
+	 * candidates 的所有元素 互不相同
+	 * 1 <= target <= 40
+	 */
+	public static class CombinationSum {
+
+		/**
+		 * 个人思路:
+		 * 画出搜索树,每个节点在遍历其子节点时,可选取的子节点都是所有元素;递归终止条件是路径的path和 >= 7
+		 * 至少一个数字的被选数量不同,则两种组合是不同的;核心点在于如果避免所有数字都相同的重复呢???
+		 * 那么得保证每个节点在遍历其子节点时,从其自身开始往后进行遍历**** --->>>
+		 * 解决办法是:然后记录当前节点遍历的子节点时遍历的上一个子节点下标 pre;每下一层的子节点遍历;都从其顶节点本身开始
+		 */
+		public static List<List<Integer>> combinationSum(int[] candidates, int target) {
+			List<List<Integer>> res = new ArrayList<>();
+			if (candidates == null || candidates.length == 0) return res;
+			// Arrays.sort(candidates);
+			Deque<Integer> path = new ArrayDeque<>();
+			dfs(candidates, path, 0, target, 0, res);
+			return res;
+		}
+
+		/**
+		 * 递归的参数中有值类型,比如int 递归栈在每一个栈函数中为其指定一个不同的副本;而引用类型是同一个副本
+		 */
+		public static void dfs(int[] nums, Deque<Integer> path, int v, int target, int pre, List<List<Integer>> res) {
+			if (v == target) {
+				res.add(new ArrayList<>(path));
+				return;
+			}
+			if (v > target) return;
+			for (; pre < nums.length; pre++) {
+				path.addLast(nums[pre]);
+				dfs(nums, path, v + nums[pre], target, pre, res);
+				path.removeLast();
+			}
+		}
+
+		public static List<List<Integer>> combinationSumI(int[] candidates, int target) {
+			List<List<Integer>> res = new ArrayList<>();
+			if (candidates == null || candidates.length == 0) return res;
+			Arrays.sort(candidates);
+			Deque<Integer> path = new ArrayDeque<>();
+			dfsI(candidates, path, 0, target, 0, res);
+			return res;
+		}
+
+		/**
+		 * 递归搜索树的剪枝思考,当遍历一个节点在子节点时,如果其要遍历的子节点有序且范围为[s...n]
+		 * 如果存在 该节点之前的和 V+nums[s]>target;则子节点[s+1...n]都不需要在遍历了
+		 */
+		public static void dfsI(int[] nums, Deque<Integer> path, int v, int target, int pre, List<List<Integer>> res) {
+			if (v == target) {
+				res.add(new ArrayList<>(path));
+				return;
+			}
+			if (v > target) return;
+			for (; pre < nums.length; pre++) {
+				if (v + nums[pre] > target) break;
+				path.addLast(nums[pre]);
+				dfsI(nums, path, v + nums[pre], target, pre, res);
+				path.removeLast();
+			}
+		}
+
+		public static void main(String[] args) {
+			List<List<Integer>> lists = combinationSumI(new int[]{2, 3, 6, 7}, 7);
 			System.out.println(lists);
 		}
 	}
