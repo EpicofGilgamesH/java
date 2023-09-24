@@ -1,5 +1,8 @@
 package test.backtracking;
 
+import com.sun.tools.javac.code.Attribute;
+
+import java.lang.reflect.Array;
 import java.util.*;
 
 /**
@@ -684,6 +687,424 @@ public class LeetCodeCase {
 		public static void main(String[] args) {
 			List<List<Integer>> lists = combinationSumI(new int[]{2, 3, 6, 7}, 7);
 			System.out.println(lists);
+		}
+	}
+
+	/**
+	 * 40. 组合总和 II
+	 * 给定一个候选人编号的集合 candidates 和一个目标数 target ，找出 candidates 中所有可以使数字和为 target 的组合。
+	 * <p>
+	 * candidates 中的每个数字在每个组合中只能使用 一次 。
+	 * 注意：解集不能包含重复的组合。
+	 * 示例 1:
+	 * 输入: candidates = [10,1,2,7,6,1,5], target = 8,
+	 * 输出:
+	 * [
+	 * [1,1,6],
+	 * [1,2,5],
+	 * [1,7],
+	 * [2,6]
+	 * ]
+	 * 示例 2:
+	 * 输入: candidates = [2,5,2,1,2], target = 5,
+	 * 输出:
+	 * [
+	 * [1,2,2],
+	 * [5]
+	 * ]
+	 * 提示:
+	 * <p>
+	 * 1 <= candidates.length <= 100
+	 * 1 <= candidates[i] <= 50
+	 * 1 <= target <= 30
+	 */
+	public static class CombinationSum2 {
+
+		/**
+		 * 个人思路:
+		 * 题意中的重点 1)原集合可以用重复数字 2)每个数字只能使用一次 3)结果中不能有重复的集合
+		 * 那么递归搜索树中,当前节点的子节点遍历时,只能遍历其后面的集合;且遍历子节点集合时需要去重
+		 */
+		public static List<List<Integer>> combinationSum2(int[] candidates, int target) {
+			List<List<Integer>> res = new ArrayList<>();
+			if (candidates == null || candidates.length == 0) return res;
+			Arrays.sort(candidates);
+			Deque<Integer> path = new ArrayDeque<>(candidates.length);
+			dfs(candidates, path, 0, 0, target, res);
+			return res;
+		}
+
+		public static void dfs(int[] nums, Deque<Integer> path, int v, int pre, int target, List<List<Integer>> res) {
+			if (v == target) {
+				res.add(new ArrayList<>(path));
+				return;
+			}
+			if (v > target) return;
+			// 当前节点的子节点遍历时,去重操作
+			HashSet<Integer> set = new HashSet<>(nums.length);
+			for (; pre < nums.length; pre++) {
+				int s = v + nums[pre];
+				if (s > target) break;
+				if (set.contains(nums[pre])) continue;
+				path.addLast(nums[pre]);
+				set.add(nums[pre]);
+				dfs(nums, path, s, pre + 1, target, res);
+				path.removeLast();
+			}
+			set.clear();
+		}
+
+		public static List<List<Integer>> combinationSum2I(int[] candidates, int target) {
+			List<List<Integer>> res = new ArrayList<>();
+			if (candidates == null || candidates.length == 0) return res;
+			Arrays.sort(candidates);
+			Deque<Integer> path = new ArrayDeque<>(candidates.length);
+			dfsI(candidates, path, 0, 0, target, res);
+			return res;
+		}
+
+		/**
+		 * 不使用set来进行去重操作
+		 */
+		public static void dfsI(int[] nums, Deque<Integer> path, int v, int pre, int target, List<List<Integer>> res) {
+			if (v == target) {
+				res.add(new ArrayList<>(path));
+				return;
+			}
+			if (v > target) return;
+			// 当前节点的子节点遍历时,去重操作
+			// 这里for循环用的i是精髓所在,为了保证每个节点的子节点在遍历时不能重复,也就是i在正常遍历时(i>pre),不能与上一个元素相同
+			// pre参数是为了确保当前节点的子节点遍历时,不能出现其父节点以上的节点出现过的元素;
+			// i参数是为了确保当前节点的子节点遍历时,从第二个子节点开始判断是否与前一个节点元素的值相同;这样就确保了同一层节点在遍历时,不会重复
+			for (int i = pre; i < nums.length; i++) {
+				int s = v + nums[i];
+				if (s > target) break;
+				if (i > pre && nums[i] == nums[i - 1]) { // 跟上一个元素一样,则退出
+					continue;
+				}
+				path.addLast(nums[i]);
+				dfsI(nums, path, s, i + 1, target, res);
+				path.removeLast();
+			}
+		}
+
+		public static List<List<Integer>> combinationSum2II(int[] candidates, int target) {
+			List<List<Integer>> res = new ArrayList<>();
+			if (candidates == null || candidates.length == 0) return res;
+			Arrays.sort(candidates);
+			Deque<Integer> path = new ArrayDeque<>(candidates.length);
+			boolean[] use = new boolean[candidates.length];
+			dfsII(candidates, path, 0, 0, use, target, res);
+			return res;
+		}
+
+		/**
+		 * 还是可以通过use数组和pre值来进行去重处理
+		 */
+		public static void dfsII(int[] nums, Deque<Integer> path, int v, int pre, boolean[] use, int target, List<List<Integer>> res) {
+			if (v == target) {
+				res.add(new ArrayList<>(path));
+				return;
+			}
+			if (v > target) return;
+			// 当前节点的子节点遍历时,去重操作
+			// 这里for循环用的i是精髓所在,为了保证每个节点的子节点在遍历时不能重复,也就是i在正常遍历时(i>pre),不能与上一个元素相同
+			// pre参数是为了确保当前节点的子节点遍历时,不能出现其父节点以上的节点出现过的元素;
+			// i参数是为了确保当前节点的子节点遍历时,从第二个子节点开始判断是否与前一个节点元素的值相同;这样就确保了同一层节点在遍历时,不会重复
+			for (int i = pre; i < nums.length && v + nums[i] <= target; i++) {
+				if (i > 0 && (nums[i] == nums[i - 1] && !use[i - 1])) { // 跟上一个元素一样,则退出
+					continue;
+				}
+				path.addLast(nums[i]);
+				use[i] = true;
+				dfsII(nums, path, v + nums[i], i + 1, use, target, res);
+				path.removeLast();
+				use[i] = false;
+			}
+		}
+
+		public static void main(String[] args) {
+			List<List<Integer>> lists = combinationSum2II(new int[]{10, 1, 2, 7, 6, 1, 5}, 8);
+			System.out.println(lists);
+		}
+	}
+
+	/**
+	 * 78. 子集
+	 * 给你一个整数数组 nums ，数组中的元素 互不相同 。返回该数组所有可能的子集（幂集）。
+	 * <p>
+	 * 解集 不能 包含重复的子集。你可以按 任意顺序 返回解集。
+	 * 示例 1：
+	 * 输入：nums = [1,2,3]
+	 * 输出：[[],[1],[2],[1,2],[3],[1,3],[2,3],[1,2,3]]
+	 * 示例 2：
+	 * 输入：nums = [0]
+	 * 输出：[[],[0]]
+	 * 提示：
+	 * <p>
+	 * 1 <= nums.length <= 10
+	 * -10 <= nums[i] <= 10
+	 * nums 中的所有元素 互不相同
+	 */
+	public static class Subsets {
+
+		/**
+		 * 个人思路:
+		 * 题意可见 要打印所有的path场景
+		 * 遍历条件是 1)每个节点x在遍历其子节点时,其遍历范围是 [x...n],所以需要记录其节点x的index
+		 */
+		public static List<List<Integer>> subsets(int[] nums) {
+			List<List<Integer>> res = new ArrayList<>();
+			if (nums == null || nums.length == 0) return res;
+			Deque<Integer> path = new ArrayDeque<>();
+			dfs(nums, path, 0, res);
+			return res;
+		}
+
+		public static void dfs(int[] nums, Deque<Integer> path, int pre, List<List<Integer>> res) {
+			res.add(new ArrayList<>(path));
+			for (; pre < nums.length; pre++) {
+				path.addLast(nums[pre]);
+				dfs(nums, path, pre + 1, res);
+				path.removeLast();
+			}
+		}
+
+		/**
+		 * 官方思路:迭代法实现子集的枚举
+		 * 一个长度为n的数组,其每一个元素ai都可能有两种情况,[在子集中]和[不在子集中]
+		 * 用1表示在子集中,用0表示不在子集中;那么用二进制表示,其总位数为n
+		 * n=[1,2,3]
+		 * 000 {}      0
+		 * 001 {3}     1
+		 * 010 {2}     2
+		 * 011 {2,3}   3
+		 * 100 {1}     4
+		 * 101 {1,3}   5
+		 * 110 {1,2}   6
+		 * 111 {1,2,3} 7
+		 * <p>
+		 * 每个位置上的元素,都可能为0或者1,则枚举了所有情况,所以其子集个数为: 2^n
+		 * <p>
+		 * 这种方式的是不容易想到的,主要原因是该数组中的每一个元素,都可能有两种情况:[在子集中,不在子集中];
+		 * 那么可以用该数组位数的二进制来枚举出所有的情况,这一点不好理解.
+		 */
+		public static List<List<Integer>> subsetsOfficial(int[] nums) {
+			// 枚举n的所有二进制,从0开始
+			// 第3位 001  1
+			// 第2位 010  2
+			// 第1为 100  3
+			List<List<Integer>> res = new ArrayList<>();
+			if (nums == null || nums.length == 0) return res;
+			int n = (int) Math.pow(2, nums.length);
+			for (int i = 0; i < n; i++) {
+				// eg 010怎么得到其n位中每位是0还是1呢?
+				List<Integer> list = new ArrayList<>();
+				for (int j = nums.length - 1; j >= 0; j--) {
+					if ((i >> j & 1) == 1) {  // 任何数 &1 运算只取其最后一位是否为1或0
+						list.add(nums[nums.length - j - 1]);
+					}
+				}
+				res.add(list);
+			}
+			return res;
+		}
+
+		public static void main(String[] args) {
+			/*List<List<Integer>> subsets = subsets(new int[]{1, 2, 3});
+			System.out.println(subsets);*/
+
+			List<List<Integer>> lists = subsetsOfficial(new int[]{1, 2, 3});
+			System.out.println(lists);
+		}
+	}
+
+	/**
+	 * 90. 子集 II
+	 * 给你一个整数数组 nums ，其中可能包含重复元素，请你返回该数组所有可能的子集（幂集）。
+	 * 解集 不能 包含重复的子集。返回的解集中，子集可以按 任意顺序 排列。
+	 * 示例 1：
+	 * 输入：nums = [1,2,2]
+	 * 输出：[[],[1],[1,2],[1,2,2],[2],[2,2]]
+	 * 示例 2：
+	 * 输入：nums = [0]
+	 * 输出：[[],[0]]
+	 * 提示：
+	 * 1 <= nums.length <= 10
+	 * -10 <= nums[i] <= 10
+	 */
+	public static class SubsetsWithDup {
+
+		/**
+		 * 个人思路:
+		 * 画出搜索树,注意关键点是:数组元素能重复,但结果集不能重复.此时说明,一个顶节点在遍历子节点时,其子节点需要去重复;
+		 * 同一层去重复有两种方式 1: 同一层设定Hash进行去重 2:对元素进行排序,同一层的元素不能与上一个相同
+		 */
+		public static List<List<Integer>> subsetsWithDup(int[] nums) {
+			List<List<Integer>> res = new ArrayList<>();
+			if (nums == null || nums.length == 0) return res;
+			Arrays.sort(nums); // 避免当前节点的子节点遍历时与之前的遍历数据重复,需要将原数组进行排序
+			Deque<Integer> path = new ArrayDeque<>(nums.length);
+			dfs(nums, 0, path, res);
+			return res;
+		}
+
+		public static void dfs(int[] nums, int pre, Deque<Integer> path, List<List<Integer>> res) {
+			res.add(new ArrayList<>(path));
+			Set<Integer> set = new HashSet<>(); // 任意一个节点的子节点遍历时,去掉重复元素
+			for (; pre < nums.length; pre++) {
+				if (set.contains(nums[pre])) continue;
+				path.addLast(nums[pre]);
+				set.add(nums[pre]);
+				dfs(nums, pre + 1, path, res);
+				path.removeLast();
+			}
+			set.clear();
+		}
+
+		public static List<List<Integer>> subsetsWithDupI(int[] nums) {
+			List<List<Integer>> res = new ArrayList<>();
+			if (nums == null || nums.length == 0) return res;
+			Arrays.sort(nums);
+			Deque<Integer> path = new ArrayDeque<>(nums.length);
+			dfsI(nums, 0, path, res);
+			return res;
+		}
+
+		/**
+		 * 对原数组进行排序,然后对任意一个节点的子节点遍历时,不能与上一个元素相同
+		 */
+		public static void dfsI(int[] nums, int start, Deque<Integer> path, List<List<Integer>> res) {
+			res.add(new ArrayList<>(path));
+			for (int i = start; i < nums.length; i++) {
+				if (i > start && nums[i] == nums[i - 1]) continue;  // 遍历当前节点的子节点时,从start的位置开始,且不能与上一个遍历过的子节点相同
+				path.addLast(nums[i]);
+				dfsI(nums, i + 1, path, res);
+				path.removeLast();
+			}
+		}
+
+		/**
+		 * 通过二进制位遍历出所有的情况
+		 * <p>
+		 * 首先二进制位从0开始逐步+1,那么肯定是第一位先选,然后第二位再选,然后再第三位 (从低位开始)
+		 * 那么,在判断每一位是否被选中时,也从二进制位第一位开始;此时当第一位和第二位的数相同时,
+		 * 比如 1,2,2 这样的情况;当枚举时,二进制位每次+1,那么 001 肯定出现在010的前面一个;
+		 * 而101 肯定 出现在110的前面一个.根据题意,后面那种情况需要排除,可以发现排除的都是10的情况;
+		 * 如果是 1,2,2,2 这种该情况呢? 0001,0010,0100 需要排除后两种; 1001,1010,1100 也需要排除后两种
+		 * 所以可以总结:当枚举到这个数与上个数相等,那么如果上个数二进制位是0,那么被排除,值保留第一位
+		 * <p>
+		 * 与运算,位移后同位相同则为1不相同则为0
+		 */
+		public static List<List<Integer>> subsetsWithDupII(int[] nums) {
+			List<List<Integer>> res = new ArrayList<>();
+			if (nums == null || nums.length == 0) return res;
+			Arrays.sort(nums);
+			int n = 1 << nums.length;
+			for (int i = 0; i < n; i++) {
+				boolean flag = true;
+				List<Integer> list = new ArrayList<>(nums.length);
+				for (int j = 0; j < nums.length; j++) {
+					if (((i >> j) & 1) == 1) {  // 从低位开始
+						if (j > 0 && nums[j] == nums[j - 1] && (i >> (j - 1) & 1) == 0) {
+							flag = false;
+							break;
+						}
+						list.add(nums[j]);
+					}
+				}
+				if (flag) res.add(list);
+			}
+			return res;
+		}
+
+		public static void main(String[] args) {
+			List<List<Integer>> lists = subsetsWithDupII(new int[]{4, 4, 4, 4, 1});
+			System.out.println(lists);
+		}
+	}
+
+	/**
+	 * 60. 排列序列
+	 * 给出集合 [1,2,3,...,n]，其所有元素共有 n! 种排列。
+	 * 按大小顺序列出所有排列情况，并一一标记，当 n = 3 时, 所有排列如下：
+	 * "123"
+	 * "132"
+	 * "213"
+	 * "231"
+	 * "312"
+	 * "321"
+	 * 给定 n 和 k，返回第 k 个排列。
+	 * 示例 1：
+	 * 输入：n = 3, k = 3
+	 * 输出："213"
+	 * 示例 2：
+	 * 输入：n = 4, k = 9
+	 * 输出："2314"
+	 * 示例 3：
+	 * 输入：n = 3, k = 1
+	 * 输出："123"
+	 * <p>
+	 * 提示：
+	 * 1 <= n <= 9
+	 * 1 <= k <= n!
+	 */
+	public static class GetPermutation {
+
+		private static int sk;
+		private static String str;
+
+		/**
+		 * 个人思路:
+		 * use 数组的使用,本题中n个数的排列,不要求顺序.在构造搜索树时,要求当前节点的子节点在遍历时,不能与此分支上的节点相同;
+		 * 即整条分支遍历下来,不能有相同的元素;use数组伴随着整个分支的遍历和回溯;那么它记录的是每一个分支的使用元素情况
+		 * <p>
+		 * 但是我们拿到想要的结果就可以返回了,根本不需要枚举所有的情况;那我们是否可以直接找到第k大的分支呢?
+		 * 举例 [1,2,3,4]
+		 * 当第一个数选1,则1分支会有3!种小分支;同理选2、3、4 都会有3!中小分支;这样我们可以初步判断k输入那个根节点的分支中
+		 * (n-1)!
+		 */
+		public static String getPermutation(int n, int k) {
+			if (n == 0) return "";
+			sk = k;
+			Deque<Integer> path = new ArrayDeque<>(n);
+			boolean[] use = new boolean[n + 1];
+			dfs(1, n, path, use);
+			return str;
+		}
+
+		public static void dfs(int c, int n, Deque<Integer> path, boolean[] use) {
+			if (path.size() == n) {
+				sk--;
+			}
+			if (sk == 0) {  // 如何退出搜索呢????不需要回溯,不行;因为在k>0时需要回溯;k==0时需要立刻终止
+				str = join(path);
+				sk--;
+				return;
+			}
+			for (int i = 0; i < n; i++) {
+				if (use[i]) {
+					continue;
+				}
+				path.addLast(i + 1);
+				use[i] = true;
+				dfs(c + 1, n, path, use);
+				path.removeLast();
+				use[i] = false;
+			}
+		}
+
+		private static String join(Deque<Integer> path) {
+			StringBuilder p = new StringBuilder();
+			for (Integer i : path) {
+				p.append(i);
+			}
+			return p.toString();
+		}
+
+		public static void main(String[] args) {
+			String permutation = getPermutation(3, 3);
+			System.out.println(permutation);
 		}
 	}
 }
