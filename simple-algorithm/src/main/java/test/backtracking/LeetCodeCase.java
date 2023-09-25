@@ -1061,8 +1061,8 @@ public class LeetCodeCase {
 		 * <p>
 		 * 但是我们拿到想要的结果就可以返回了,根本不需要枚举所有的情况;那我们是否可以直接找到第k大的分支呢?
 		 * 举例 [1,2,3,4]
-		 * 当第一个数选1,则1分支会有3!种小分支;同理选2、3、4 都会有3!中小分支;这样我们可以初步判断k输入那个根节点的分支中
-		 * (n-1)!
+		 * 当第一个数选1,则1分支会有3!种小分支;同理选2、3、4 都会有3!种小分支;这样我们可以初步判断k输入那个根节点的分支中
+		 * 然后同理,可以一步步确定最后的分支上
 		 */
 		public static String getPermutation(int n, int k) {
 			if (n == 0) return "";
@@ -1102,9 +1102,65 @@ public class LeetCodeCase {
 			return p.toString();
 		}
 
+		private static int n_2;
+		private static int k_2;
+		private static int[] factorial = new int[]{1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880, 3628800};
+
+		/**
+		 * 递归方式
+		 */
+		public static String getPermutationI(int n, int k) {
+			n_2 = n;
+			k_2 = k;
+			boolean[] use = new boolean[n + 1];
+			StringBuilder sb = new StringBuilder();
+			dfsI(0, use, sb);
+			return sb.toString();
+		}
+
+		/**
+		 * @param index 递归树的层级
+		 * @param use   已搜索数组
+		 * @param path  路径字符串
+		 */
+		public static void dfsI(int index, boolean[] use, StringBuilder path) {
+			if (index == n_2) return;
+			// 第一次进入的全排列个数,就是n-1的阶乘 index=0
+			int v = factorial[n_2 - 1 - index];
+			for (int i = 1; i <= n_2; i++) {
+				if (use[i]) continue;
+				if (v < k_2) {
+					k_2 -= v;
+					continue;  // 不是这个分支,直接丢弃
+				}
+				path.append(i);
+				use[i] = true;
+				dfsI(index + 1, use, path);
+				// 第一层子节点遍历完成就结束
+				return;
+			}
+		}
+
+		/**
+		 * 计算阶乘
+		 */
+		public static String printFactorial(int n) {
+			String str = "int[] factorial=new int[] {";
+			int factorial = 1;
+			for (int i = 1; i <= n; i++) {
+				factorial = factorial * i;
+				str += factorial + ",";
+			}
+			return str.substring(0, str.length() - 1) + "};";
+		}
+
 		public static void main(String[] args) {
-			String permutation = getPermutation(3, 3);
-			System.out.println(permutation);
+			// String permutation = getPermutation(3, 3);
+			String permutationI = getPermutationI(3, 3);
+			System.out.println(permutationI);
+
+			String s = printFactorial(10);
+			System.out.println(s);
 		}
 	}
 }
