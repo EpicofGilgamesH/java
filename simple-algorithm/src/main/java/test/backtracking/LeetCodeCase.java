@@ -1,6 +1,7 @@
 package test.backtracking;
 
 import com.sun.tools.javac.code.Attribute;
+import test.DailyQuestionCase;
 
 import java.lang.reflect.Array;
 import java.util.*;
@@ -1161,6 +1162,246 @@ public class LeetCodeCase {
 
 			String s = printFactorial(10);
 			System.out.println(s);
+		}
+	}
+
+	/**
+	 * 93. 复原 IP 地址
+	 * 有效 IP 地址 正好由四个整数（每个整数位于 0 到 255 之间组成，且不能含有前导 0），整数之间用 '.' 分隔。
+	 * <p>
+	 * 例如："0.1.2.201" 和 "192.168.1.1" 是 有效 IP 地址，但是 "0.011.255.245"、"192.168.1.312" 和 "192.168@1.1" 是 无效 IP 地址。
+	 * 给定一个只包含数字的字符串 s ，用以表示一个 IP 地址，返回所有可能的有效 IP 地址，这些地址可以通过在 s 中插入 '.' 来形成。你 不能 重新排序或删除 s 中的任何数字。你可以按 任何 顺序返回答案。
+	 * 示例 1：
+	 * 输入：s = "25525511135"
+	 * 输出：["255.255.11.135","255.255.111.35"]
+	 * 示例 2：
+	 * 输入：s = "0000"
+	 * 输出：["0.0.0.0"]
+	 * 示例 3：
+	 * 输入：s = "101023"
+	 * 输出：["1.0.10.23","1.0.102.3","10.1.0.23","10.10.2.3","101.0.2.3"]
+	 * 提示：
+	 * 1 <= s.length <= 20
+	 * s 仅由数字组成
+	 */
+	public static class RestoreIpAddresses {
+
+		/**
+		 * 个人思路:
+		 * 搜索树,首先这棵树的层级永远是4,每一次搜索的值只能在[0,255];可以初步通过s的长度来判断每一次搜索值的长度[1-4]之间
+		 * 当搜索节点遇见0时,那么这个数只能是0;如果搜索节点的值不在[0,255]直接return;如果搜索层级超过4层,return;如果搜索层级不够4层,则忽略
+		 */
+		public static List<String> restoreIpAddresses(String s) {
+			List<String> list = new ArrayList<>();
+			if (s == null) return list;
+			if (s.length() < 4 || s.length() > 12) return list;
+			// s的长度4-5 可选位数是[1-2] ; s的长度 6-10 可选位数是 [1-3] ; s的长度11以上 s的长度是[2-3]
+			int min, max;
+			if (s.length() <= 5) {
+				min = 1;
+				max = 2;
+			} else if (s.length() <= 10) {
+				min = 1;
+				max = 3;
+			} else {
+				min = 2;
+				max = 3;
+			}
+
+			Deque<String> path = new ArrayDeque<>();
+			List<String> res = new ArrayList<>();
+			dfs(s, min, max, 0, path, res);
+			return res;
+		}
+
+		/**
+		 * dfs 感觉还有更加优秀的剪枝,实时判断下一次只能选几位数,也就是实时的计算min和max的值
+		 *
+		 * @param s     原字符串
+		 * @param min   节点遍历子节点时最小位数
+		 * @param max   节点遍历子节点时最大位数
+		 * @param start 节点遍历子节点时的开始位置
+		 * @param path  遍历搜索树分支路径
+		 */
+		public static void dfs(String s, int min, int max, int start, Deque<String> path, List<String> res) {
+			if (path.size() == 4) {
+				if (start == s.length())
+					res.add(String.join(".", new ArrayList<>(path)));
+				return;
+			}
+			for (int i = min; i <= max; i++) {
+				// 切割字符
+				if (i + start > s.length()) return;
+				String cur = s.substring(start, i + start);
+				if (cur.startsWith("0") && cur.length() > 1) return;
+				if (Integer.parseInt(cur) > 255) return;
+				path.addLast(cur);
+				dfs(s, min, max, start + i, path, res);
+				path.removeLast();
+			}
+		}
+
+		public static void main(String[] args) {
+			List<String> strings = restoreIpAddresses("101023");
+			System.out.println(strings);
+		}
+	}
+
+	/**
+	 * 733. 图像渲染
+	 * 有一幅以 m x n 的二维整数数组表示的图画 image ，其中 image[i][j] 表示该图画的像素值大小。
+	 * 你也被给予三个整数 sr ,  sc 和 newColor 。你应该从像素 image[sr][sc] 开始对图像进行 上色填充 。
+	 * 为了完成 上色工作 ，从初始像素开始，记录初始坐标的 上下左右四个方向上 像素值与初始坐标相同的相连像素点，接着再记录这四个方向上符合条件的像素点与他们对应 四个方向上 像素值与初始坐标相同的相连像素点，……，重复该过程。将所有有记录的像素点的颜色值改为 newColor 。
+	 * 最后返回 经过上色渲染后的图像 。
+	 * 示例 1:
+	 * <p>
+	 * 输入: image = [[1,1,1],[1,1,0],[1,0,1]]，sr = 1, sc = 1, newColor = 2
+	 * 输出: [[2,2,2],[2,2,0],[2,0,1]]
+	 * 解析: 在图像的正中间，(坐标(sr,sc)=(1,1)),在路径上所有符合条件的像素点的颜色都被更改成2。
+	 * 注意，右下角的像素没有更改为2，因为它不是在上下左右四个方向上与初始点相连的像素点。
+	 * 示例 2:
+	 * 输入: image = [[0,0,0],[0,0,0]], sr = 0, sc = 0, newColor = 2
+	 * 输出: [[2,2,2],[2,2,2]]
+	 * 提示:
+	 * <p>
+	 * m == image.length
+	 * n == image[i].length
+	 * 1 <= m, n <= 50
+	 * 0 <= image[i][j], newColor < 216
+	 * 0 <= sr < m
+	 * 0 <= sc < n
+	 */
+	public static class FloodFill {
+
+		/**
+		 * 个人思路:
+		 * 找到初始点[sr,sc]后,然后向四周发散;发散的过程中找到已经修改过的元素
+		 * 初始化点,需要发散到[上,左,下,右]四个方向;而后续的每个点则只需要发散两个方向
+		 * 上->[上,左] 下->[下,右] 左->[左,下] 右->[右,上] 就可以全部覆盖避免重复发散 该方式错误,会形成无限递归
+		 * 要是需要有一个二位数组记录 已经遍历过的坐标点
+		 */
+		public static int[][] floodFill(int[][] image, int sr, int sc, int color) {
+			image[sr][sc] = color;
+			// 重点是需要记录点坐标
+			// 上
+			if (sc - 1 >= 0) {
+				image[sr][sc - 1] = color;
+				dfs(image, sr, sc - 1, color, 1);
+			}
+			// 下
+			if (sc + 1 < image[0].length) {
+				image[sr][sc + 1] = color;
+				dfs(image, sr, sc + 1, color, 2);
+			}
+			// 左
+			if (sr - 1 >= 0) {
+				image[sr - 1][sc] = color;
+				dfs(image, sr - 1, sc, color, 3);
+			}
+			// 右
+			if (sr + 1 < image.length) {
+				image[sr + 1][sc] = color;
+				dfs(image, sr + 1, sc, color, 4);
+			}
+			return image;
+		}
+
+		public static void dfs(int[][] image, int sr, int sc, int color, int v) {
+			if (v == 1) { // 上
+				if (sc - 1 >= 0) {
+					image[sr][sc - 1] = color;
+					dfs(image, sr, sc - 1, color, 1);
+				}
+				if (sr - 1 >= 0) {
+					image[sr - 1][sc] = color;
+					dfs(image, sr - 1, sc, color, 3);
+				}
+			} else if (v == 2) { // 下
+				if (sc + 1 < image[0].length) {
+					image[sr][sc + 1] = color;
+					dfs(image, sr, sc + 1, color, 2);
+				}
+				if (sr + 1 < image.length) {
+					image[sr + 1][sc] = color;
+					dfs(image, sr + 1, sc, color, 4);
+				}
+			} else if (v == 3) {  // 左
+				if (sr - 1 >= 0) {
+					image[sr - 1][sc] = color;
+					dfs(image, sr - 1, sc, color, 3);
+				}
+				if (sc + 1 < image[0].length) {
+					image[sr][sc + 1] = color;
+					dfs(image, sr, sc + 1, color, 2);
+				}
+			} else {  // 右
+				if (sr + 1 < image.length) {
+					image[sr + 1][sc] = color;
+					dfs(image, sr + 1, sc, color, 4);
+				}
+				if (sc - 1 >= 0) {
+					image[sr][sc - 1] = color;
+					dfs(image, sr, sc - 1, color, 1);
+				}
+			}
+		}
+
+		/**
+		 * 通过use数组记录是否已经遍历过的元素
+		 * 看了官方的解决思路,这是一道简单题.并不需要去记录是不是已经遍历过,题意是指,其节点的上下左右节点的值相同的才需要发散
+		 */
+		public static int[][] floodFillI(int[][] image, int sr, int sc, int color) {
+			if (image == null) return null;
+			boolean[][] use = new boolean[image.length][image[0].length];
+			int v = image[sr][sc];
+			dfsI(image, sr, sc, color, v, use);
+			return image;
+		}
+
+		public static void dfsI(int[][] image, int sr, int sc, int color, int v, boolean[][] use) {
+			if (use[sr][sc]) return;
+			if (image[sr][sc] != v) {
+				return;
+			}
+			image[sr][sc] = color;
+			use[sr][sc] = true;
+			if (sr + 1 < image.length)
+				dfsI(image, sr + 1, sc, color, v, use);
+			if (sr - 1 >= 0)
+				dfsI(image, sr - 1, sc, color, v, use);
+			if (sc + 1 < image[0].length)
+				dfsI(image, sr, sc + 1, color, v, use);
+			if (sc - 1 >= 0)
+				dfsI(image, sr, sc - 1, color, v, use);
+		}
+
+		public static int[][] floodFillII(int[][] image, int sr, int sc, int color) {
+			if (image == null) return null;
+			int v = image[sr][sc];
+			if (v != color)
+				dfsII(image, sr, sc, color, v);
+			return image;
+		}
+
+		public static void dfsII(int[][] image, int sr, int sc, int color, int v) {
+			if (image[sr][sc] != v) {
+				return;
+			}
+			image[sr][sc] = color;
+			if (sr + 1 < image.length)
+				dfsII(image, sr + 1, sc, color, v);
+			if (sr - 1 >= 0)
+				dfsII(image, sr - 1, sc, color, v);
+			if (sc + 1 < image[0].length)
+				dfsII(image, sr, sc + 1, color, v);
+			if (sc - 1 >= 0)
+				dfsII(image, sr, sc - 1, color, v);
+		}
+
+		public static void main(String[] args) {
+			 int[][] ints = floodFillI(new int[][]{{1, 1, 1}, {1, 1, 0}, {1, 0, 1}}, 1, 1, 2);
+			//int[][] ints = floodFillII(new int[][]{{0, 0, 0}, {0, 0, 0}}, 0, 0, 2);
+			System.out.println(Arrays.deepToString(ints));
 		}
 	}
 }
