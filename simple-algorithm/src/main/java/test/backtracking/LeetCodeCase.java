@@ -1,9 +1,5 @@
 package test.backtracking;
 
-import com.sun.tools.javac.code.Attribute;
-import test.DailyQuestionCase;
-
-import java.lang.reflect.Array;
 import java.util.*;
 
 /**
@@ -1277,7 +1273,7 @@ public class LeetCodeCase {
 		 * 个人思路:
 		 * 找到初始点[sr,sc]后,然后向四周发散;发散的过程中找到已经修改过的元素
 		 * 初始化点,需要发散到[上,左,下,右]四个方向;而后续的每个点则只需要发散两个方向
-		 * 上->[上,左] 下->[下,右] 左->[左,下] 右->[右,上] 就可以全部覆盖避免重复发散 该方式错误,会形成无限递归
+		 * 上->[上,左] 下->[下,右] 左->[左,下] 右->[右,上] 就可以全部覆盖避免重复发散 该方式错误,会形成无限递归*****
 		 * 要是需要有一个二位数组记录 已经遍历过的坐标点
 		 */
 		public static int[][] floodFill(int[][] image, int sr, int sc, int color) {
@@ -1398,10 +1394,163 @@ public class LeetCodeCase {
 				dfsII(image, sr, sc - 1, color, v);
 		}
 
+		// x,y坐标的方式表示原地的上下左右四个位置的坐标
+		private static int[] dx = {1, 0, 0, -1};
+		private static int[] dy = {0, 1, -1, 0};
+
+		/**
+		 * bfs 广度优先遍历
+		 *
+		 * @param image
+		 * @param sr
+		 * @param sc
+		 * @param color
+		 * @return
+		 */
+		public static int[][] floodFillIII(int[][] image, int sr, int sc, int color) {
+			int cur = image[sr][sc];
+			if (cur == color) return image;
+			// 队列中存放的是坐标点
+			Deque<int[]> deque = new LinkedList<>();
+			deque.add(new int[]{sr, sc}); // 0 为x坐标; 1 为y坐标
+			image[sr][sc] = color;
+			while (!deque.isEmpty()) {
+				int[] poll = deque.poll();
+				// 搜索其上下左右四个坐标点,并记录到队列中
+				int x = poll[0], y = poll[1];
+				for (int i = 0; i < 4; i++) {
+					int mx = x + dx[i], my = y + dy[i];  // 当前节点坐标为原坐标做偏移操作
+					if (mx >= 0 && mx < image.length && my >= 0 && my < image[0].length && image[mx][my] == cur) {
+						deque.add(new int[]{mx, my});
+						image[mx][my] = color;
+					}
+				}
+			}
+			return image;
+		}
+
 		public static void main(String[] args) {
-			 int[][] ints = floodFillI(new int[][]{{1, 1, 1}, {1, 1, 0}, {1, 0, 1}}, 1, 1, 2);
-			//int[][] ints = floodFillII(new int[][]{{0, 0, 0}, {0, 0, 0}}, 0, 0, 2);
+			int[][] ints = floodFillIII(new int[][]{{1, 1, 1}, {1, 1, 0}, {1, 0, 1}}, 1, 1, 2);
+			// int[][] ints = floodFillII(new int[][]{{0, 0, 0}, {0, 0, 0}}, 0, 0, 2);
 			System.out.println(Arrays.deepToString(ints));
+		}
+	}
+
+	//---------------------------------------岛屿问题解析------------------------------------
+
+	/**
+	 * 200. 岛屿数量
+	 * 给你一个由 '1'（陆地）和 '0'（水）组成的的二维网格，请你计算网格中岛屿的数量。
+	 * 岛屿总是被水包围，并且每座岛屿只能由水平方向和/或竖直方向上相邻的陆地连接形成。
+	 * 此外，你可以假设该网格的四条边均被水包围。
+	 * 示例 1：
+	 * <p>
+	 * 输入：grid = [
+	 * ["1","1","1","1","0"],
+	 * ["1","1","0","1","0"],
+	 * ["1","1","0","0","0"],
+	 * ["0","0","0","0","0"]
+	 * ]
+	 * 输出：1
+	 * 示例 2：
+	 * <p>
+	 * 输入：grid = [
+	 * ["1","1","0","0","0"],
+	 * ["1","1","0","0","0"],
+	 * ["0","0","1","0","0"],
+	 * ["0","0","0","1","1"]
+	 * ]
+	 * 输出：3
+	 * <p>
+	 * <p>
+	 * 提示：
+	 * <p>
+	 * m == grid.length
+	 * n == grid[i].length
+	 * 1 <= m, n <= 300
+	 * grid[i][j] 的值为 '0' 或 '1'
+	 */
+	public static class NumIslands {
+
+		/**
+		 * 个人思路:
+		 * 从题意理解来看,本题最容易联想到的就是深度优先遍历;将网格中的某个坐标节点看作二叉树的顶节点;
+		 * 那么它的上下左右四个节点就是其下级节点.当然网格的遍历要注意重复遍历和边界问题.
+		 * 当遍历过是,给该节点做个标记;边做边思考,怎么才能计算出岛屿的个数...
+		 * 当前遍历过程中,如果周围都不是岛屿则退出了,怎么计算有多少块岛屿呢?
+		 * 首先,我们要找到岛屿,必须是递归搜索终止时(子节点全是0)才能得到;而怎么才能找到所有的岛屿呢?找到一个岛屿之后继续找下一个岛屿
+		 * 将从那个节点开始呢?如果避免遗漏?官方解题中把每一个节点作为顶点进行遍历,保证不会遗漏场景,是否还有更好的方法呢?
+		 */
+		public static int numIslands(char[][] grid) {
+			int count = 0;
+			for (int i = 0; i < grid.length; i++) {
+				for (int j = 0; j < grid[0].length; j++) {
+					if (grid[i][j] == '1') { // 找到为'1'的节点做深度优先遍历
+						dfs(grid, i, j);
+						count++;
+					}
+				}
+			}
+			return count;
+		}
+
+		public static void dfs(char[][] grid, int sr, int sc) {
+			// 首先判断其是否在网格中,先遍历进来再判断边界,思路会清晰很多
+			if (sr < 0 || sr >= grid.length || sc < 0 || sc >= grid[0].length) {
+				return;
+			}
+			if (grid[sr][sc] != '1') { // 不是岛屿 返回
+				return;
+			}
+			grid[sr][sc] = '2'; // 遍历过节点做上标记
+			// 遍历其上下左右
+			dfs(grid, sr + 1, sc);
+			dfs(grid, sr - 1, sc);
+			dfs(grid, sr, sc + 1);
+			dfs(grid, sr, sc - 1);
+		}
+
+		/**
+		 * bfs 同样的思路,广度优先遍历到所有子节点(相邻坐标)都为'0' 即找到一个岛屿
+		 */
+		public static int numIslandsI(char[][] grid) {
+			int count = 0;
+			for (int i = 0; i < grid.length; i++) {
+				for (int j = 0; j < grid[0].length; j++) {
+					if (grid[i][j] == '1') { // 找到为'1'的节点做深度优先遍历
+						bfs(grid, i, j);
+						count++;
+					}
+				}
+			}
+			return count;
+		}
+
+		// x,y坐标的方式表示原地的上下左右四个位置的坐标
+		private static int[] dx = {1, 0, 0, -1};
+		private static int[] dy = {0, 1, -1, 0};
+
+		public static void bfs(char[][] grid, int sr, int sc) {
+			Deque<int[]> deque = new LinkedList<>();
+			deque.add(new int[]{sr, sc});
+			grid[sr][sc] = '2';
+			while (!deque.isEmpty()) {
+				int[] cur = deque.poll();
+				int x = cur[0], y = cur[1];
+				for (int i = 0; i < 4; i++) {
+					int mx = x + dx[i], my = y + dy[i];
+					if (mx >= 0 && mx < grid.length && my >= 0 && my < grid[0].length && grid[mx][my] == '1') {
+						deque.add(new int[]{mx, my});
+						grid[mx][my] = 2;
+					}
+				}
+			}
+		}
+
+		public static void main(String[] args) {
+			//int i = numIslandsI(new char[][]{{'1', '1', '0', '0', '0'}, {'1', '1', '0', '0', '0'}, {'0', '0', '1', '0', '0'}, {'0', '0', '0', '1', '1'}});
+			int i = numIslandsI(new char[][]{{'1', '1', '1', '1', '0'}, {'1', '1', '0', '1', '0'}, {'1', '1', '0', '0', '0'}, {'0', '0', '0', '0', '0'}});
+			System.out.println(i);
 		}
 	}
 }

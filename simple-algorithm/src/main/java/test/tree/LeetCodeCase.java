@@ -1,17 +1,6 @@
 package test.tree;
 
-import com.alibaba.fastjson.JSON;
-import com.sun.org.apache.xml.internal.utils.StringComparable;
-import org.apache.commons.codec.StringEncoderComparator;
-import org.omg.CORBA.INTERNAL;
-import sun.misc.Perf;
-import sun.reflect.generics.tree.Tree;
-
-import javax.transaction.TransactionRequiredException;
-import java.lang.reflect.Array;
-import java.security.interfaces.RSAPublicKey;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * 二叉树的使用
