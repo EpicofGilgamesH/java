@@ -1437,6 +1437,7 @@ public class LeetCodeCase {
 	}
 
 	//---------------------------------------岛屿问题解析------------------------------------
+	// 200,463,695,827
 
 	/**
 	 * 200. 岛屿数量
@@ -1548,9 +1549,577 @@ public class LeetCodeCase {
 		}
 
 		public static void main(String[] args) {
-			//int i = numIslandsI(new char[][]{{'1', '1', '0', '0', '0'}, {'1', '1', '0', '0', '0'}, {'0', '0', '1', '0', '0'}, {'0', '0', '0', '1', '1'}});
+			// int i = numIslandsI(new char[][]{{'1', '1', '0', '0', '0'}, {'1', '1', '0', '0', '0'}, {'0', '0', '1', '0', '0'}, {'0', '0', '0', '1', '1'}});
 			int i = numIslandsI(new char[][]{{'1', '1', '1', '1', '0'}, {'1', '1', '0', '1', '0'}, {'1', '1', '0', '0', '0'}, {'0', '0', '0', '0', '0'}});
 			System.out.println(i);
+		}
+	}
+
+	/**
+	 * 463. 岛屿的周长
+	 * 给定一个 row x col 的二维网格地图 grid ，其中：grid[i][j] = 1 表示陆地， grid[i][j] = 0 表示水域。
+	 * 网格中的格子 水平和垂直 方向相连（对角线方向不相连）。整个网格被水完全包围，但其中恰好有一个岛屿（或者说，一个或多个表示陆地的格子相连组成的岛屿）。
+	 * 岛屿中没有“湖”（“湖” 指水域在岛屿内部且不和岛屿周围的水相连）。格子是边长为 1 的正方形。网格为长方形，且宽度和高度均不超过 100 。计算这个岛屿的周长。
+	 * 示例 1：
+	 * 输入：grid = [[0,1,0,0],[1,1,1,0],[0,1,0,0],[1,1,0,0]]
+	 * 输出：16
+	 * 解释：它的周长是上面图片中的 16 个黄色的边
+	 * 示例 2：
+	 * 输入：grid = [[1]]
+	 * 输出：4
+	 * 示例 3：
+	 * 输入：grid = [[1,0]]
+	 * 输出：4
+	 * 提示：
+	 * <p>
+	 * row == grid.length
+	 * col == grid[i].length
+	 * 1 <= row, col <= 100
+	 * grid[i][j] 为 0 或 1
+	 */
+	public static class IslandPerimeter {
+
+		/**
+		 * 个人思路:
+		 * 根据题意,确定网格中只有一个岛屿,且岛屿的内部没有湖;我们可以通过dfs遍历这个岛屿的边界坐标
+		 * 计算周长,确定边界节点,然后累加其边界节点的各个方向的边长。
+		 * 关于周长的计算有两点:
+		 * 1.到达边界,很显然需要累加一次边长并退出
+		 * 2.到达0节点,不要进入该节点的遍历,在判断要遍历的节点是0时,则可以累加一次边长并退出;每次不同的1节点遍历到其相邻的0节点时,
+		 * 都有存在一个临界的边长
+		 */
+		public static int islandPerimeter(int[][] grid) {
+			for (int i = 0; i < grid.length; i++) {
+				for (int j = 0; j < grid[0].length; j++) {
+					if (grid[i][j] == 1) {
+						return dfs_I(grid, i, j);
+					}
+				}
+			}
+			return 0;
+		}
+
+		private static int l = 0;
+
+		public static void dfs(int[][] grid, int sr, int sc) {
+			// 遍历的节点超出边界或者为0,都需要退出并累加周长
+			if ((sr < 0 || sr >= grid.length || sc < 0 || sc >= grid[0].length) || grid[sr][sc] == 0) {
+				l++;
+				return;
+			}
+			if (grid[sr][sc] == 2) {
+				return;
+			}
+			grid[sr][sc] = 2;
+			dfs(grid, sr + 1, sc);
+			dfs(grid, sr - 1, sc);
+			dfs(grid, sr, sc + 1);
+			dfs(grid, sr, sc - 1);
+		}
+
+		/**
+		 * 带返回值的递归,运行时间稍微快一点
+		 */
+		public static int dfs_I(int[][] grid, int sr, int sc) {
+			if ((sr < 0 || sr >= grid.length || sc < 0 || sc >= grid[0].length) || grid[sr][sc] == 0) {
+				return 1;
+			}
+			if (grid[sr][sc] == 2) {
+				return 0;
+			}
+			grid[sr][sc] = 2;
+			return dfs_I(grid, sr + 1, sc) +
+					dfs_I(grid, sr - 1, sc) +
+					dfs_I(grid, sr, sc + 1) +
+					dfs_I(grid, sr, sc - 1);
+		}
+
+		/**
+		 * 查看解题发现还有一个或在哪个,题中明确说了只有一个岛屿,那说明所有1节点都是相邻的
+		 * 找到所有的1节点,然后找到所有的接壤边上 周长=节点数*4-接壤边数*2 首先接壤的边上不能计算到周长中,其次接壤的边还计算了2次
+		 * 如何计算接壤边的条数呢?
+		 * 通过行和列分别计算接壤的边数,同一行接壤则计算[x][y] x固定时y的连续次数;同一列接壤则计算[x][y] y固定时x的连续次数
+		 * <p>
+		 * 这里要总结下二维数组的定义:grid[x][y] x为行,y为列  如果是一维数组grid[y] y为列,数组行的序列永远是x=0
+		 * <p>
+		 * 方法总结,计算节点数和接壤边数的方式,时间复杂度O(m*n)  深度优先遍历的时间复杂度同样为O(m*n)
+		 * 但是明显dfs的遍历中涉及递归遍历,时间复杂度和空间复杂度都更高;但是当岛屿的节点数很少时,dfs只用遍历岛屿那一块数据就完成了
+		 */
+		public static int islandPerimeter_I(int[][] grid) {
+			int count = 0, edge = 0;
+			for (int i = 0; i < grid.length; i++) {
+				int preY = Integer.MIN_VALUE;
+				for (int j = 0; j < grid[0].length; j++) {
+					if (grid[i][j] == 1) {
+						count++;
+						// 处理同一行的接壤
+						if (preY + 1 == j) {
+							edge++;
+						}
+						preY = j;
+					}
+				}
+			}
+			// 目前只能想到两层循环来做
+			for (int j = 0; j < grid[0].length; j++) {
+				int preX = Integer.MIN_VALUE;
+				for (int i = 0; i < grid.length; i++) {
+					if (grid[i][j] == 1) {
+						// 处理同一列的接壤
+						if (preX + 1 == i) {
+							edge++;
+						}
+						preX = i;
+					}
+				}
+			}
+			return 4 * count - 2 * edge;
+		}
+
+		/**
+		 * 参考了评论区的求接壤边数的思路,一次循环就可以得到
+		 * 网格中每个为1的节点,查找其右边和下边是否有接壤节点,这样接壤节点数不会重复计算
+		 */
+		public static int islandPerimeter_II(int[][] grid) {
+			int count = 0, edge = 0;
+			for (int i = 0; i < grid.length; i++) {
+				for (int j = 0; j < grid[0].length; j++) {
+					if (grid[i][j] == 1) {
+						count++;
+						// 计算接壤数
+						if (i < grid.length - 1 && grid[i + 1][j] == 1) {
+							edge++;
+						}
+						if (j < grid[0].length - 1 && grid[i][j + 1] == 1) {
+							edge++;
+						}
+					}
+				}
+			}
+			return 4 * count - 2 * edge;
+		}
+
+		public static void main(String[] args) {
+			int i = islandPerimeter_II(new int[][]{{0, 1, 0, 0}, {1, 1, 1, 0}, {0, 1, 0, 0}, {1, 1, 0, 0}});
+			// int i = islandPerimeter(new int[][]{{1}});
+			// int i = islandPerimeter_I(new int[][]{{1, 0}});
+			System.out.println(i);
+		}
+	}
+
+	/**
+	 * 695. 岛屿的最大面积
+	 * 给你一个大小为 m x n 的二进制矩阵 grid 。
+	 * 岛屿 是由一些相邻的 1 (代表土地) 构成的组合，这里的「相邻」要求两个 1 必须在 水平或者竖直的四个方向上 相邻。你可以假设 grid 的四个边缘都被 0（代表水）包围着。
+	 * 岛屿的面积是岛上值为 1 的单元格的数目。
+	 * 计算并返回 grid 中最大的岛屿面积。如果没有岛屿，则返回面积为 0 。
+	 * 示例 1：
+	 * <p>
+	 * 输入：grid = [[0,0,1,0,0,0,0,1,0,0,0,0,0],[0,0,0,0,0,0,0,1,1,1,0,0,0],[0,1,1,0,1,0,0,0,0,0,0,0,0],[0,1,0,0,1,1,0,0,1,0,1,0,0],[0,1,0,0,1,1,0,0,1,1,1,0,0],[0,0,0,0,0,0,0,0,0,0,1,0,0],[0,0,0,0,0,0,0,1,1,1,0,0,0],[0,0,0,0,0,0,0,1,1,0,0,0,0]]
+	 * 输出：6
+	 * 解释：答案不应该是 11 ，因为岛屿只能包含水平或垂直这四个方向上的 1 。
+	 * 示例 2：
+	 * 输入：grid = [[0,0,0,0,0,0,0,0]]
+	 * 输出：0
+	 * <p>
+	 * 提示：
+	 * m == grid.length
+	 * n == grid[i].length
+	 * 1 <= m, n <= 50
+	 * grid[i][j] 为 0 或 1
+	 */
+	public static class MaxAreaOfIsland {
+
+		/**
+		 * 个人思路:
+		 * 首先该题是在[200. 岛屿数量]这一题基础上的延伸,找出所有的岛屿,然后记录岛屿包含的节点个数,返回最大的岛屿节点个数
+		 */
+		public static int maxAreaOfIsland(int[][] grid) {
+			int max = 0;
+			for (int i = 0; i < grid.length; i++) {
+				for (int j = 0; j < grid[0].length; j++) {
+					if (grid[i][j] == 1) {
+						dfs(grid, i, j);
+						max = Math.max(max, area);
+						area = 0;
+					}
+				}
+			}
+			return max;
+		}
+
+		private static int area = 0;
+
+		public static void dfs(int[][] grid, int sr, int sc) {
+			if (sr < 0 || sr >= grid.length || sc < 0 || sc >= grid[0].length) {
+				return;
+			}
+			if (grid[sr][sc] != 1) {
+				return;
+			}
+			grid[sr][sc] = 2;
+			area++;
+			dfs(grid, sr + 1, sc);
+			dfs(grid, sr - 1, sc);
+			dfs(grid, sr, sc + 1);
+			dfs(grid, sr, sc - 1);
+		}
+
+		public static int maxAreaOfIsland_I(int[][] grid) {
+			int max = 0;
+			for (int i = 0; i < grid.length; i++) {
+				for (int j = 0; j < grid[0].length; j++) {
+					if (grid[i][j] == 1) {
+						int area = dfs_I(grid, i, j);
+						max = Math.max(max, area);
+					}
+				}
+			}
+			return max;
+		}
+
+		/**
+		 * 带返回值的递归总是更难处理一些,如何学习写出带返回值的递归方法呢?????
+		 */
+		public static int dfs_I(int[][] grid, int sr, int sc) {
+			if (sr < 0 || sr >= grid.length || sc < 0 || sc >= grid[0].length) {
+				return 0;
+			}
+			if (grid[sr][sc] != 1) {
+				return 0;
+			}
+			// 如果当前节点为1 则返回其岛屿的数量;其本身加上其上下左右四个节点的岛屿数量
+			grid[sr][sc] = 2;
+			return 1 + dfs_I(grid, sr + 1, sc)
+					+ dfs_I(grid, sr - 1, sc)
+					+ dfs_I(grid, sr, sc + 1)
+					+ dfs_I(grid, sr, sc - 1);
+		}
+
+		/**
+		 * bfs方式,同样的思路,找到为1的节点后,寻找其上下左右的节点放入队列,一直往外延伸性搜索
+		 */
+		public static int maxAreaOfIsland_II(int[][] grid) {
+			int max = 0;
+			for (int i = 0; i < grid.length; i++) {
+				for (int j = 0; j < grid[0].length; j++) {
+					if (grid[i][j] == 1) {
+						// 存在多个岛屿,每一个都需要单独的bfs搜索,跟dfs思路类似
+						int area = bfs(grid, i, j);
+						max = Math.max(max, area);
+					}
+				}
+			}
+			return max;
+		}
+
+		private static int[] dx = {1, 0, 0, -1};
+		private static int[] dy = {0, 1, -1, 0};
+
+		public static int bfs(int[][] grid, int sr, int sc) {
+			int area = 0;
+			Deque<int[]> deque = new LinkedList<>(); // 队列中存放的是节点的坐标
+			deque.add(new int[]{sr, sc});
+			grid[sr][sc] = 2;
+			area++;
+			while (!deque.isEmpty()) {
+				int[] cur = deque.poll();
+				int x = cur[0], y = cur[1];
+				for (int i = 0; i < 4; i++) {
+					int mx = x + dx[i], my = y + dy[i];
+					if (mx >= 0 && mx < grid.length && my >= 0 && my < grid[0].length && grid[mx][my] == 1) {
+						deque.add(new int[]{mx, my});
+						grid[mx][my] = 2;
+						area++;
+					}
+				}
+			}
+			return area;
+		}
+
+		public static void main(String[] args) {
+			int i = maxAreaOfIsland_II(new int[][]{
+					{0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
+					{0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0},
+					{0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0},
+					{0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 0, 0},
+					{0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0},
+					{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0},
+					{0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0},
+					{0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0}
+			});
+			System.out.println(i);
+		}
+	}
+
+	/**
+	 * 827. 最大人工岛
+	 * 给你一个大小为 n x n 二进制矩阵 grid 。最多 只能将一格 0 变成 1 。
+	 * 返回执行此操作后，grid 中最大的岛屿面积是多少？
+	 * 岛屿 由一组上、下、左、右四个方向相连的 1 形成。
+	 * 示例 1:
+	 * 输入: grid = [[1, 0], [0, 1]]
+	 * 输出: 3
+	 * 解释: 将一格0变成1，最终连通两个小岛得到面积为 3 的岛屿。
+	 * 示例 2:
+	 * 输入: grid = [[1, 1], [1, 0]]
+	 * 输出: 4
+	 * 解释: 将一格0变成1，岛屿的面积扩大为 4。
+	 * 示例 3:
+	 * 输入: grid = [[1, 1], [1, 1]]
+	 * 输出: 4
+	 * 解释: 没有0可以让我们变成1，面积依然为 4。
+	 * 提示：
+	 * n == grid.length
+	 * n == grid[i].length
+	 * 1 <= n <= 500
+	 * grid[i][j] 为 0 或 1
+	 */
+	public static class LargestIsland {
+
+		/**
+		 * 个人思路:
+		 * 题意要求将一个节点0变成1,然后找出最大的岛屿;相当于把0变成1,然后求岛屿面积
+		 * 时间复杂度/空间复杂度太高，超时了...
+		 */
+		public static int largestIsland(int[][] grid) {
+			int max = 0;
+			boolean flag = false;
+			for (int i = 0; i < grid.length; i++) {
+				for (int j = 0; j < grid[0].length; j++) {
+					if (grid[i][j] == 0) {
+						flag = true;
+						// 二维数组的深度拷贝,需要一行行进行拷贝
+						int[][] newGrid = new int[grid.length][grid[0].length];
+						for (int k = 0; k < grid.length; k++) {
+							newGrid[k] = Arrays.copyOf(grid[k], grid[k].length);
+						}
+						newGrid[i][j] = 1;
+						int area = dfs(newGrid, i, j);
+						max = Math.max(max, area);
+					}
+				}
+			}
+			// 如果没有0,直接计算所有节点个数
+			if (!flag) {
+				max = grid.length * grid[0].length;
+			}
+			return max;
+		}
+
+		public static int dfs(int[][] grid, int sr, int sc) {
+			if (sr < 0 || sr >= grid.length || sc < 0 || sc >= grid[0].length) {
+				return 0;
+			}
+			if (grid[sr][sc] != 1) {
+				return 0;
+			}
+			grid[sr][sc] = 2;
+			return 1 + dfs(grid, sr + 1, sc) + dfs(grid, sr - 1, sc) + dfs(grid, sr, sc + 1) + dfs(grid, sr, sc - 1);
+		}
+
+
+		/**
+		 * 个人思路的核心点是遍历所有为0的节点,然后将之变成1之后计算该岛屿的面积;这样会出现非常多的重复计算,并且每一次计算要还原二位数组
+		 * 官方思路分为两个步骤
+		 * 1.对原网格中的每个岛屿进行面积计算,即遍历网格中的每个[1],并且为这个岛屿设定一个唯一与之对应的整数值t;并存储成hash结构 Map[t,area]
+		 * 然后同时存储一份该元素与t的对应关系  tag[i][j]=t实际含义是,当前[i][j]点所在的整个岛屿的tag值都是t
+		 * 2.对网格中的所有0元素进行遍历,然后找到该元素周围的岛屿面值最
+		 */
+		public static int largestIslandOfficial(int[][] grid) {
+			int n = grid.length, res = 0;
+			int[][] tag = new int[n][n];
+			Map<Integer, Integer> area = new HashMap<>();
+			for (int i = 0; i < n; i++) {
+				for (int j = 0; j < n; j++) {
+					if (grid[i][j] == 1 && tag[i][j] == 0) {
+						int t = i * n + j + 1;
+						area.put(t, dfs(grid, i, j, tag, t));
+						res = Math.max(res, area.get(t));
+					}
+				}
+			}
+			for (int i = 0; i < n; i++) {
+				for (int j = 0; j < n; j++) {
+					if (grid[i][j] == 0) {
+						int z = 1;
+						Set<Integer> set = new HashSet<>();
+						for (int k = 0; k < 4; k++) {
+							int x = i + d[k], y = j + d[k + 1];
+							if (!valid(n, x, y) || tag[x][y] == 0 || set.contains(tag[x][y])) {
+								continue;
+							}
+							z += area.get(tag[x][y]);
+							set.add(tag[x][y]);
+						}
+						res = Math.max(res, z);
+					}
+				}
+			}
+			return res;
+		}
+
+		private static int[] d = {0, -1, 0, 1, 0};
+
+		public static int dfs(int[][] grid, int sr, int sc, int[][] tag, int t) {
+			int n = grid.length, res = 1;
+			tag[sr][sc] = t;
+			for (int i = 0; i < 4; i++) {
+				int x1 = sr + d[i], y1 = sc + d[i + 1];
+				if (valid(n, sr, sc) && grid[sr][sc] == 1 && tag[sr][sc] == 0) {
+					res += dfs(grid, sr, sc, tag, t);
+				}
+			}
+			return res;
+		}
+
+		private static boolean valid(int n, int sr, int sc) {
+			return sr >= 0 && sr < n && sc >= 0 && sc < n;
+		}
+
+		public static void main(String[] args) {
+			int i = largestIslandOfficial(new int[][]{
+					{1, 0},
+					{0, 1}
+			});
+			System.out.println(i);
+		}
+	}
+
+	/**
+	 * 130. 被围绕的区域
+	 * 给你一个 m x n 的矩阵 board ，由若干字符 'X' 和 'O' ，找到所有被 'X' 围绕的区域，并将这些区域里所有的 'O' 用 'X' 填充。
+	 * 示例 1：
+	 * 输入：board = [["X","X","X","X"],["X","O","O","X"],["X","X","O","X"],["X","O","X","X"]]
+	 * 输出：[["X","X","X","X"],["X","X","X","X"],["X","X","X","X"],["X","O","X","X"]]
+	 * 解释：被围绕的区间不会存在于边界上，换句话说，任何边界上的 'O' 都不会被填充为 'X'。 任何不在边界上，或不与边界上的 'O' 相连的 'O' 最终都会被填充为 'X'。如果两个元素在水平或垂直方向相邻，则称它们是“相连”的。
+	 * 示例 2：
+	 * 输入：board = [["X"]]
+	 * 输出：[["X"]]
+	 * 提示：
+	 * m == board.length
+	 * n == board[i].length
+	 * 1 <= m, n <= 200
+	 * board[i][j] 为 'X' 或 'O'
+	 */
+	public static class Solve {
+
+		/**
+		 * 个人思路:
+		 * 另一种岛屿的思路,不挨着边界且都被'X'包围的'O'才是岛屿,另一方面说明边界都是'O'
+		 * 思路错误****************** 错误的原因是,正向去思考是否有岛屿,然后dfs返回是否岛屿的结果,以搜索过的节点没法返回
+		 */
+		public static void solve(char[][] board) {
+			int m = board.length, n = board[0].length;
+			boolean[][] visited = new boolean[m][n];
+			for (int i = 0; i < m; i++) {
+				for (int j = 0; j < n; j++) {
+					if (board[i][j] == 'O' && !visited[i][j]) { // 寻找岛屿
+						HashSet<int[]> set = new HashSet<>();
+						if (dfs(board, i, j, visited, set)) {
+							for (int[] s : set) {
+								board[s[0]][s[1]] = 'X';
+							}
+						}
+					}
+				}
+			}
+		}
+
+		/**
+		 * dfs
+		 *
+		 * @param board   原网格
+		 * @param sr      横坐标
+		 * @param sc      纵坐标
+		 * @param visited 已遍历过的坐标点
+		 * @param set     本次岛屿遍历过的元素节点
+		 * @return 是否为岛屿
+		 */
+		public static boolean dfs(char[][] board, int sr, int sc, boolean[][] visited, Set<int[]> set) {
+			if (sr < 0 || sr >= board.length || sc < 0 || sc >= board[0].length) {
+				return false;
+			}
+			if (visited[sr][sc]) {
+				return true;
+			}
+			if (board[sr][sc] == 'X') {
+				return true;
+			}
+			visited[sr][sc] = true;
+			set.add(new int[]{sr, sc});
+			return dfs(board, sr - 1, sc, visited, set)
+					&& dfs(board, sr, sc - 1, visited, set)
+					&& dfs(board, sr + 1, sc, visited, set)
+					&& dfs(board, sr, sc + 1, visited, set);
+
+		}
+
+		/**
+		 * 官方思路：
+		 * 逆向去思考,因为边界上的'O'和与其相连的'O'将不被覆盖,其他的'O'则要覆盖成'X'
+		 * 那么就遍历所有边界上的'O'然后dfs遍历其相连的'O'将其变成'A',然后遍历所有网格将剩下的'O'变成'X';
+		 * 最后将'A'还原成'O'即可.
+		 * 关于DFS的标记问题,遍历过的元素需要被标记,避免重复遍历进入无限循环.当元素值不为'O'则直接退出,当元素值为'O'则标记其为'A'
+		 *
+		 * @param board
+		 */
+		public static void solve_Official(char[][] board) {
+			int m = board.length, n = board[0].length;
+			for (int i = 0; i < m; i++) {
+				dfs(board, i, 0);
+				dfs(board, i, n - 1);
+			}
+			for (int i = 0; i < n; i++) {
+				dfs(board, 0, i);
+				dfs(board, m - 1, i);
+			}
+			for (int i = 0; i < m; i++) {
+				for (int j = 0; j < n; j++) {
+					if (board[i][j] == 'A') {
+						board[i][j] = 'O';
+					} else if (board[i][j] == 'O') {
+						board[i][j] = 'X';
+					}
+				}
+			}
+		}
+
+		/**
+		 * dfs
+		 *
+		 * @param board 二位数组
+		 * @param sr    row index
+		 * @param sc    column index
+		 */
+		public static void dfs(char[][] board, int sr, int sc) {
+			if (sr < 0 || sr >= board.length || sc < 0 || sc >= board[0].length || board[sr][sc] != 'O') {
+				return;
+			}
+			board[sr][sc] = 'A';
+			dfs(board, sr + 1, sc);
+			dfs(board, sr - 1, sc);
+			dfs(board, sr, sc + 1);
+			dfs(board, sr, sc - 1);
+		}
+
+		public static void main(String[] args) {
+			/*solve(new char[][]{
+					{'X', 'X', 'X', 'X'},
+					{'X', 'O', 'O', 'X'},
+					{'X', 'X', 'O', 'X'},
+					{'X', 'O', 'X', 'X'}
+			});*/
+			char[][] board = {
+					{'O', 'O', 'O', 'O', 'X', 'X'},
+					{'O', 'O', 'O', 'O', 'O', 'O'},
+					{'O', 'X', 'O', 'X', 'O', 'O'},
+					{'O', 'X', 'O', 'O', 'X', 'O'},
+					{'O', 'X', 'O', 'X', 'O', 'O'},
+					{'O', 'X', 'O', 'O', 'O', 'O'}
+			};
+			solve_Official(board);
+			System.out.println("competed.");
 		}
 	}
 }

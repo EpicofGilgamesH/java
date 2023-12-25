@@ -256,6 +256,29 @@ public class RegexHelper {
 				IntStream.range(0, l).forEach(x -> sb.append('*'));
 				System.out.println("replace:" + sb.toString());
 			}
+
+			{
+				String regex6 = "^[^\\u4e00-\\u9fa5]+$|";
+				boolean matches8 = "".matches(regex6);
+				System.out.println(matches8);
+				System.out.println("123".matches(regex6));
+				System.out.println("abc&*".matches(regex6));
+				System.out.println("中国".matches(regex6));
+			}
+
+			{
+				System.out.println("------------------------------------------------");
+				String regex7 = "^\\d{11}$";
+				System.out.println("123123456854".matches(regex7));
+				System.out.println("13682560155".matches(regex7));
+			}
+
+			{
+				System.out.println("------------------------------------------------");
+				String regex8 = "^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$";
+				System.out.println("abc@qq.com".matches(regex8));
+				System.out.println("abc_-132@qq.weixin.com".matches(regex8));
+			}
 		}
 	}
 

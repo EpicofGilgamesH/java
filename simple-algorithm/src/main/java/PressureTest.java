@@ -6,8 +6,12 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 import java.util.concurrent.*;
@@ -27,33 +31,44 @@ public class PressureTest {
 		public void run() {
 			try {
 				start.await();
-				// System.out.println(Thread.currentThread().getName() + "开始执行:" + System.currentTimeMillis());
+				System.out.println(Thread.currentThread().getName() + "开始执行:" + System.currentTimeMillis());
 				execute();
 			} catch (InterruptedException e) {
 				// throw new RuntimeException(e);
 			} finally {
-				// System.out.println(Thread.currentThread().getName() + "执行完成:" + System.currentTimeMillis());
+				System.out.println(Thread.currentThread().getName() + "执行完成:" + System.currentTimeMillis());
 				latch2.countDown();
 			}
 		}
 
 		private static void execute() {
-
+			String jsonBody = "{\"recipientNo\":\"023408111222331\",\"billerName\":\"GLO\",\"billerId\":\"GLO\",\"serviceType\":\"1\",\"orderAmount\":\"50.00\",\"paymentAmount\":\"50.00\",\"paymentMethod\":\"0\",\"itemId\":\"s98736140800350\",\"orderSource\":0}";
 			try {
-				String response = HttpRequest
-						.get("http://10.250.160.40:8101/buyer/info")
-						.header("authorization", "Bearer 76836e89-af3e-4976-ac00-b296627bb0cf")
-						.body("")
-						.execute().body();
-
+				HttpClient httpClient = HttpClients.createDefault();
+				RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(5000)
+						.setConnectionRequestTimeout(5000)
+						.setSocketTimeout(5000)
+						.setRedirectsEnabled(true)
+						.build();
+				HttpPost post = new HttpPost("https://wap2.test.egatee.cn/api/user/palmpay/generateBusinessOrder");
+				post.setHeader("authorization", "Bearer 4bcc7ff2-0047-4197-bff8-7d4e43fda74a");
+				post.setHeader("Content-Type", "application/json");
+				post.setConfig(requestConfig);
+				StringEntity requestEntity = new StringEntity(jsonBody, ContentType.APPLICATION_JSON);
+				post.setEntity(requestEntity);
+				HttpResponse execute = httpClient.execute(post);
+				if (execute.getEntity() != null) {
+					System.out.println(EntityUtils.toString(execute.getEntity()));
+				}
 			} catch (Exception exception) {
 
 			}
 		}
 	}
 
-	public static CountDownLatch latch1 = new CountDownLatch(3000);
-	public static CountDownLatch latch2 = new CountDownLatch(3000);
+	private static final int count = 2000;
+	public static CountDownLatch latch1 = new CountDownLatch(count);
+	public static CountDownLatch latch2 = new CountDownLatch(count);
 
 	public static void main(String[] args) throws InterruptedException, IOException {
 
@@ -68,21 +83,22 @@ public class PressureTest {
 		System.out.println("单次耗时:" + (System.currentTimeMillis() - l));*/
 
 
+		String jsonBody = "{\"recipientNo\":\"023408111222331\",\"billerName\":\"GLO\",\"billerId\":\"GLO\",\"serviceType\":\"1\",\"orderAmount\":\"50.00\",\"paymentAmount\":\"50.00\",\"paymentMethod\":\"0\",\"itemId\":\"s98736140800350\",\"orderSource\":0}";
 		long l1 = System.currentTimeMillis();
 		HttpClient httpClient = HttpClients.createDefault();
 		RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(5000)
-				.setConnectionRequestTimeout(5000)
-				.setSocketTimeout(5000)
+				.setConnectionRequestTimeout(20000)
+				.setSocketTimeout(20000)
 				.setRedirectsEnabled(true)
 				.build();
-
-		HttpGet get = new HttpGet("http://10.250.160.40:8101/buyer/info");
-		get.setHeader("authorization", "Bearer 76836e89-af3e-4976-ac00-b296627bb0cf");
-		get.setConfig(requestConfig);
-		HttpResponse execute = httpClient.execute(get);
+		HttpPost post = new HttpPost("https://wap2.test.egatee.cn/api/user/palmpay/generateBusinessOrder");
+		post.setHeader("authorization", "Bearer 4bcc7ff2-0047-4197-bff8-7d4e43fda74a");
+		post.setHeader("Content-Type", "application/json");
+		post.setConfig(requestConfig);
+		StringEntity requestEntity = new StringEntity(jsonBody, ContentType.APPLICATION_JSON);
+		post.setEntity(requestEntity);
+		HttpResponse execute = httpClient.execute(post);
 		System.out.println("单次耗时:" + (System.currentTimeMillis() - l1));
-		httpClient.execute(get);
-		System.out.println();
 
 		// 初始化线程池
 		ExecutorService pool = new ThreadPoolExecutor(24 * 40 + 1, 24 * 40 + 1, 120,
@@ -92,10 +108,9 @@ public class PressureTest {
 				new ThreadPoolExecutor.DiscardPolicy()  // 丢弃任务  策略设置交给当前线程处理时,导致主线程阻塞,任务没法继续,所以策略设置必须要考虑使用场景
 
 		);
-		long cast = 0;
 
 		long s = System.currentTimeMillis();
-		for (int j = 0; j < 3000; j++) {
+		for (int j = 0; j < count; j++) {
 			try {
 				pool.submit(new RequestTask(latch1));
 			} finally {
@@ -108,6 +123,6 @@ public class PressureTest {
 		pool.shutdown();
 		long s1 = System.currentTimeMillis() - s;
 
-		System.out.println("压测100次耗时为:" + s1);
+		System.out.println("压测" + count + "次耗时为:" + s1);
 	}
 }
