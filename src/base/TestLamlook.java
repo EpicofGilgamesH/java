@@ -16,4 +16,10 @@ public class TestLamlook {
 		private String scanDate;
 
 	}
+
+	public static void main(String[] args) {
+		String phone = "13628560155";
+		String substring = phone.substring(phone.length() - 4);
+		System.out.println(substring);
+	}
 }
