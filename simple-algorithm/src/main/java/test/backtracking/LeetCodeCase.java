@@ -2122,4 +2122,411 @@ public class LeetCodeCase {
 			System.out.println("competed.");
 		}
 	}
+
+	//************************二叉树******************
+
+	public static class TreeNode {
+		int val;
+		TreeNode left;
+		TreeNode right;
+
+		TreeNode() {
+		}
+
+		TreeNode(int val) {
+			this.val = val;
+		}
+
+		TreeNode(int val, TreeNode left, TreeNode right) {
+			this.val = val;
+			this.left = left;
+			this.right = right;
+		}
+	}
+
+
+	/**
+	 * 104. 二叉树的最大深度
+	 * 给定一个二叉树 root ，返回其最大深度。
+	 * <p>
+	 * 二叉树的 最大深度 是指从根节点到最远叶子节点的最长路径上的节点数。
+	 * 示例 1：
+	 * 输入：root = [3,9,20,null,null,15,7]
+	 * 输出：3
+	 * 示例 2：
+	 * <p>
+	 * 输入：root = [1,null,2]
+	 * 输出：2
+	 * 提示：
+	 * 树中节点的数量在 [0, 104] 区间内。
+	 * -100 <= Node.val <= 100
+	 */
+	public static class MaxDepth {
+
+		/**
+		 * 个人思路:
+		 * 通过两种方式实现
+		 * 1.使用栈分层遍历,并记录层度
+		 * 2.使用二叉树搜索,记录深度
+		 * <p>
+		 * 二叉树的层序遍历核心是什么呢?栈怎么保证一层一层的去遍历呢?
+		 * 最简单的方式是使用两个栈 A,B A放入上一层的节点,解析出来的子节点放入B节点,来回切换使用
+		 * 较巧妙的方式是,每一层记录节点数量,在操作栈时,先记录栈中节点的数量,那就是本层需要遍历的节点的数量,遍历完的节点弹出
+		 *
+		 * @param root
+		 * @return
+		 */
+		public static int maxDepth(TreeNode root) {
+			Deque<TreeNode> deque = new LinkedList<>();
+			if (root != null) deque.push(root);
+			int deep = 0;
+			while (!deque.isEmpty()) {  // 循环每进来一次,就是一下层的遍历
+				int size = deque.size();
+				for (; size > 0; --size) {
+					TreeNode node = deque.pop();
+					if (node != null && node.left != null) deque.add(node.left);
+					if (node != null && node.right != null) deque.add(node.right);
+				}
+				deep++;
+			}
+			return deep;
+		}
+
+		/**
+		 * 二叉树搜索
+		 * 深度优先遍历时,中序遍历
+		 * root二叉树的深度= Math.max(左子树的深度,右子树的深度)+1
+		 * 子节点为空则退出
+		 *
+		 * @param root
+		 * @return
+		 */
+		public static int maxDepthI(TreeNode root) {
+			if (root == null) return 0;
+			int l = maxDepthI(root.left);
+			int r = maxDepthI(root.right);
+			return Math.max(l, r) + 1;
+		}
+
+		public static void main(String[] args) {
+			TreeNode root = new TreeNode(3);
+			TreeNode r_l = new TreeNode(9);
+			TreeNode r_r = new TreeNode(20);
+			TreeNode n20_l = new TreeNode(15);
+			TreeNode n20_r = new TreeNode(7);
+			root.left = r_l;
+			root.right = r_r;
+			r_l.left = n20_l;
+			r_r.right = n20_r;
+			int i = maxDepthI(root);
+			System.out.println(i);
+		}
+
+	}
+
+	/**
+	 * 113. 路径总和 II
+	 * 给你二叉树的根节点 root 和一个整数目标和 targetSum ，找出所有 从根节点到叶子节点 路径总和等于给定目标和的路径。
+	 * <p>
+	 * 叶子节点 是指没有子节点的节点。
+	 * 示例 1：
+	 * <p>
+	 * <p>
+	 * 输入：root = [5,4,8,11,null,13,4,7,2,null,null,5,1], targetSum = 22
+	 * 输出：[[5,4,11,2],[5,8,4,5]]
+	 * 示例 2：
+	 * 输入：root = [1,2,3], targetSum = 5
+	 * 输出：[]
+	 * 示例 3：
+	 * <p>
+	 * 输入：root = [1,2], targetSum = 0
+	 * 输出：[]
+	 * 提示：
+	 * <p>
+	 * 树中节点总数在范围 [0, 5000] 内
+	 * -1000 <= Node.val <= 1000
+	 * -1000 <= targetSum <= 1000
+	 */
+	public static class PathSum {
+
+		/**
+		 * 个人思路：
+		 * 二叉树的搜索,考虑搜索时,记录路径的回溯问题,将匹配到的结果记录下来
+		 *
+		 * @param root
+		 * @param targetSum
+		 * @return
+		 */
+		private static List<List<Integer>> list = new ArrayList<>();
+
+		/**
+		 * dfs 深度优先遍历
+		 *
+		 * @param root
+		 * @param targetSum
+		 * @return
+		 */
+		public static List<List<Integer>> pathSum(TreeNode root, int targetSum) {
+			if (root != null) {
+				LinkedList<Integer> depth = new LinkedList<>();
+				depth.addLast(root.val);
+				treeTraverse(root, targetSum - root.val, depth);
+			}
+			return list;
+		}
+
+		private static void treeTraverse(TreeNode node, int target, LinkedList<Integer> depth) {
+			if (node.left == null && node.right == null) { // 叶子节点
+				if (target == 0) {
+					list.add(new ArrayList<>(depth));
+				}
+				return;
+			}
+			if (node.left != null) {
+				depth.addLast(node.left.val);
+				treeTraverse(node.left, target - node.left.val, depth);
+				depth.removeLast();
+			}
+			if (node.right != null) {
+				depth.addLast(node.right.val);
+				treeTraverse(node.right, target - node.right.val, depth);
+				depth.removeLast();
+			}
+		}
+
+		public static List<List<Integer>> pathSumI(TreeNode root, int targetSum) {
+			LinkedList<Integer> depth = new LinkedList<>();
+			treeTraverseI(root, targetSum, depth);
+			return list;
+		}
+
+		private static void treeTraverseI(TreeNode node, int target, LinkedList<Integer> depth) {
+			if (node == null) return;
+			depth.addLast(node.val);
+			target -= node.val;
+			if (node.left == null && node.right == null && target == 0) {
+				list.add(new ArrayList<>(depth));
+			}
+			treeTraverseI(node.left, target, depth);
+			treeTraverseI(node.right, target, depth);
+			depth.removeLast();
+		}
+
+
+		private static Map<TreeNode, TreeNode> map = new HashMap<>();
+
+		/**
+		 * 层序遍历,分层遍历时记录节点路经,并找出符合条件的节点路径;记录不了路径,因为是通过分层遍历出来的,路径只能在找到符合条件的
+		 * 叶子节点之后反推出来;这里需要记录当前节点累计的值,使用栈特性 模拟进行值求和计算
+		 * 分层好像没有什么作用,只需要遍历到叶子节点,然后计算是否满足条件
+		 * 要使用模拟栈,并不是层序遍历 层序遍历和模拟栈 是FIFO和FILO的区别
+		 * <p>
+		 * 模拟栈深度优先遍历,找到符合条件的叶子节点,然后反向遍历得到结果集
+		 * <p>
+		 * 直接看了官方的代码,发现并不是这么回事;官方思路还是层序遍历FIFO 然后用一个FIFO的链表结构来存放sum值,该节点如果有左右子节点
+		 * 这存放两个相同的sum值,同样是层序的,随着节点的遍历一起进行操作
+		 * 理解起来还是有点复杂的
+		 *
+		 * @param root
+		 * @param targetSum
+		 * @return
+		 */
+		public static List<List<Integer>> pathSumII(TreeNode root, int targetSum) {
+			if (root == null) return list;
+			Deque<Integer> dequeSum = new LinkedList<>();
+			Deque<TreeNode> deque = new LinkedList<>();
+			deque.offer(root);
+			dequeSum.offer(0);
+			while (!deque.isEmpty()) {
+				TreeNode node = deque.poll();
+				int v = dequeSum.poll() + node.val;
+				if (node.left == null && node.right == null) {
+					if (v == targetSum) {
+						list.add(getList(node));
+					}
+				} else {
+					if (node.left != null) {
+						deque.offer(node.left);
+						dequeSum.offer(v);
+						map.put(node.left, node);
+					}
+					if (node.right != null) {
+						deque.offer(node.right);
+						dequeSum.offer(v);
+						map.put(node.right, node);
+					}
+
+				}
+			}
+			return list;
+		}
+
+		private static List<Integer> getList(TreeNode treeNode) {
+			List<Integer> li = new ArrayList<>();
+			while (treeNode != null) {
+				li.add(treeNode.val);
+				treeNode = map.get(treeNode);
+			}
+			Collections.reverse(li);
+			return li;
+		}
+
+		public static void main(String[] args) {
+			TreeNode n_5 = new TreeNode(5);
+			TreeNode n_4 = new TreeNode(4);
+			TreeNode n_8 = new TreeNode(8);
+			n_5.left = n_4;
+			n_5.right = n_8;
+			TreeNode n_11 = new TreeNode(11);
+			n_4.left = n_11;
+			TreeNode n_7 = new TreeNode(7);
+			TreeNode n_2 = new TreeNode(2);
+			n_11.left = n_7;
+			n_11.right = n_2;
+			TreeNode n_13 = new TreeNode(13);
+			TreeNode n_4_1 = new TreeNode(4);
+			n_8.left = n_13;
+			n_8.right = n_4_1;
+			TreeNode n_5_1 = new TreeNode(5);
+			TreeNode n_1 = new TreeNode(1);
+			n_4_1.left = n_5_1;
+			n_4_1.right = n_1;
+
+			List<List<Integer>> lists = pathSumII(n_5, 22);
+			System.out.println(lists);
+		}
+	}
+
+	/**
+	 * 79. 单词搜索
+	 * 给定一个 m x n 二维字符网格 board 和一个字符串单词 word 。如果 word 存在于网格中，返回 true ；否则，返回 false 。
+	 * <p>
+	 * 单词必须按照字母顺序，通过相邻的单元格内的字母构成，其中“相邻”单元格是那些水平相邻或垂直相邻的单元格。同一个单元格内的字母不允许被重复使用。
+	 * 示例 1：
+	 * 输入：board = [["A","B","C","E"],["S","F","C","S"],["A","D","E","E"]], word = "ABCCED"
+	 * 输出：true
+	 * 示例 2：
+	 * 输入：board = [["A","B","C","E"],["S","F","C","S"],["A","D","E","E"]], word = "SEE"
+	 * 输出：true
+	 * 示例 3：
+	 * 输入：board = [["A","B","C","E"],["S","F","C","S"],["A","D","E","E"]], word = "ABCB"
+	 * 输出：false
+	 * 提示：
+	 * <p>
+	 * m == board.length
+	 * n = board[i].length
+	 * 1 <= m, n <= 6
+	 * 1 <= word.length <= 15
+	 * board 和 word 仅由大小写英文字母组成
+	 * 进阶：你可以使用搜索剪枝的技术来优化解决方案，使其在 board 更大的情况下可以更快解决问题？
+	 */
+	public static class WordSearch {
+
+
+		private static boolean flag = false;
+
+		/**
+		 * 个人思路:
+		 * 回溯搜索,先找到word中的符合第一个字母的元素,然后向其水平和垂直方向进行搜索
+		 *
+		 * @param board
+		 * @param word
+		 * @return
+		 */
+		public static boolean exist(char[][] board, String word) {
+			for (int i = 0; i < board.length; i++) {
+				for (int j = 0; j < board[0].length; j++) {
+					if (board[i][j] == word.charAt(0)) {  // 第一个字母符合条件,则开始进行搜索
+						Deque<Character> deque = new LinkedList<>();
+						boolean[][] use = new boolean[board.length][board[0].length];
+						isMatch(board, i, j, deque, use, word, 0);
+						if (flag) return true;
+					}
+				}
+			}
+			return flag;
+		}
+
+		private static void isMatch(char[][] board, int m, int n, Deque<Character> deque, boolean[][] use, String word, int index) {
+			if (deque.size() == word.length()) {
+				flag = true;
+				return;
+			}
+			if (m < 0 || m >= board.length || n < 0 || n >= board[0].length) return;
+			if (use[m][n]) return;
+			char c = board[m][n];
+			if (c != word.charAt(index)) return;
+			use[m][n] = true;
+			deque.addLast(c);
+			isMatch(board, m + 1, n, deque, use, word, index + 1);
+			isMatch(board, m - 1, n, deque, use, word, index + 1);
+			isMatch(board, m, n + 1, deque, use, word, index + 1);
+			isMatch(board, m, n - 1, deque, use, word, index + 1);
+			deque.pollLast();
+			use[m][n] = false;
+		}
+
+		public static boolean existI(char[][] board, String word) {
+			for (int i = 0; i < board.length; i++) {
+				for (int j = 0; j < board[0].length; j++) {
+					if (board[i][j] == word.charAt(0)) {  // 第一个字母符合条件,则开始进行搜索
+						boolean[][] use = new boolean[board.length][board[0].length];
+						if (match(board, i, j, use, word, 0)) {
+							return true;
+						}
+					}
+				}
+			}
+			return false;
+		}
+
+		private static boolean match(char[][] board, int m, int n, boolean[][] use, String word, int index) {
+			if (board[m][n] != word.charAt(index)) {
+				return false;
+			} else if (index + 1 == word.length()) return true;
+			use[m][n] = true;
+			int[][] coordinate = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+			boolean result = false;
+			for (int[] pos : coordinate) {
+				int m1 = m + pos[0], n1 = n + pos[1];
+				if (m1 >= 0 && m1 < board.length && n1 >= 0 && n1 < board[0].length) {  // 坐标范围判定
+					if (!use[m1][n1]) {
+						if (match(board, m1, n1, use, word, index + 1)) {
+							result = true;
+							break;
+						}
+					}
+				}
+			}
+			// 如果该元素的水平和垂直方向找不到合适的下一个元素,则回溯到上一个元素,此时use数组在(m,n)点置为false
+			use[m][n] = false;
+			return result;
+		}
+
+		/**
+		 * 为什么通过记录匹配字母的数量K的方式无法得到正确的结果呢,最后还得使用Deque的回溯
+		 * 后续需要用这种方式实现,空间复杂度更低
+		 *
+		 * @param args
+		 */
+		public static void main(String[] args) {
+			char[][] board = new char[][]{{'A', 'B', 'C', 'E'}, {'S', 'F', 'E', 'S'}, {'A', 'D', 'E', 'E'}};
+			boolean flag = existI(board, "ABCESEEEFS");
+			// char[][] board = new char[][]{{'A'}};
+			// boolean flag = exist(board, "A");
+			System.out.println(flag);
+		}
+	}
+
+	public static class Test {
+
+		public static void main(String[] args) {
+			String str = "12-test";
+			String[] split = str.split("/");
+			if (split.length > 0) {
+				String s = split[0];
+				System.out.println(s);
+			}
+		}
+	}
 }

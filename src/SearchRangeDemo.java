@@ -90,7 +90,7 @@ public class SearchRangeDemo {
 	}
 
 	public static void main(String[] args) {
-		boolean search = search(new Range(22, 26));
+		/*boolean search = search(new Range(22, 26));
 		boolean search1 = search(new Range(1, 3));
 		boolean search2 = search(new Range(34, 38));
 		boolean search3 = search(new Range(43, 50));
@@ -101,7 +101,11 @@ public class SearchRangeDemo {
 		System.out.println(search2);
 		System.out.println(search3);
 		System.out.println(search4);
-		System.out.println(search5);
-
+		System.out.println(search5);*/
+		Integer i1 = 4;
+		Integer i2 = null;
+		if (i1 > i2) {
+			System.out.println("true");
+		}
 	}
 }

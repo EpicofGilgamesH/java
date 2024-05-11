@@ -1,5 +1,7 @@
 package test.tree;
 
+import sun.reflect.generics.tree.Tree;
+
 import java.util.*;
 
 /**
@@ -2359,6 +2361,657 @@ public class LeetCodeCase {
 			System.out.println(strings);
 			List<String> strings2 = binaryTreePathsIterator(n1);
 			System.out.println(strings2);
+		}
+	}
+
+	/**
+	 * 226. 翻转二叉树
+	 * 给你一棵二叉树的根节点 root ，翻转这棵二叉树，并返回其根节点。
+	 * 示例 1：
+	 * <p>
+	 * 输入：root = [4,2,7,1,3,6,9]
+	 * 输出：[4,7,2,9,6,3,1]
+	 * 示例 2：
+	 * 输入：root = [2,1,3]
+	 * 输出：[2,3,1]
+	 * 示例 3：
+	 * 输入：root = []
+	 * 输出：[]
+	 * 提示：
+	 * 树中节点数目范围在 [0, 100] 内
+	 * -100 <= Node.val <= 100
+	 */
+	public static class InvertTree {
+
+		/**
+		 * 个人思路:
+		 * 1.层序遍历,反向构造树,无法原地进行构造新的树,思路比较简单
+		 * 2.递归,可以把整个树分解成最小的处理过程:将某个节点的左右子树进行交换
+		 *
+		 * @param root
+		 * @return
+		 */
+		public static TreeNode invertTree(TreeNode root) {
+			invert(root);
+			return root;
+		}
+
+		/**
+		 * 递归方式
+		 *
+		 * @param node
+		 */
+		private static void invert(TreeNode node) {
+			if (node == null) return;
+			if (node.left == null && node.right == null) return;
+			TreeNode temp = node.left;
+			node.left = node.right;
+			node.right = temp;
+			if (node.left != null) invert(node.left);
+			if (node.right != null) invert(node.right);
+		}
+
+		/**
+		 * 分层遍历-每一层遍历节点,然后翻转其左右节点
+		 *
+		 * @param root
+		 * @return
+		 */
+		public static TreeNode invertTreeI(TreeNode root) {
+			if (root == null) return null;
+			Deque<TreeNode> deque = new LinkedList<>();
+			deque.addLast(root);
+			while (!deque.isEmpty()) {
+				int size = deque.size();
+				for (; size > 0; --size) {
+					TreeNode crr = deque.pollFirst();
+					TreeNode temp = crr.left;
+					crr.left = crr.right;
+					crr.right = temp;
+					if (crr.left != null) deque.addLast(crr.left);
+					if (crr.right != null) deque.addLast(crr.right);
+				}
+			}
+			return root;
+		}
+
+		public static void main(String[] args) {
+			TreeNode root = new TreeNode(4);
+			TreeNode n2 = new TreeNode(2);
+			TreeNode n7 = new TreeNode(7);
+			root.left = n2;
+			root.right = n7;
+			TreeNode n1 = new TreeNode(1);
+			TreeNode n3 = new TreeNode(3);
+			n2.left = n1;
+			n2.right = n3;
+			TreeNode n6 = new TreeNode(6);
+			TreeNode n9 = new TreeNode(9);
+			n7.left = n6;
+			n7.right = n9;
+			// TreeNode treeNode = invertTree(root);
+			invertTreeI(root);
+			System.out.println();
+		}
+	}
+
+	/**
+	 * 105. 从前序与中序遍历序列构造二叉树
+	 * 给定两个整数数组 preorder 和 inorder ，其中 preorder 是二叉树的先序遍历， inorder 是同一棵树的中序遍历，请构造二叉树并返回其根节点。
+	 * 示例 1:
+	 * <p>
+	 * 输入: preorder = [3,9,20,15,7], inorder = [9,3,15,20,7]
+	 * 输出: [3,9,20,null,null,15,7]
+	 * 示例 2:
+	 * 输入: preorder = [-1], inorder = [-1]
+	 * 输出: [-1]
+	 * 提示:
+	 * 1 <= preorder.length <= 3000
+	 * inorder.length == preorder.length
+	 * -3000 <= preorder[i], inorder[i] <= 3000
+	 * preorder 和 inorder 均 无重复 元素
+	 * inorder 均出现在 preorder
+	 * preorder 保证 为二叉树的前序遍历序列
+	 * inorder 保证 为二叉树的中序遍历序列
+	 */
+	public static class BuildTree {
+
+		/**
+		 * 中序遍历 左-中-右
+		 *
+		 * @param node
+		 */
+		public static void inorder(TreeNode node) {
+			if (node == null) return;
+			inorder(node.left);
+			System.out.print(node.val + " ");
+			inorder(node.right);
+		}
+
+		/**
+		 * 前序遍历 中-左-右
+		 *
+		 * @param node
+		 */
+		public static void preorder(TreeNode node) {
+			if (node == null) return;
+			System.out.print(node.val + " ");
+			preorder(node.left);
+			preorder(node.right);
+		}
+
+		/**
+		 * 首先拿到这个题后,要求通过一颗树的前序遍历数组和中序遍历数组,来构造出这个树,简直毫无头绪
+		 * 没有头绪的原因是对前序遍历和中序遍历没有深刻的理解,所以首先要分析这两种遍历的特点和规律
+		 * 例如这颗二叉树
+		 * *        3
+		 * *      /  \
+		 * *     9   20
+		 * *    / \  / \
+		 * *   4  8 15  7
+		 * 前序:3 9 4 8 20 15 7  可以发现其为:[根,左子树,右子树] 而其中的左右子树,也同样符合[根,左子树,右子树]
+		 * 中序:4 9 8 3 15 20 7  可以发现其为:[左子树,根,右子树] 而其中的左右子树,也同样符合[左子树,根,右子树]
+		 * 所以前序中,可以得到第一个元素肯定为根其树的根节点,通过这个根节点即可以在中序中找到(题目要求节点值不能重复)
+		 * 左子树和右子树,然后继续以上操作.当在中序中找到的左子树为空或者只有一个元素,则遍历结束并进行树的构造
+		 * <p>
+		 * 这里只记录preorder数组需要处理子树节点范围[s,e]没法完成
+		 * 需要记录 preorder数组需要处理子树节点范围[ps,pe] 和 记录inorder数组需要处理子节点范围[is,ie]
+		 * 第一步:
+		 * 前序数组[0,n-1]
+		 * 中序数组[0,n-1]
+		 * 前序根节点3,在中序的index=3,那么得到左子树节点数leftCount= index-is 右子树的节点数rightCount= ie-index
+		 * 那么 前序数组左[ps+1,ps+leftCount] 右[ps+leftCount+1,pe]
+		 * *   中序数组左[is,index-1] 右[index+1,ie]
+		 */
+		public static TreeNode build(int[] preorder, int[] inorder, int ps, int pe, int is, int ie) {
+			if (ps > pe) return null;
+			int first = preorder[ps]; // 根节点值
+			int index = indexMap.get(first); // 根节点在中序数组的位置
+			TreeNode root = new TreeNode(preorder[ps]); // 构造跟节点
+			int leftCount = index - is; // 在中序数组中通过根节点的位置,计算左子树的节点数量
+			root.left = build(preorder, inorder, ps + 1, ps + leftCount, is, index - 1); // 递归构建左子树连接到根节点
+			root.right = build(preorder, inorder, ps + leftCount + 1, pe, index + 1, ie);  // 递归构建右子树连接到根节点
+			return root;
+		}
+
+		private static Map<Integer, Integer> indexMap;  //<value,index>
+
+		public static TreeNode buildTree(int[] preorder, int[] inorder) {
+			indexMap = new HashMap<>(preorder.length);
+			for (int i = 0; i < preorder.length; i++) {
+				indexMap.put(inorder[i], i);
+			}
+			return build(preorder, inorder, 0, preorder.length - 1, 0, preorder.length - 1);
+		}
+
+		private static int indexOf(int[] array, int v) {
+			for (int i = 0; i < array.length; ++i) {
+				if (array[i] == v) return i;
+			}
+			return -1;
+		}
+
+		public static void main(String[] args) {
+			// 中序遍历
+			TreeNode n_3 = new TreeNode(3);
+			TreeNode n_9 = new TreeNode(9);
+			TreeNode n_20 = new TreeNode(20);
+			TreeNode n_4 = new TreeNode(4);
+			TreeNode n_8 = new TreeNode(8);
+			TreeNode n_15 = new TreeNode(15);
+			TreeNode n_7 = new TreeNode(7);
+			TreeNode n_2 = new TreeNode(2);
+			TreeNode n_6 = new TreeNode(6);
+			n_3.left = n_9;
+			n_3.right = n_20;
+			n_9.left = n_4;
+			n_9.right = n_8;
+			n_20.left = n_15;
+			n_20.right = n_7;
+			n_8.left = n_2;
+			n_8.right = n_6;
+			inorder(n_3);
+			System.out.println();
+			preorder(n_3);
+			System.out.println();
+			TreeNode treeNode = buildTree(new int[]{3, 9, 20, 15, 7}, new int[]{9, 3, 15, 20, 7});
+			System.out.println();
+		}
+	}
+
+	/**
+	 * 103. 二叉树的锯齿形层序遍历
+	 * 给你二叉树的根节点 root ，返回其节点值的 锯齿形层序遍历 。（即先从左往右，再从右往左进行下一层遍历，以此类推，层与层之间交替进行）。
+	 */
+	public static class ZigzagLevelOrder {
+
+		/**
+		 * 锯齿形层序遍历,那还是层序遍历,只是每一层遍历的顺序进行交替
+		 * FIFO 偶数层子节点遍历 先右后左 奇数层子节点遍历先左后右
+		 * 这里发现一个问题,层序遍历肯定是先进先出,才能实现一层层的遍历.那交替反向如何实现呢?这里使用LinkedList可以遍历元素的特点来实现.
+		 * 那如果只能使用Deque如何实现呢?
+		 * 官方思路也差不多的技巧,在添加都list集合中时进行倒序操作,将list设置为LinkedList
+		 *
+		 * @param root
+		 * @return
+		 */
+		public static List<List<Integer>> zigzagLevelOrder(TreeNode root) {
+			LinkedList<TreeNode> deque = new LinkedList<>();
+			List<List<Integer>> list = new ArrayList<>();
+			deque.addFirst(root);
+			int level = 1;
+			while (!deque.isEmpty()) {
+				int size = deque.size();
+				list.add(getLevelList(deque, level));
+				for (; size > 0; size--) {
+					TreeNode crr = deque.pollLast();
+					if (crr.left != null) deque.addFirst(crr.left);
+					if (crr.right != null) deque.addFirst(crr.right);
+				}
+				level++;
+			}
+			return list;
+		}
+
+		private static List<Integer> getLevelList(LinkedList<TreeNode> deque, int level) {
+			// 奇数层反向
+			List<Integer> list = new ArrayList<>();
+			for (int i = 0; i < deque.size(); i++) {
+				if (level % 2 == 1) {
+					list.add(deque.get(deque.size() - i - 1).val);
+				} else {
+					list.add(deque.get(i).val);
+				}
+			}
+			return list;
+		}
+
+		/**
+		 * @param root
+		 * @return
+		 */
+		public static List<List<Integer>> zigzagLevelOrderOfficial(TreeNode root) {
+			LinkedList<TreeNode> deque = new LinkedList<>();
+			List<List<Integer>> list = new ArrayList<>();
+			deque.addFirst(root);
+			int level = 1;
+			while (!deque.isEmpty()) {
+				LinkedList<Integer> li = new LinkedList<>();
+				int size = deque.size();
+				for (; size > 0; size--) {
+					TreeNode crr = deque.pollLast();
+					if (level % 2 == 0) { // 偶数层是反向的
+						li.addFirst(crr.val);
+					} else {
+						li.addLast(crr.val);
+					}
+					if (crr.left != null) deque.addFirst(crr.left);
+					if (crr.right != null) deque.addFirst(crr.right);
+				}
+				level++;
+				list.add(li);
+			}
+			return list;
+		}
+
+		public static void main(String[] args) {
+			TreeNode root = new TreeNode(3);
+			TreeNode n1 = new TreeNode(9);
+			TreeNode n2 = new TreeNode(20);
+			root.left = n1;
+			root.right = n2;
+			TreeNode n4 = new TreeNode(4);
+			TreeNode n10 = new TreeNode(10);
+			n1.left = n4;
+			n1.right = n10;
+			TreeNode n15 = new TreeNode(15);
+			TreeNode n7 = new TreeNode(7);
+			n2.left = n15;
+			n2.right = n7;
+			List<List<Integer>> lists = zigzagLevelOrderOfficial(root);
+			System.out.println(lists);
+		}
+	}
+
+	/**
+	 * 236. 二叉树的最近公共祖先
+	 * 给定一个二叉树, 找到该树中两个指定节点的最近公共祖先。
+	 * 百度百科中最近公共祖先的定义为：“对于有根树 T 的两个节点 p、q，最近公共祖先表示为一个节点 x，满足 x 是 p、q 的祖先且 x 的深度尽可能大（一个节点也可以是它自己的祖先）。”
+	 * 示例 1：
+	 * 输入：root = [3,5,1,6,2,0,8,null,null,7,4], p = 5, q = 1
+	 * 输出：3
+	 * 解释：节点 5 和节点 1 的最近公共祖先是节点 3 。
+	 * 示例 2：
+	 * 输入：root = [3,5,1,6,2,0,8,null,null,7,4], p = 5, q = 4
+	 * 输出：5
+	 * 解释：节点 5 和节点 4 的最近公共祖先是节点 5 。因为根据定义最近公共祖先节点可以为节点本身。
+	 * 示例 3：
+	 * 输入：root = [1,2], p = 1, q = 2
+	 * 输出：1
+	 * 提示：
+	 * 树中节点数目在范围 [2, 105] 内。
+	 * -109 <= Node.val <= 109
+	 * 所有 Node.val 互不相同 。
+	 * p != q
+	 * p 和 q 均存在于给定的二叉树中。
+	 */
+	public static class LowestCommonAncestor {
+
+		/**
+		 * 个人思路:
+		 * 最直接的思路,从根节点开始找到p和q节点的路径 a,b Deque数据结构
+		 * 然后通过a,b集合从p,q节点开始在路径上找到一个最近的匹配项
+		 * 二叉树搜索,得到指定节点的路径
+		 *
+		 * @param root
+		 * @param p
+		 * @param q
+		 * @return
+		 */
+		public static TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+			LinkedList<TreeNode> dequeP = new LinkedList<>();
+			LinkedList<TreeNode> dequeQ = new LinkedList<>();
+			getPath(root, p, dequeP, true);
+			getPath(root, q, dequeQ, false);
+			for (int i = pList.size() - 1; i >= 0; i--) {
+				TreeNode np = pList.get(i);
+				for (int j = qList.size() - 1; j >= 0; j--) {
+					if (np.val == qList.get(j).val) {
+						return np;
+					}
+				}
+			}
+			return null;
+		}
+
+		/**
+		 * 当拿到p,q节点从根节点开始的路径之后,其实不需要两层循环进行比对;
+		 * 从根节点开始往下,当出现不是同一个节点时,那上一个节点就是最近公共祖先节点
+		 *
+		 * @param root
+		 * @param p
+		 * @param q
+		 * @return
+		 */
+		public static TreeNode lowestCommonAncestorI(TreeNode root, TreeNode p, TreeNode q) {
+			LinkedList<TreeNode> dequeP = new LinkedList<>();
+			LinkedList<TreeNode> dequeQ = new LinkedList<>();
+			getPath(root, p, dequeP, true);
+			getPath(root, q, dequeQ, false);
+			TreeNode ancestor = null;
+			for (int i = 0; i < pList.size() && i < qList.size(); ++i) {
+				if (pList.get(i) == qList.get(i)) {
+					ancestor = pList.get(i);
+				} else break;
+			}
+			return ancestor;
+		}
+
+		private static List<TreeNode> pList;
+		private static List<TreeNode> qList;
+
+		private static void getPath(TreeNode root, TreeNode node, Deque<TreeNode> path, boolean isP) {
+			path.addLast(root);
+			if (root.val == node.val) {
+				if (isP) pList = new ArrayList<>(path);
+				else qList = new ArrayList<>(path);
+				return;  // 找到该节点则退出
+			}
+			if (root.left != null) {
+				getPath(root.left, node, path, isP);
+				path.removeLast();
+			}
+			if (root.right != null) {
+				getPath(root.right, node, path, isP);
+				path.removeLast();
+			}
+		}
+
+		public static void main(String[] args) {
+			TreeNode root = new TreeNode(3);
+			TreeNode n1 = new TreeNode(9);
+			TreeNode n2 = new TreeNode(20);
+			root.left = n1;
+			root.right = n2;
+			TreeNode n4 = new TreeNode(4);
+			TreeNode n10 = new TreeNode(10);
+			n1.left = n4;
+			n1.right = n10;
+			TreeNode n15 = new TreeNode(15);
+			TreeNode n7 = new TreeNode(7);
+			n2.left = n15;
+			n2.right = n7;
+			TreeNode treeNode = lowestCommonAncestorI(root, n4, n10);
+			System.out.println(treeNode == null ? "" : treeNode.val);
+		}
+	}
+
+	/**
+	 * 230. 二叉搜索树中第K小的元素
+	 * 给定一个二叉搜索树的根节点 root ，和一个整数 k ，请你设计一个算法查找其中第 k 个最小元素（从 1 开始计数）。
+	 * 示例 1：
+	 * 输入：root = [3,1,4,null,2], k = 1
+	 * 输出：1
+	 * 示例 2：
+	 * 输入：root = [5,3,6,2,4,null,null,1], k = 3
+	 * 输出：3
+	 * 提示：
+	 * 树中的节点数为 n 。
+	 * 1 <= k <= n <= 104
+	 * 0 <= Node.val <= 104
+	 * 进阶：如果二叉搜索树经常被修改（插入/删除操作）并且你需要频繁地查找第 k 小的值，你将如何优化算法？
+	 */
+	public static class KthSmallest {
+
+		/**
+		 * 二叉查找树的定义:即节点的左节点比其小,右节点比其大,根节点的左右子树都满足二叉查找树的特性
+		 * 通过中序遍历,最后一次左节点遍历时,即为最小的节点.然后回溯遍历第k-1个节点则是第k大的
+		 *
+		 * @param root
+		 * @param k
+		 * @return
+		 */
+		public static int kthSmallest(TreeNode root, int k) {
+			if (root == null) return -1;
+			preOrder(root, k);
+			return value;
+		}
+
+		private static int value;
+		private static int n = 0;
+
+		private static void preOrder(TreeNode root, int k) {
+			if (root == null) return;
+			preOrder(root.left, k);
+			if (++n == k) {  // n是记录遍历到的节点数量
+				value = root.val;
+				return;
+			}
+			preOrder(root.right, k);
+		}
+
+		/**
+		 * 模拟栈遍历-中序遍历;那怎么确定中序遍历到了最左边的节点呢?第一次从栈中弹出的元素没有字节点,这开始计数为1
+		 * 也就是最左边的节点,且最小
+		 *
+		 * @param root
+		 * @param k
+		 * @return
+		 */
+		public static int kthSmallestI(TreeNode root, int k) {
+			Deque<TreeNode> deque = new LinkedList<>();
+			while (root != null || !deque.isEmpty()) {
+				while (root != null) { // 先拿到最左边节点
+					deque.push(root);
+					root = root.left;
+				}
+				root = deque.pop(); // 拿出最左节点,开始往右子树遍历
+				--k;
+				if (k == 0) break;
+				root = root.right;
+			}
+			return root.val;
+		}
+
+		public static void main(String[] args) {
+			TreeNode n_10 = new TreeNode(10);
+			TreeNode n_2 = new TreeNode(2);
+			TreeNode n_14 = new TreeNode(14);
+			TreeNode n_1 = new TreeNode(1);
+			TreeNode n_4 = new TreeNode(4);
+			TreeNode n_3 = new TreeNode(3);
+			TreeNode n_5 = new TreeNode(5);
+			TreeNode n_12 = new TreeNode(12);
+			TreeNode n_15 = new TreeNode(15);
+			n_10.left = n_2;
+			n_10.right = n_14;
+			n_2.left = n_1;
+			n_2.right = n_4;
+			n_4.left = n_3;
+			n_4.right = n_5;
+			n_14.left = n_12;
+			n_14.right = n_15;
+
+			int i = kthSmallestI(n_10, 3);
+			System.out.println(i);
+		}
+	}
+
+	/**
+	 * 235. 二叉搜索树的最近公共祖先
+	 * 给定一个二叉搜索树, 找到该树中两个指定节点的最近公共祖先。
+	 * 百度百科中最近公共祖先的定义为：“对于有根树 T 的两个结点 p、q，最近公共祖先表示为一个结点 x，满足 x 是 p、q 的祖先且 x 的深度尽可能大（一个节点也可以是它自己的祖先）。”
+	 * 例如，给定如下二叉搜索树:  root = [6,2,8,0,4,7,9,null,null,3,5]
+	 * 示例 1:
+	 * 输入: root = [6,2,8,0,4,7,9,null,null,3,5], p = 2, q = 8
+	 * 输出: 6
+	 * 解释: 节点 2 和节点 8 的最近公共祖先是 6。
+	 * 示例 2:
+	 * 输入: root = [6,2,8,0,4,7,9,null,null,3,5], p = 2, q = 4
+	 * 输出: 2
+	 * 解释: 节点 2 和节点 4 的最近公共祖先是 2, 因为根据定义最近公共祖先节点可以为节点本身。
+	 * 说明:
+	 * 所有节点的值都是唯一的。
+	 * p、q 为不同节点且均存在于给定的二叉搜索树中。
+	 */
+	public static class LowestCommonAncestorI {
+
+		/**
+		 * 这一题与236的思路是一模一样的
+		 * 实际上不一样,二叉查找树是有大小规范的,有利于找到其最近公共祖先
+		 * 不用左右子树都进行遍历了,根据与父节点的比较,来寻找p,q节点的路径
+		 *
+		 * @param root
+		 * @param p
+		 * @param q
+		 * @return
+		 */
+		public static TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+			List<TreeNode> pathP = getPath(root, p);
+			List<TreeNode> pathQ = getPath(root, q);
+			// 得到p,q两节点的路径,实际上从上往下,遇到第一个不相同的节点时,那么上一个节点就是其最小公共祖先节点
+			TreeNode ancestor = null;
+			for (int i = 0; i < pathP.size() && i < pathQ.size(); i++) {
+				if (pathP.get(i) == pathQ.get(i)) {
+					ancestor = pathP.get(i);
+				} else {
+					break;
+				}
+			}
+			return ancestor;
+		}
+
+		/**
+		 * 二叉查找树在查找指定节点的路径时,不需要回溯遍历,能明确找到一条路径
+		 *
+		 * @param root
+		 * @param n
+		 * @return
+		 */
+		private static List<TreeNode> getPath(TreeNode root, TreeNode n) {
+			List<TreeNode> list = new ArrayList<>();
+			while (root != null) {
+				list.add(root);
+				if (root.val > n.val) { // 往左子树向下
+					root = root.left;
+				} else if (root.val < n.val) { // 往右子树向下
+					root = root.right;
+				} else {
+					break;
+				}
+			}
+			return list;
+		}
+
+		/**
+		 * 上面使用寻找p,q节点的路径来匹配出最近公共祖先
+		 * 当然二叉查找树的特性可以得出,从根节点开始:
+		 * 1.p,q < root 那么最小公共祖先肯定在左子树
+		 * 2.p,q > root 那么最小公共祖先肯定在右子树
+		 * 3.p<=root<=q ||q<=root<=q 说明p,q为root本身或者是root节点的左右子树中的节点,那么root就是其最近公共祖先
+		 */
+		public static TreeNode lowestCommonAncestorI(TreeNode root, TreeNode p, TreeNode q) {
+			while (root != null) {
+				if (root.val < p.val && root.val < q.val) {
+					root = root.right;
+				} else if (root.val > p.val && root.val > q.val) {
+					root = root.left;
+				} else {
+					break;
+				}
+			}
+			return root;
+		}
+
+		public static void main(String[] args) {
+			TreeNode n_10 = new TreeNode(10);
+			TreeNode n_2 = new TreeNode(2);
+			TreeNode n_14 = new TreeNode(14);
+			TreeNode n_1 = new TreeNode(1);
+			TreeNode n_4 = new TreeNode(4);
+			TreeNode n_3 = new TreeNode(3);
+			TreeNode n_5 = new TreeNode(5);
+			TreeNode n_12 = new TreeNode(12);
+			TreeNode n_15 = new TreeNode(15);
+			n_10.left = n_2;
+			n_10.right = n_14;
+			n_2.left = n_1;
+			n_2.right = n_4;
+			n_4.left = n_3;
+			n_4.right = n_5;
+			n_14.left = n_12;
+			n_14.right = n_15;
+
+			TreeNode treeNode = lowestCommonAncestorI(n_10, n_3, n_5);
+			System.out.println(treeNode.val);
+		}
+	}
+
+	/**
+	 * 207. 课程表
+	 * 你这个学期必须选修 numCourses 门课程，记为 0 到 numCourses - 1 。
+	 * 在选修某些课程之前需要一些先修课程。 先修课程按数组 prerequisites 给出，其中 prerequisites[i] = [ai, bi] ，表示如果要学习课程 ai 则 必须 先学习课程  bi 。
+	 * 例如，先修课程对 [0, 1] 表示：想要学习课程 0 ，你需要先完成课程 1 。
+	 * 请你判断是否可能完成所有课程的学习？如果可以，返回 true ；否则，返回 false 。
+	 * 示例 1：
+	 * 输入：numCourses = 2, prerequisites = [[1,0]]
+	 * 输出：true
+	 * 解释：总共有 2 门课程。学习课程 1 之前，你需要完成课程 0 。这是可能的。
+	 * 示例 2：
+	 * 输入：numCourses = 2, prerequisites = [[1,0],[0,1]]
+	 * 输出：false
+	 * 解释：总共有 2 门课程。学习课程 1 之前，你需要先完成课程 0 ；并且学习课程 0 之前，你还应先完成课程 1 。这是不可能的。
+	 * 提示：
+	 * 1 <= numCourses <= 2000
+	 * 0 <= prerequisites.length <= 5000
+	 * prerequisites[i].length == 2
+	 * 0 <= ai, bi < numCourses
+	 * prerequisites[i] 中的所有课程对 互不相同
+	 */
+	public static class CanFinish {
+
+		public boolean canFinish(int numCourses, int[][] prerequisites) {
+			return false;
 		}
 	}
 }
