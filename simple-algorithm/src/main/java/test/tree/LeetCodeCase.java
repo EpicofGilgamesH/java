@@ -3010,8 +3010,51 @@ public class LeetCodeCase {
 	 */
 	public static class CanFinish {
 
-		public boolean canFinish(int numCourses, int[][] prerequisites) {
-			return false;
+		/**
+		 * 拓扑排序,广度优先遍历思路
+		 * 构建拓扑图,计算每个节点的入度数.从入度为0的节点开始,遍历其相邻的节点,然后将其相邻节点的入度数减1,依次遍历(入度为0才能被选中)
+		 * 当所有的节点都能完全遍历完则说明拓扑图不存在环
+		 * <p>
+		 * 拓扑排序-构建有向图和入度(出度)数据
+		 *
+		 * @param numCourses
+		 * @param prerequisites
+		 * @return
+		 */
+		public static boolean canFinish(int numCourses, int[][] prerequisites) {
+			List<List<Integer>> lists = new ArrayList<>();
+			for (int i = 0; i < numCourses; ++i) {
+				lists.add(new ArrayList<>());
+			}
+			int[] indeg = new int[numCourses];
+			for (int[] prerequisite : prerequisites) {
+				lists.get(prerequisite[1]).add(prerequisite[0]);
+				++indeg[prerequisite[0]];
+			}
+			Queue<Integer> queue = new LinkedList<>();
+			for (int i = 0; i < indeg.length; ++i) {
+				if (indeg[i] == 0) {
+					queue.offer(i);
+				}
+			}
+			int visited = 0; // 记录入度为0的元素个数
+			while (!queue.isEmpty()) {
+				++visited;
+				Integer u = queue.poll();
+				for (int v : lists.get(u)) {
+					indeg[v]--;
+					if (indeg[v] == 0) {
+						queue.offer(v);
+					}
+				}
+			}
+			return visited == numCourses;
+		}
+
+		public static void main(String[] args) {
+			int[][] prerequisites = new int[][]{{0, 1}, {2, 1}, {5, 0}, {5, 3}, {4, 0}, {4, 5}, {2, 0}, {6, 5}};
+			boolean b = canFinish(7, prerequisites);
+			System.out.println(b);
 		}
 	}
 }
