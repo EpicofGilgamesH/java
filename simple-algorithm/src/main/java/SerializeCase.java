@@ -1,10 +1,8 @@
 import com.alibaba.fastjson.JSON;
 import com.taobao.diamond.utils.StringUtils;
-import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 
-@Slf4j
 public class SerializeCase {
 
 	public static void main(String[] args) {
@@ -71,7 +69,7 @@ public class SerializeCase {
 		}
 
 		// log.debug("二进制转byte数组：\n{}", ByteUtils.toString(bytes));
-		log.debug("二进制长度：{}，字节大小：{}，比特÷字节={}", bitStr.length(), bytes.length, bitStr.length() / bytes.length);
+		// log.debug("二进制长度：{}，字节大小：{}，比特÷字节={}", bitStr.length(), bytes.length, bitStr.length() / bytes.length);
 		return bytes;
 	}
 

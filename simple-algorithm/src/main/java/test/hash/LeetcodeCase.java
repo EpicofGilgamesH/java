@@ -2,6 +2,7 @@ package test.hash;
 
 import sun.awt.util.IdentityLinkedList;
 
+import javax.swing.text.html.parser.Entity;
 import java.util.*;
 
 public class LeetcodeCase {
@@ -764,8 +765,172 @@ public class LeetcodeCase {
 			return -1;
 		}
 
+		/**
+		 * 通过数组来存储字符出现的次数
+		 *
+		 * @param s
+		 * @return
+		 */
+		public static int firstUniqCharI(String s) {
+			int[] arr = new int[26];
+			for (int i = 0; i < s.length(); ++i) {
+				int index = s.charAt(i) - 'a';
+				arr[index] = arr[index] + 1;
+			}
+			int v = 0;
+			for (; v < s.length(); ++v) {
+				if (arr[s.charAt(v) - 'a'] == 1) {
+					return v;
+				}
+			}
+			return -1;
+		}
+
+		/**
+		 * 通过hashMap 字符作为key,字符的索引作为value
+		 * 此时该字符出现一次则记录索引,出现多次则为-1
+		 * 最后遍历map,找到不为-1的最小值
+		 *
+		 * @param s
+		 * @return
+		 */
+		public static int firstUniqCharOfficial(String s) {
+			Map<Character, Integer> map = new HashMap<>();
+			for (int i = 0; i < s.length(); ++i) {
+				if (map.containsKey(s.charAt(i))) {
+					map.put(s.charAt(i), -1);
+				} else {
+					map.put(s.charAt(i), i);
+				}
+			}
+			int v = s.length();
+			for (Map.Entry<Character, Integer> entry : map.entrySet()) {
+				if (entry.getValue() != -1) {
+					v = Math.min(v, entry.getValue());
+				}
+			}
+			return v == s.length() ? -1 : v;
+		}
+
 		public static void main(String[] args) {
-			System.out.println(firstUniqChar("leetcode"));
+			System.out.println(firstUniqCharOfficial("loveleetcode"));
+		}
+	}
+
+	/**
+	 * 205. 同构字符串
+	 * 给定两个字符串 s 和 t ，判断它们是否是同构的。
+	 * 如果 s 中的字符可以按某种映射关系替换得到 t ，那么这两个字符串是同构的。
+	 * 每个出现的字符都应当映射到另一个字符，同时不改变字符的顺序。不同字符不能映射到同一个字符上，相同字符只能映射到同一个字符上，字符可以映射到自己本身。
+	 * 示例 1:
+	 * 输入：s = "egg", t = "add"
+	 * 输出：true
+	 * 示例 2：
+	 * 输入：s = "foo", t = "bar"
+	 * 输出：false
+	 * 示例 3：
+	 * 输入：s = "paper", t = "title"
+	 * 输出：true
+	 * 提示：
+	 * 1 <= s.length <= 5 * 104
+	 * t.length == s.length
+	 * s 和 t 由任意有效的 ASCII 字符组成
+	 */
+	public static class Isomorphic {
+
+		/**
+		 * 个人思路:
+		 * 按题意来看,需要存储字符的映射;
+		 *
+		 * @param s
+		 * @param t
+		 * @return
+		 */
+		public static boolean isSomorphic(String s, String t) {
+			Map<Character, Character> map = new HashMap<>();
+			for (int i = 0; i < s.length(); ++i) {
+				if (map.containsKey(s.charAt(i))) { // map中已存在,判断映射关系是否正确
+					if (t.charAt(i) != map.get(s.charAt(i))) {
+						return false;
+					}
+				} else {
+					// map得key中不存在,得看下t此时的字符是否出现在value中
+					if (map.containsValue(t.charAt(i))) {
+						return false;
+					}
+					map.put(s.charAt(i), t.charAt(i));
+				}
+			}
+			return true;
+		}
+
+		public static void main(String[] args) {
+			System.out.println(isSomorphic("badc", "baba"));
+		}
+	}
+
+	/**
+	 * 409. 最长回文串
+	 * 给定一个包含大写字母和小写字母的字符串 s ，返回 通过这些字母构造成的 最长的回文串 。
+	 * 在构造过程中，请注意 区分大小写 。比如 "Aa" 不能当做一个回文字符串。
+	 * 示例 1:
+	 * 输入:s = "abccccdd"
+	 * 输出:7
+	 * 解释:
+	 * 我们可以构造的最长的回文串是"dccaccd", 它的长度是 7。
+	 * 示例 2:
+	 * 输入:s = "a"
+	 * 输出:1
+	 * 示例 3：
+	 * 输入:s = "aaaaaccc"
+	 * 输出:7
+	 * 提示:
+	 * <p>
+	 * 1 <= s.length <= 2000
+	 * s 只由小写 和/或 大写英文字母组成
+	 */
+	public static class LongestPalindrome {
+
+		/**
+		 * 个人思路:
+		 * 构建回文串,即构建一个字符串,它从中间往两边延展是完全对称的
+		 * 也就是找到一个字符,必须找到一个对应的字符;
+		 * 1.当找不到对应字符时,最长回文串就是找到对应字符数+1
+		 * 2.如果可以找到字符一直到字符串结束,最长回文串就是找到对应字符数
+		 * @param s
+		 * @return
+		 */
+		public static int longestPalindrome(String s) {
+			Map<Character, Integer> map = new HashMap<>();
+			for (int i = 0; i < s.length(); ++i) {
+				if (map.containsKey(s.charAt(i))) {
+					map.put(s.charAt(i), map.get(s.charAt(i)) + 1);
+				} else {
+					map.put(s.charAt(i), 1);
+				}
+			}
+			int v = 0;
+			for (Map.Entry<Character, Integer> entry : map.entrySet()) {
+				v += entry.getValue() / 2;
+			}
+			return 2 * v < s.length() ? 2 * v + 1 : 2 * v;
+		}
+
+		public static int longestPalindromeI(String s) {
+			int[] arr = new int[52];
+			for (int i = 0; i < s.length(); ++i) {
+				int index = s.charAt(i) <= 90 ? s.charAt(i) - 65 : s.charAt(i) - 71;
+				arr[index] += 1;
+			}
+			int v = 0;
+			for (int i = 0; i < arr.length; ++i) {
+				if (arr[i] != 0) v += arr[i] / 2;
+			}
+			return v * 2 < s.length() ? v * 2 + 1 : v * 2;
+		}
+
+		public static void main(String[] args) {
+			System.out.println(longestPalindromeI("abccccdd"));
 		}
 	}
 }
