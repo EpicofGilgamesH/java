@@ -1152,4 +1152,245 @@ public class LeetCodeCase {
 			System.out.println(kthLargestByPriorityQueue);
 		}
 	}
+
+	/**
+	 * 155.最小栈
+	 * 设计一个支持 push ，pop ，top 操作，并能在常数时间内检索到最小元素的栈。
+	 * 实现 MinStack 类:
+	 * MinStack() 初始化堆栈对象。
+	 * void push(int val) 将元素val推入堆栈。
+	 * void pop() 删除堆栈顶部的元素。
+	 * int top() 获取堆栈顶部的元素。
+	 * int getMin() 获取堆栈中的最小元素。
+	 * 示例 1:
+	 * 输入：
+	 * ["MinStack","push","push","push","getMin","pop","top","getMin"]
+	 * [[],[-2],[0],[-3],[],[],[],[]]
+	 * 输出：
+	 * [null,null,null,null,-3,null,0,-2]
+	 * 解释：
+	 * MinStack minStack = new MinStack();
+	 * minStack.push(-2);
+	 * minStack.push(0);
+	 * minStack.push(-3);
+	 * minStack.getMin();   --> 返回 -3.
+	 * minStack.pop();
+	 * minStack.top();      --> 返回 0.
+	 * minStack.getMin();   --> 返回 -2.
+	 * 提示：
+	 * -231 <= val <= 231 - 1
+	 * pop、top 和 getMin 操作总是在 非空栈 上调用
+	 * push, pop, top, and getMin最多被调用 3 * 104 次
+	 */
+	public static class MinStack {
+
+		private List<Integer> arr;
+
+		private LinkedList<Integer> stack;
+
+		/**
+		 * 个人思路:
+		 * 使用额外的数组来进行排序,然后依次压入栈中.这种做法其实是借助数组排序,未使用到栈本身的特性进行排序
+		 * <p>
+		 * **************** 题意理解错误了,并不是要把原本的栈变成一个单调栈;原本的栈保持不变,得提供一个api能在O(1)的
+		 * **************** 时间复杂度查找到最小值
+		 */
+		public MinStack() {
+			stack = new LinkedList<>();
+			arr = new ArrayList<>();
+		}
+
+		public void push(int val) {
+			// 维护栈内元素从上到下递减
+			// 1.如果val>=栈顶元素,直接入栈
+			// 2.如果 val<栈顶元素,则依次出栈;当val>=当前栈顶元素时入栈;已出栈的元素按顺序保存在数组中,最后按顺序入栈
+			if (stack.isEmpty()) {
+				stack.push(val);
+				return;
+			}
+			boolean flag = false;
+			while (!stack.isEmpty()) {
+				Integer crr = stack.pop();
+				arr.add(crr);
+				if (val >= crr) {
+					arr.set(arr.size() - 1, val);
+					arr.add(crr);
+					flag = true;
+					break;
+				}
+			}
+			if (!flag) arr.add(val);
+			for (int i = arr.size() - 1; i >= 0; --i) {
+				stack.push(arr.get(i));
+			}
+			arr.clear();
+		}
+
+		public void pop() {
+			stack.pollLast();
+		}
+
+		public int top() {
+			return stack.peek();
+		}
+
+		public int getMin() {
+			return stack.getLast();
+		}
+	}
+
+	/**
+	 * 栈的规则为FILO 先进后出,元素的弹出有顺序性
+	 * 比如压入 2,-1,3,-2时,弹出的顺序为 -2,3,-1,2 所以当弹出-2后,元素肯定还有3,-1,2 这个是可知的
+	 * 1.那么弹出-2后栈中最小值也可知为-1
+	 * 2.弹出3后后栈中最小值也可知为-1
+	 * 3.弹出-1后栈中最小值可知为2
+	 * 所以可以维护一个最小值栈,记录原数据栈中弹出一个元素后对应最小值
+	 */
+	public static class MinStackI {
+
+		private Stack<Integer> stack;
+		private Stack<Integer> minStack;
+
+		public MinStackI() {
+			stack = new Stack<>();
+			minStack = new Stack<>();
+			minStack.push(Integer.MAX_VALUE);
+		}
+
+		public void push(int val) {
+			stack.push(val);
+			/*int top = val;
+			if (!minStack.isEmpty() && val > minStack.peek()) {
+				top = minStack.peek();
+			}
+			minStack.push(top);*/
+			minStack.push(Math.min(val, minStack.peek()));  // 类似于哨兵的作用,让代码简化
+		}
+
+		public void pop() {
+			stack.pop();
+			minStack.pop();
+		}
+
+		public int top() {
+			return stack.peek();
+		}
+
+		public int getMin() {
+			return minStack.peek();
+		}
+	}
+
+	public static void main(String[] args) {
+		MinStack minStack = new MinStack();
+		minStack.push(-2);
+		minStack.push(0);
+		minStack.push(-1);
+		System.out.println(minStack.getMin());
+		minStack.pop();
+		System.out.println(minStack.top());
+		System.out.println(minStack.getMin());
+
+		MinStackI minStackI = new MinStackI();
+		minStackI.push(-2);
+		minStackI.push(0);
+		minStackI.push(-3);
+		System.out.println(minStackI.getMin());
+		minStackI.pop();
+		System.out.println(minStackI.top());
+		System.out.println(minStackI.getMin());
+	}
+
+	/**
+	 * 394. 字符串解码
+	 * 给定一个经过编码的字符串，返回它解码后的字符串。
+	 * 编码规则为: k[encoded_string]，表示其中方括号内部的 encoded_string 正好重复 k 次。注意 k 保证为正整数。
+	 * 你可以认为输入字符串总是有效的；输入字符串中没有额外的空格，且输入的方括号总是符合格式要求的。
+	 * 此外，你可以认为原始数据不包含数字，所有的数字只表示重复的次数 k ，例如不会出现像 3a 或 2[4] 的输入。
+	 * 示例 1：
+	 * 输入：s = "3[a]2[bc]"
+	 * 输出："aaabcbc"
+	 * 示例 2：
+	 * 输入：s = "3[a2[c]]"
+	 * 输出："accaccacc"
+	 * 示例 3：
+	 * 输入：s = "2[abc]3[cd]ef"
+	 * 输出："abcabccdcdcdef"
+	 * 示例 4：
+	 * 输入：s = "abc3[cd]xyz"
+	 * 输出："abccdcdcdxyz"
+	 * 提示：
+	 * 1 <= s.length <= 30
+	 * s 由小写英文字母、数字和方括号 '[]' 组成
+	 * s 保证是一个 有效 的输入。
+	 * s 中所有整数的取值范围为 [1, 300]
+	 */
+	public static class DecodeString {
+
+		/**
+		 * 个人思路:
+		 * 示例1、3、4都是顺序操作即可,但是示例2给出了一中情况,[]的输入是嵌套的,类似于符号运算,需要处理最内层的[]
+		 * 3[a2[c]] 依次入栈
+		 * <p>
+		 * c
+		 * [
+		 * 2
+		 * a
+		 * [
+		 * 3
+		 * 当遇到字符']'时,弹出直到字符'[' 构建字符串,并弹出下一个次数字符,连接字符串:cc 然后将得到的字符串cc压入栈中
+		 * 遇到第二个字符']'时,同上连接字符串并压入栈中.最后将整个栈正序遍历出来
+		 * <p>
+		 * 3[a]2[bc]
+		 * a
+		 * [
+		 * 3
+		 * 下一个字符为']' : aaa
+		 * <p>
+		 * c
+		 * b
+		 * [
+		 * 2
+		 * 下一个字符为']' : cbcb
+		 * <p>
+		 * 当然本题也可以用递归的方式求解,涉及到《编译原理》相关内容
+		 *
+		 * @param s
+		 * @return
+		 */
+		public static String decodeString(String s) {
+			Deque<String> stack = new LinkedList<>();
+			for (int i = 0; i < s.length(); ++i) {
+				if (s.charAt(i) != ']') {
+					stack.push(String.valueOf(s.charAt(i)));
+				} else {  // 遍历到']',则弹出元素直到遇到'['
+					StringBuilder part = new StringBuilder();
+					while (!stack.isEmpty() && !stack.peek().equals("[")) {
+						part.insert(0, stack.pop());
+					}
+					stack.pop();
+					// 处理数字
+					StringBuilder timeStr = new StringBuilder();
+					while (!stack.isEmpty() && Character.isDigit(stack.peek().charAt(0))) {
+						timeStr.insert(0, stack.pop());
+					}
+					int times = Integer.parseInt(timeStr.toString());
+					String partStr = part.toString();
+					for (int j = 0; j < times; ++j) {
+						stack.push(partStr);
+					}
+				}
+			}
+			StringBuilder result = new StringBuilder();
+			while (!stack.isEmpty()) {
+				result.insert(0, stack.pop());
+			}
+			return result.toString();
+		}
+
+		public static void main(String[] args) {
+			System.out.println(decodeString("3[a]2[bc]"));
+		}
+	}
 }

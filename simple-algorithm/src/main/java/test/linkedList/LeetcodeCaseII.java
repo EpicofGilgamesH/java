@@ -1,6 +1,10 @@
 package test.linkedList;
 
+import lombok.val;
+
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class LeetcodeCaseII {
@@ -642,4 +646,283 @@ public class LeetcodeCaseII {
 			System.out.println();
 		}
 	}
+
+	/**
+	 * 86. 分隔链表
+	 * 给你一个链表的头节点 head 和一个特定值 x ，请你对链表进行分隔，使得所有 小于 x 的节点都出现在 大于或等于 x 的节点之前。
+	 * 你应当 保留 两个分区中每个节点的初始相对位置。
+	 * 示例 1：
+	 * 输入：head = [1,4,3,2,5,2], x = 3
+	 * 输出：[1,2,2,4,3,5]
+	 * 示例 2：
+	 * 输入：head = [2,1], x = 2
+	 * 输出：[1,2]
+	 * 提示：
+	 * 链表中节点的数目在范围 [0, 200] 内
+	 * -100 <= Node.val <= 100
+	 * -200 <= x <= 200
+	 */
+	public static class Partition {
+
+		/**
+		 * 个人思路:
+		 * 首先思考在原链表上进行操作,常规做法
+		 * 1.找到第一个 >=x的节点,并记录p节点前置节点pre_p,如果第一个节点就>=x 所以需要为链表添加一个前置节点head
+		 * 2.遍历链表从p.next节点开始,记录为q,其前置节点记录为pre_q,如果 q.val < x 则pre_q.next=q.next; pre_p.next=q; q.next=p
+		 *
+		 * @param head
+		 * @param x
+		 * @return
+		 */
+		public static ListNode partition(ListNode head, int x) {
+			if (head == null) return head;
+			ListNode node = new ListNode(Integer.MIN_VALUE);
+			ListNode result = node;
+			node.next = head;
+			ListNode p = null, pre_p = null, q, pre_q;
+			while (node.next != null) {
+				// 找到第一个 > x的节点
+				pre_q = node;
+				q = node.next;
+				if (pre_p == null && q.val >= x) {
+					pre_p = pre_q;
+					p = q;
+				}
+				boolean flag = false;
+				if (pre_p != null && q.val < x) {
+					pre_q.next = q.next;
+					pre_p.next = q;
+					q.next = p;
+
+					pre_p = pre_p.next;
+					p = pre_p.next;
+					flag = true;
+				}
+				if (!flag)
+					node = pre_q.next;
+			}
+			return result.next;
+		}
+
+		/**
+		 * 构造左右两个链表,分别存放小于和大于等于x的节点数据
+		 *
+		 * @param head
+		 * @param x
+		 * @return
+		 */
+		public static ListNode partitionI(ListNode head, int x) {
+			ListNode min = new ListNode(Integer.MIN_VALUE);
+			ListNode max = new ListNode(Integer.MIN_VALUE);
+			ListNode left = min, right = max;
+			while (head != null) {
+				ListNode next = head.next;
+				if (head.val < x) {
+					left.next = head;
+					left.next.next = null;
+					left = left.next;
+				} else {
+					right.next = head;
+					right.next.next = null;
+					right = right.next;
+				}
+				head = next;
+			}
+			left.next = max.next;
+			return min.next;
+		}
+
+		public static void main(String[] args) {
+			ListNode head = new ListNode(1);
+			ListNode node1 = new ListNode(4);
+			ListNode node2 = new ListNode(3);
+			ListNode node3 = new ListNode(0);
+			ListNode node4 = new ListNode(2);
+			ListNode node5 = new ListNode(5);
+			ListNode node6 = new ListNode(2);
+			head.next = node1;
+			node1.next = node2;
+			node2.next = node3;
+			node3.next = node4;
+			node4.next = node5;
+			node5.next = node6;
+			ListNode partition = partitionI(head, 3);
+			System.out.println();
+
+			ListNode aa = node1;
+			node1 = null;
+			System.out.println();
+
+			ABC abc = new ABC("a", "b");
+			ABC ab = new ABC("123", "456");
+			ABC abc1 = abc;
+			abc = ab;
+			System.out.println();
+		}
+
+	}
+
+	public static class ABC {
+		private String aa;
+		private String bb;
+
+		public ABC(String aa, String bb) {
+			this.aa = aa;
+			this.bb = bb;
+		}
+
+		public String getBb() {
+			return bb;
+		}
+
+		public void setBb(String bb) {
+			this.bb = bb;
+		}
+
+		public String getAa() {
+			return aa;
+		}
+
+		public void setAa(String aa) {
+			this.aa = aa;
+		}
+	}
+
+	/**
+	 * 237. 删除链表中的节点
+	 * 有一个单链表的 head，我们想删除它其中的一个节点 node。
+	 * 给你一个需要删除的节点 node 。你将 无法访问 第一个节点  head。
+	 * 链表的所有值都是 唯一的，并且保证给定的节点 node 不是链表中的最后一个节点。
+	 * 删除给定的节点。注意，删除节点并不是指从内存中删除它。这里的意思是：
+	 * 给定节点的值不应该存在于链表中。
+	 * 链表中的节点数应该减少 1。
+	 * node 前面的所有值顺序相同。
+	 * node 后面的所有值顺序相同。
+	 * 自定义测试：
+	 * 对于输入，你应该提供整个链表 head 和要给出的节点 node。node 不应该是链表的最后一个节点，而应该是链表中的一个实际节点。
+	 * 我们将构建链表，并将节点传递给你的函数。
+	 * 输出将是调用你函数后的整个链表。
+	 * 示例 1：
+	 * 输入：head = [4,5,1,9], node = 5
+	 * 输出：[4,1,9]
+	 * 解释：指定链表中值为 5 的第二个节点，那么在调用了你的函数之后，该链表应变为 4 -> 1 -> 9
+	 * 示例 2：
+	 * 输入：head = [4,5,1,9], node = 1
+	 * 输出：[4,5,9]
+	 * 解释：指定链表中值为 1 的第三个节点，那么在调用了你的函数之后，该链表应变为 4 -> 5 -> 9
+	 * 提示：
+	 * 链表中节点的数目范围是 [2, 1000]
+	 * -1000 <= Node.val <= 1000
+	 * 链表中每个节点的值都是 唯一 的
+	 * 需要删除的节点 node 是 链表中的节点 ，且 不是末尾节点
+	 */
+	public static class DeleteNode {
+
+		/**
+		 * 个人思路:
+		 * 题意不是很清晰,是需要删除链表中的一个非链尾的节点么?
+		 * eg:
+		 * 4 -> 1 -> 5 -> 3  链表需要删除值为5的节点
+		 * 按常规方法,找到值为5的节点时,记录其前置节点1,同时记录其后继节点3,把前置节点的next指向后置节点
+		 * 但是次数题意中有个条件,每个元素的值不相同,所以节点的值可以修改;将1的next节点的值改为1 : 4 -> 1 -> 1 -> 3
+		 * 然后删除1节点,这样操作起来会方便很多
+		 *
+		 * @param node
+		 */
+		public static void deleteNode(ListNode node) {
+			node.val = node.next.val;
+			node.next = node.next.next;
+		}
+	}
+
+	public static class Node {
+		int val;
+		Node next;
+		Node random;
+
+		public Node(int val) {
+			this.val = val;
+			this.next = null;
+			this.random = null;
+		}
+	}
+
+	/**
+	 * 138. 随机链表的复制
+	 * 给你一个长度为 n 的链表，每个节点包含一个额外增加的随机指针 random ，该指针可以指向链表中的任何节点或空节点。
+	 * 构造这个链表的 深拷贝。 深拷贝应该正好由 n 个 全新 节点组成，其中每个新节点的值都设为其对应的原节点的值。新节点的 next 指针和 random 指针也都应指向复制链表中的新节点，并使原链表和复制链表中的这些指针能够表示相同的链表状态。复制链表中的指针都不应指向原链表中的节点 。
+	 * 例如，如果原链表中有 X 和 Y 两个节点，其中 X.random --> Y 。那么在复制链表中对应的两个节点 x 和 y ，同样有 x.random --> y 。
+	 * 返回复制链表的头节点。
+	 * 用一个由 n 个节点组成的链表来表示输入/输出中的链表。每个节点用一个 [val, random_index] 表示：
+	 * val：一个表示 Node.val 的整数。
+	 * random_index：随机指针指向的节点索引（范围从 0 到 n-1）；如果不指向任何节点，则为  null 。
+	 * 你的代码 只 接受原链表的头节点 head 作为传入参数。
+	 * 示例 1：
+	 * 输入：head = [[7,null],[13,0],[11,4],[10,2],[1,0]]
+	 * 输出：[[7,null],[13,0],[11,4],[10,2],[1,0]]
+	 * 示例 2：
+	 * 输入：head = [[1,1],[2,1]]
+	 * 输出：[[1,1],[2,1]]
+	 * 示例 3：
+	 * 输入：head = [[3,null],[3,0],[3,null]]
+	 * 输出：[[3,null],[3,0],[3,null]]
+	 * 提示：
+	 * 0 <= n <= 1000
+	 * -104 <= Node.val <= 104
+	 * Node.random 为 null 或指向链表中的节点。
+	 */
+	public static class CopyRandomList {
+
+		/**
+		 * 个人思路:
+		 * 深拷贝随机链表,next指针很好复制,但是随机指针需要节点存在才可以复制
+		 * 那么需要两次构造,第一次遍历构造next指针,第二次遍历构造random指针
+		 *
+		 * @param head
+		 * @return
+		 */
+		public static Node copyRandomList(Node head) {
+			Map<Node, Node> map = new HashMap<>();
+			Node cp = new Node(Integer.MIN_VALUE);
+			Node cpHead = cp;
+			Node node = head;
+			while (node != null) {
+				Node cpNode = new Node(node.val);
+				cpHead.next = cpNode;
+				map.put(node, cpNode);
+				node = node.next;
+				cpHead = cpHead.next;
+			}
+			Node randomNode = cp.next;
+			node = head;
+			while (node != null) {
+				if (node.random != null) {
+					randomNode.random = map.get(node.random);
+				}
+				node = node.next;
+				randomNode = randomNode.next;
+			}
+			return cp.next;
+		}
+
+		public static void main(String[] args) {
+			Node node7 = new Node(7);
+			Node head13 = new Node(13);
+			Node head11 = new Node(11);
+			Node head10 = new Node(10);
+			Node head1 = new Node(1);
+			node7.next = head13;
+			head13.next = head11;
+			head11.next = head10;
+			head10.next = head1;
+			node7.random = null;
+			head13.random = node7;
+			head11.random = head1;
+			head10.random = head11;
+			head1.random = node7;
+			Node node = copyRandomList(node7);
+			System.out.println();
+		}
+	}
+
 }
