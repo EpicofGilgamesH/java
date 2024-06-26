@@ -1,15 +1,20 @@
+/*
 package en_de;
 
+*/
 /**
  * @Description 非对称加密RSA
  * @Date 2021-09-29 11:16
  * @Created by wangjie
- */
+ *//*
+
 public class RSAUtil {
 
-	/**
+	*/
+/**
 	 * 发送方
-	 */
+	 *//*
+
 	public static class Sender extends RSABase {
 
 		private Sender() {
@@ -25,9 +30,11 @@ public class RSAUtil {
 		}
 	}
 
-	/**
+	*/
+/**
 	 * 接收方
-	 */
+	 *//*
+
 	public static class Receiver extends RSABase {
 
 		protected Receiver() {
@@ -36,3 +43,4 @@ public class RSAUtil {
 	}
 
 }
+*/

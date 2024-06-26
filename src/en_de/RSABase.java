@@ -1,3 +1,4 @@
+/*
 package en_de;
 
 import lombok.Data;
@@ -13,11 +14,13 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
+*/
 /**
  * @Description RAS加解密抽象父类
  * @Date 2021-09-29 14:07
  * @Created by wangjie
- */
+ *//*
+
 public abstract class RSABase {
 	private final static Logger log = LoggerFactory.getLogger(RSABase.class);
 
@@ -54,12 +57,14 @@ public abstract class RSABase {
 		}
 	}
 
-	/**
+	*/
+/**
 	 * 发送方用私钥进行加密
 	 *
 	 * @param str
 	 * @return
-	 */
+	 *//*
+
 	protected String encrypt(String str) {
 		//Base64编码公钥
 		String result = "";
@@ -77,13 +82,15 @@ public abstract class RSABase {
 		return result;
 	}
 
-	/**
+	*/
+/**
 	 * 发送方用私钥进行解密
 	 *
 	 * @param str
-	 * @param publicKey
+	 * @param
 	 * @return
-	 */
+	 *//*
+
 	protected String decrypt(String str) {
 		String result = "";
 		try {
@@ -122,13 +129,15 @@ public abstract class RSABase {
 		return result;
 	}
 
-	/**
+	*/
+/**
 	 * 接收方用公钥进行加密
 	 *
 	 * @param str
 	 * @param publicKey
 	 * @return
-	 */
+	 *//*
+
 	protected String encrypt(String str, String publicKey) {
 		//Base64编码公钥
 		String result = "";
@@ -147,12 +156,14 @@ public abstract class RSABase {
 		return result;
 	}
 
-	/**
+	*/
+/**
 	 * 接收方用公钥进行解密
 	 *
 	 * @param str
 	 * @return
-	 */
+	 *//*
+
 	protected String decrypt(String str, String publicKey) {
 		String result = "";
 		try {
@@ -190,3 +201,4 @@ public abstract class RSABase {
 		RECEIVER
 	}
 }
+*/

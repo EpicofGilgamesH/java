@@ -1,3 +1,4 @@
+/*
 package en_de;
 
 import org.slf4j.Logger;
@@ -14,20 +15,24 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 
+*/
 /**
  * des加解密 对称加密
- */
+ *//*
+
 public class DESUtil {
 
 	private static final Logger log = LoggerFactory.getLogger(DESUtil.class);
 
-	/**
+	*/
+/**
 	 * DES加密操作
 	 *
 	 * @param source 要加密的源
 	 * @param key
 	 * @return
-	 */
+	 *//*
+
 	public static String encrypt(String source, String key) {
 		//强加密随机数生成器
 		SecureRandom random = new SecureRandom();
@@ -47,13 +52,15 @@ public class DESUtil {
 		return null;
 	}
 
-	/**
+	*/
+/**
 	 * 解密
 	 *
 	 * @param cryptograph 密文
 	 * @param key         约定的密钥
 	 * @return
-	 */
+	 *//*
+
 	public static String decrypt(String cryptograph, String key) {
 		//强加密随机生成器
 		SecureRandom random = new SecureRandom();
@@ -73,9 +80,11 @@ public class DESUtil {
 	}
 
 
-	/**
+	*/
+/**
 	 * 密钥规则
-	 */
+	 *//*
+
 	public static SecretKey generateSecret(String key) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
 		//创建密钥规则
 		DESKeySpec keySpec = new DESKeySpec(key.getBytes());
@@ -87,13 +96,15 @@ public class DESUtil {
 
 
 	public static void main(String[] args) {
-		/*String source = "42108720210301XXXX";
+		*/
+/*String source = "42108720210301XXXX";
 		String key = "JT_yl123456";
 		String result = encrypt(source, key);
 		//加密结果
 		System.out.println(result);
 		//解密
-		System.out.println(decrypt(result, key));*/
+		System.out.println(decrypt(result, key));*//*
+
 
 		int a1 = 0;
 		int a2 = 0;
@@ -103,3 +114,4 @@ public class DESUtil {
 	}
 
 }
+*/

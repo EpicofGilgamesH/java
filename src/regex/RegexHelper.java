@@ -1,3 +1,4 @@
+
 package regex;
 
 import cn.hutool.core.util.StrUtil;
@@ -5,7 +6,10 @@ import com.alibaba.fastjson.JSON;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -278,6 +282,16 @@ public class RegexHelper {
 				String regex8 = "^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$";
 				System.out.println("abc@qq.com".matches(regex8));
 				System.out.println("abc_-132@qq.weixin.com".matches(regex8));
+			}
+
+			{
+				Map<String, String> map = new HashMap<>();
+				Pattern p = Pattern.compile("\\{(.*?)\\}");
+				Matcher matcher = p.matcher("[Egatee] {name} will call you soon to deliver your order {orderId} today. {amount} to be paid at delivery.Thank you!");
+				while (matcher.find()) {
+					String param = matcher.group(1);
+					System.out.println(param);
+				}
 			}
 		}
 	}
