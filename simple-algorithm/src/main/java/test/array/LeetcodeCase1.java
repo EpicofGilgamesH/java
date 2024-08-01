@@ -1106,8 +1106,356 @@ public class LeetcodeCase1 {
 			System.out.println(trap(new int[]{0,1,0,2,1,0,1,3,2,1,2,1}));
 			System.out.println(trapOfficial(new int[]{0,1,0,2,1,0,1,3,2,1,2,1}));
 			System.out.println(trapOfficialI(new int[]{0,1,0,2,1,0,1,3,2,1,2,1}));
+		}
+	}
 
-			System.out.println(Math.round((double) 180/365*10)*0.1d);
+	/**
+	 * 13. 罗马数字转整数
+	 * 罗马数字包含以下七种字符: I， V， X， L，C，D 和 M。
+	 * 字符          数值
+	 * I             1
+	 * V             5
+	 * X             10
+	 * L             50
+	 * C             100
+	 * D             500
+	 * M             1000
+	 * 例如， 罗马数字 2 写做 II ，即为两个并列的 1 。12 写做 XII ，即为 X + II 。 27 写做  XXVII, 即为 XX + V + II 。
+	 * 通常情况下，罗马数字中小的数字在大的数字的右边。但也存在特例，例如 4 不写做 IIII，而是 IV。数字 1 在数字 5 的左边，所表示的数等于大数 5 减小数 1 得到的数值 4 。同样地，数字 9 表示为 IX。这个特殊的规则只适用于以下六种情况：
+	 * I 可以放在 V (5) 和 X (10) 的左边，来表示 4 和 9。
+	 * X 可以放在 L (50) 和 C (100) 的左边，来表示 40 和 90。
+	 * C 可以放在 D (500) 和 M (1000) 的左边，来表示 400 和 900。
+	 * 给定一个罗马数字，将其转换成整数。
+	 * 示例 1:
+	 * 输入: s = "III"
+	 * 输出: 3
+	 * 示例 2:
+	 * 输入: s = "IV"
+	 * 输出: 4
+	 * 示例 3:
+	 * 输入: s = "IX"
+	 * 输出: 9
+	 * 示例 4:
+	 * 输入: s = "LVIII"
+	 * 输出: 58
+	 * 解释: L = 50, V= 5, III = 3.
+	 * 示例 5:
+	 * 输入: s = "MCMXCIV"
+	 * 输出: 1994
+	 * 解释: M = 1000, CM = 900, XC = 90, IV = 4.
+	 * 提示：
+	 * 1 <= s.length <= 15
+	 * s 仅含字符 ('I', 'V', 'X', 'L', 'C', 'D', 'M')
+	 * 题目数据保证 s 是一个有效的罗马数字，且表示整数在范围 [1, 3999] 内
+	 * 题目所给测试用例皆符合罗马数字书写规则，不会出现跨位等情况。
+	 * IL 和 IM 这样的例子并不符合题目要求，49 应该写作 XLIX，999 应该写作 CMXCIX 。
+	 * 关于罗马数字的详尽书写规则，可以参考 罗马数字 - Mathematics 。
+	 */
+	static class RomanToInt {
+
+		/**
+		 * 罗马数字的含义解释
+		 * 先把特例声明出来:6种特例  IV=4,IX=9,XL=40,XC=90,CD=400,CM=900;
+		 * 怎么找出这些特例呢?最简单的方式就是先找两个字符是否符合.
+		 *
+		 * @param s
+		 * @return
+		 */
+		public static int romanToInt(String s) {
+			Map<Character, Integer> map = new HashMap<>();
+			map.put('I', 1);
+			map.put('V', 5);
+			map.put('X', 10);
+			map.put('L', 50);
+			map.put('C', 100);
+			map.put('D', 500);
+			map.put('M', 1000);
+
+			Map<String, Integer> map1 = new HashMap<>();
+			map1.put("IV", 4);
+			map1.put("IX", 9);
+			map1.put("XL", 40);
+			map1.put("XC", 90);
+			map1.put("CD", 400);
+			map1.put("CM", 900);
+			int sum = 0;
+			for (int i = 0; i < s.length(); i++) {
+				if (i == s.length() - 1) {
+					sum += map.get(s.charAt(i));
+				} else {
+					String s1 = s.charAt(i) + "" + s.charAt(i + 1);
+					if (map1.containsKey(s1)) {
+						sum += map1.get(s1);
+						i++;
+					} else {
+						sum += map.get(s.charAt(i));
+					}
+				}
+			}
+			return sum;
+		}
+
+		/**
+		 * 实际上特例是有规律的,当index=i的值小于i+1的值时,说明i位置的值要被减去
+		 *
+		 * @param s
+		 * @return
+		 */
+		public static int romanToIntOfficial(String s) {
+			Map<Character, Integer> map = new HashMap<>();
+			map.put('I', 1);
+			map.put('V', 5);
+			map.put('X', 10);
+			map.put('L', 50);
+			map.put('C', 100);
+			map.put('D', 500);
+			map.put('M', 1000);
+			int sum = 0;
+			for (int i = 0; i < s.length(); i++) {
+				if (i < s.length() - 1 && map.get(s.charAt(i)) < map.get(s.charAt(i + 1))) {
+					sum -= map.get(s.charAt(i));
+				} else {
+					sum += map.get(s.charAt(i));
+				}
+			}
+			return sum;
+		}
+
+		public static int romanToIntI(String s) {
+			Map<Character, Integer> map = new HashMap<>();
+			map.put('I', 1);
+			map.put('V', 5);
+			map.put('X', 10);
+			map.put('L', 50);
+			map.put('C', 100);
+			map.put('D', 500);
+			map.put('M', 1000);
+			int sum = 0, pre = map.get(s.charAt(0));
+			for (int i = 1; i < s.length(); i++) {
+				Integer cur = map.get(s.charAt(i));
+				if (pre >= cur) {
+					sum += pre;
+				} else {
+					sum -= pre;
+				}
+				pre = cur;
+			}
+			sum += pre; // 最后一位肯定是+
+			return sum;
+		}
+
+		public static void main(String[] args) {
+			System.out.println(romanToIntI("MCMXCIV"));
+		}
+	}
+
+	/**
+	 * 12.整数转罗马数字
+	 * 罗马数字是通过添加从最高到最低的小数位值的转换而形成的。将小数位值转换为罗马数字有以下规则：
+	 * 如果该值不是以 4 或 9 开头，请选择可以从输入中减去的最大值的符号，将该符号附加到结果，减去其值，然后将其余部分转换为罗马数字。
+	 * 如果该值以 4 或 9 开头，使用 减法形式，表示从以下符号中减去一个符号，例如 4 是 5 (V) 减 1 (I): IV ，9 是 10 (X) 减 1 (I)：IX。仅使用以下减法形式：4 (IV)，9 (IX)，40 (XL)，90 (XC)，400 (CD) 和 900 (CM)。
+	 * 只有 10 的次方（I, X, C, M）最多可以连续附加 3 次以代表 10 的倍数。你不能多次附加 5 (V)，50 (L) 或 500 (D)。如果需要将符号附加4次，请使用 减法形式。
+	 * 给定一个整数，将其转换为罗马数字。
+	 */
+	static class IntToRoman {
+
+		/**
+		 * 个人思路:
+		 * 本题数字转罗马数字,最开高位开始,迭代向下进行转换
+		 * 1.当该位上不是以4,9开头,则正常转换
+		 * 2.当该为上是4,9开头,则考虑4,9的构成
+		 * <p>
+		 * 思路可优化
+		 *
+		 * @param num
+		 * @return
+		 */
+		public static String intToRoman(int num) {
+			Map<Integer, Character> map = new HashMap<>();
+			map.put(1, 'I');
+			map.put(5, 'V');
+			map.put(10, 'X');
+			map.put(50, 'L');
+			map.put(100, 'C');
+			map.put(500, 'D');
+			map.put(1000, 'M');
+			Map<Integer, String> map1 = new HashMap<>();
+			map1.put(4, "IV");
+			map1.put(9, "IX");
+			map1.put(40, "XL");
+			map1.put(90, "XC");
+			map1.put(400, "CD");
+			map1.put(900, "CM");
+			int v = 1000;
+			StringBuilder sb = new StringBuilder();
+			while (num > 0) {
+				int n = num / v * v; // 每一位上的值
+				if (map1.containsKey(n)) {
+					sb.append(map1.get(n));
+				} else {
+					int l = n / v;
+					if (l >= 5) {
+						sb.append(map.get(5 * v));
+						l -= 5;
+					}
+					for (int i = 0; i < l; i++) {
+						sb.append(map.get(v));
+					}
+				}
+				v /= 10;
+				num -= n;
+			}
+			return sb.toString();
+		}
+
+		/**
+		 * 官方思路
+		 *
+		 * @param num
+		 * @return
+		 */
+		public static String intToRomanOfficial(int num) {
+			int[] nums = new int[]{1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1};
+			String[] roman = new String[]{"M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"};
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < nums.length; i++) {
+				while (num >= nums[i]) {
+					num -= nums[i];
+					sb.append(roman[i]);
+				}
+			}
+			return sb.toString();
+		}
+
+		public static void main(String[] args) {
+			System.out.println(intToRoman(1994));
+			System.out.println(intToRomanOfficial(3749));
+		}
+	}
+
+	/**
+	 * 58. 最后一个单词的长度
+	 * 给你一个字符串 s，由若干单词组成，单词前后用一些空格字符隔开。返回字符串中 最后一个 单词的长度。
+	 * 单词 是指仅由字母组成、不包含任何空格字符的最大子字符串
+	 * 示例 1：
+	 * 输入：s = "Hello World"
+	 * 输出：5
+	 * 解释：最后一个单词是“World”，长度为 5。
+	 * 示例 2：
+	 * <p>
+	 * 输入：s = "   fly me   to   the moon  "
+	 * 输出：4
+	 * 解释：最后一个单词是“moon”，长度为 4。
+	 * 示例 3：
+	 * <p>
+	 * 输入：s = "luffy is still joyboy"
+	 * 输出：6
+	 * 解释：最后一个单词是长度为 6 的“joyboy”。
+	 * 提示：
+	 * 1 <= s.length <= 104
+	 * s 仅有英文字母和空格 ' ' 组成
+	 * s 中至少存在一个单词
+	 */
+	static class LengthOfLastWord {
+
+		/**
+		 * 个人思路：
+		 * 倒序遍历 关键在于记录第一个不是空格的字符,和记录完成后跳出循环
+		 *
+		 * @param s
+		 * @return
+		 */
+		public static int lengthOfLastWord(String s) {
+			int l = 0, i = s.length() - 1;
+			while (i >= 0) {
+				if (s.charAt(i) == ' ') {
+					i--;
+				} else {
+					break;
+				}
+			}
+			while (i >= 0) {
+				if (s.charAt(i) != ' ') {
+					l++;
+					i--;
+				} else {
+					break;
+				}
+			}
+			return l;
+		}
+
+		/**
+		 * 代码简化
+		 *
+		 * @param s
+		 * @return
+		 */
+		public static int lengthOfLastWordI(String s) {
+			int l = 0, i = s.length() - 1;
+			while (i >= 0 && s.charAt(i) == ' ') {
+				i--;
+			}
+			while (i >= 0 && s.charAt(i) != ' ') {
+				l++;
+				i--;
+			}
+			return l;
+		}
+
+		public static void main(String[] args) {
+			System.out.println(lengthOfLastWord("a"));
+		}
+	}
+
+	/**
+	 * 14. 最长公共前缀
+	 * 编写一个函数来查找字符串数组中的最长公共前缀。
+	 * 如果不存在公共前缀，返回空字符串 ""。
+	 * 示例 1：
+	 * 输入：strs = ["flower","flow","flight"]
+	 * 输出："fl"
+	 * 示例 2：
+	 * 输入：strs = ["dog","racecar","car"]
+	 * 输出：""
+	 * 解释：输入不存在公共前缀。
+	 * 提示：
+	 * 1 <= strs.length <= 200
+	 * 0 <= strs[i].length <= 200
+	 * strs[i] 仅由小写英文字母组成
+	 */
+	static class LongestCommonPrefix {
+
+		/**
+		 * 个人思路：
+		 * 同时遍历多个数组,统计公共前缀的数量
+		 * 目前应多注意细节问题，如何避免边界问题呢？？？
+		 * @param strs
+		 * @return
+		 */
+		public static String longestCommonPrefix(String[] strs) {
+			if (strs == null || strs.length == 0) return "";
+			int k = 0;
+			StringBuilder sb = new StringBuilder();
+			while (true) {
+				char c;
+				if (strs[0].length() > k) {
+					c = strs[0].charAt(k);
+				} else {
+					return sb.toString();
+				}
+				for (int i = 1; i < strs.length; i++) {
+					if (strs[i].length() <= k || strs[i].charAt(k) != c) {
+						return sb.toString();
+					}
+				}
+				sb.append(c);
+				k++;
+			}
+		}
+
+		public static void main(String[] args) {
+			System.out.println(longestCommonPrefix(new String[]{"flower","flow","flight"}));
 		}
 	}
 }

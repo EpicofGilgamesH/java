@@ -1,8 +1,6 @@
 package test.doublePointer;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 双指针LeetCode题示例
@@ -434,6 +432,346 @@ public class LeetCodeCase {
 
 		public static void main(String[] args) {
 			System.out.println(lengthOfLongestSubstringOfficialI("abcbacbb"));
+		}
+	}
+
+	/**
+	 * 125. 验证回文串
+	 * 如果在将所有大写字符转换为小写字符、并移除所有非字母数字字符之后，短语正着读和反着读都一样。则可以认为该短语是一个 回文串 。
+	 * 字母和数字都属于字母数字字符。
+	 * 给你一个字符串 s，如果它是 回文串 ，返回 true ；否则，返回 false 。
+	 * 示例 1：
+	 * 输入: s = "A man, a plan, a canal: Panama"
+	 * 输出：true
+	 * 解释："amanaplanacanalpanama" 是回文串。
+	 * 示例 2：
+	 * 输入：s = "race a car"
+	 * 输出：false
+	 * 解释："raceacar" 不是回文串。
+	 * 示例 3：
+	 * 输入：s = " "
+	 * 输出：true
+	 * 解释：在移除非字母数字字符之后，s 是一个空字符串 "" 。
+	 * 由于空字符串正着反着读都一样，所以是回文串。
+	 * 提示：
+	 * 1 <= s.length <= 2 * 105
+	 * s 仅由可打印的 ASCII 字符组成
+	 */
+	public static class IsPalindrome {
+
+		/**
+		 * 个人思路：
+		 * 双指针的同时,在判断是否数字字母后
+		 * 1.是数字直接比较数字字符是否相同
+		 * 2.是字母则转换为小写后比较是否相同
+		 * 3.既不是数字也不是字母,指针向中间移动一位
+		 * 总是比较左右两个指针
+		 *
+		 * @param s
+		 * @return
+		 */
+		public static boolean isPalindrome(String s) {
+			int p = 0, q = s.length() - 1;
+			while (p < q) {
+				Character cp, cq;
+				if ((cp = execute(s.charAt(p))) == null) {
+					p++;
+					continue;
+				}
+				if ((cq = execute(s.charAt(q))) == null) {
+					q--;
+					continue;
+				}
+				if (!cq.equals(cp)) {
+					return false;
+				}
+				p++;
+				q--;
+			}
+			return true;
+		}
+
+		private static Character execute(char c) {
+			if (c >= '0' && c <= '9') { // 数字
+				return c;
+			} else if (c >= 'a' && c <= 'z') {
+				return c;
+			} else if (c >= 'A' && c <= 'Z') {
+				return Character.toLowerCase(c);
+			} else {
+				return null;
+			}
+		}
+
+		/**
+		 * 官方思路,先除去不需要的字符,然后翻转后对比两个字符串
+		 *
+		 * @param s
+		 * @return
+		 */
+		public static boolean isPalindromeOfficial(String s) {
+			StringBuffer sgood = new StringBuffer();
+			int length = s.length();
+			for (int i = 0; i < length; i++) {
+				char ch = s.charAt(i);
+				if (Character.isLetterOrDigit(ch)) {
+					sgood.append(Character.toLowerCase(ch));
+				}
+			}
+			StringBuffer sgood_rev = new StringBuffer(sgood).reverse();
+			return sgood.toString().equals(sgood_rev.toString());
+		}
+
+		public static void main(String[] args) {
+			System.out.println(isPalindrome("9,8"));
+			System.out.println(isPalindromeOfficial("9,8"));
+		}
+	}
+
+	/**
+	 * 30. 串联所有单词的子串
+	 * 给定一个字符串 s 和一个字符串数组 words。 words 中所有字符串 长度相同。
+	 * s 中的 串联子串 是指一个包含  words 中所有字符串以任意顺序排列连接起来的子串。
+	 * 例如，如果 words = ["ab","cd","ef"]， 那么 "abcdef"， "abefcd"，"cdabef"， "cdefab"，"efabcd"， 和 "efcdab" 都是串联子串。 "acdbef" 不是串联子串，因为他不是任何 words 排列的连接。
+	 * 返回所有串联子串在 s 中的开始索引。你可以以 任意顺序 返回答案。
+	 * 示例 1：
+	 * 输入：s = "barfoothefoobarman", words = ["foo","bar"]
+	 * 输出：[0,9]
+	 * 解释：因为 words.length == 2 同时 words[i].length == 3，连接的子字符串的长度必须为 6。
+	 * 子串 "barfoo" 开始位置是 0。它是 words 中以 ["bar","foo"] 顺序排列的连接。
+	 * 子串 "foobar" 开始位置是 9。它是 words 中以 ["foo","bar"] 顺序排列的连接。
+	 * 输出顺序无关紧要。返回 [9,0] 也是可以的。
+	 * 示例 2：
+	 * 输入：s = "wordgoodgoodgoodbestword", words = ["word","good","best","word"]
+	 * 输出：[]
+	 * 解释：因为 words.length == 4 并且 words[i].length == 4，所以串联子串的长度必须为 16。
+	 * s 中没有子串长度为 16 并且等于 words 的任何顺序排列的连接。
+	 * 所以我们返回一个空数组。
+	 * 示例 3：
+	 * 输入：s = "barfoofoobarthefoobarman", words = ["bar","foo","the"]
+	 * 输出：[6,9,12]
+	 * 解释：因为 words.length == 3 并且 words[i].length == 3，所以串联子串的长度必须为 9。
+	 * 子串 "foobarthe" 开始位置是 6。它是 words 中以 ["foo","bar","the"] 顺序排列的连接。
+	 * 子串 "barthefoo" 开始位置是 9。它是 words 中以 ["bar","the","foo"] 顺序排列的连接。
+	 * 子串 "thefoobar" 开始位置是 12。它是 words 中以 ["the","foo","bar"] 顺序排列的连接。
+	 * 提示：
+	 * 1 <= s.length <= 104
+	 * 1 <= words.length <= 5000
+	 * 1 <= words[i].length <= 30
+	 * words[i] 和 s 由小写英文字母组成
+	 */
+	public static class FindSubstring {
+
+		/**
+		 * 本题使用滑动窗口根本没有思路,只能想到暴力匹配
+		 * 1.窗口的右边每次滑动一个单词的长度
+		 * 2.窗口的起点范围是[0...单词数组中每个单词的长度数]
+		 *
+		 * @param s
+		 * @param words
+		 * @return
+		 */
+		public static List<Integer> findSubstring(String s, String[] words) {
+			List<Integer> res = new ArrayList<>();
+			Map<String, Integer> wordsMap = new HashMap<>();
+			if (s.length() == 0 || words.length == 0) return res;
+			for (String word : words) {
+				// 主串s中没有这个单词，直接返回空
+				if (s.indexOf(word) < 0) return res;
+				// map中保存每个单词，和它出现的次数
+				wordsMap.put(word, wordsMap.getOrDefault(word, 0) + 1);
+			}
+			// 每个单词的长度， 总长度
+			int oneLen = words[0].length(), wordsLen = oneLen * words.length;
+			// 主串s长度小于单词总和，返回空
+			if (wordsLen > s.length()) return res;
+			// 只讨论从0，1，...， oneLen-1 开始的子串情况，
+			// 每次进行匹配的窗口大小为 wordsLen，每次后移一个单词长度，由左右窗口维持当前窗口位置
+			for (int i = 0; i < oneLen; ++i) {
+				// 左右窗口
+				int left = i, right = i, count = 0;
+				// 统计每个符合要求的word
+				Map<String, Integer> subMap = new HashMap<>();
+				// 右窗口不能超出主串长度
+				while (right + oneLen <= s.length()) {
+					// 得到一个单词
+					String word = s.substring(right, right + oneLen);
+					// 有窗口右移
+					right += oneLen;
+					// words[]中没有这个单词，那么当前窗口肯定匹配失败，直接右移到这个单词后面
+					if (!wordsMap.containsKey(word)) {
+						left = right;
+						// 窗口内单词统计map清空，重新统计
+						subMap.clear();
+						// 符合要求的单词数清0
+						count = 0;
+					} else {
+						// 统计当前子串中这个单词出现的次数
+						subMap.put(word, subMap.getOrDefault(word, 0) + 1);
+						++count;
+						// 如果这个单词出现的次数大于words[]中它对应的次数，又由于每次匹配和words长度相等的子串
+						// 如 ["foo","bar","foo","the"]  "| foobarfoobar| foothe"
+						// 第二个bar虽然是words[]中的单词，但是次数抄了，那么右移一个单词长度后 "|barfoobarfoo|the"
+						// bar还是不符合，所以直接从这个不符合的bar之后开始匹配，也就是将这个不符合的bar和它之前的单词(串)全移出去
+						while (subMap.getOrDefault(word, 0) > wordsMap.getOrDefault(word, 0)) {
+							// 从当前窗口字符统计map中删除从左窗口开始到数量超限的所有单词(次数减一)
+							String w = s.substring(left, left + oneLen);
+							subMap.put(w, subMap.getOrDefault(w, 0) - 1);
+							// 符合的单词数减一
+							--count;
+							// 左窗口位置右移
+							left += oneLen;
+						}
+						// 当前窗口字符串满足要求
+						if (count == words.length) res.add(left);
+					}
+				}
+			}
+			return res;
+		}
+
+		public static void main(String[] args) {
+			System.out.println(findSubstring("barfoofoobarthefoobarman", new String[]{"bar", "foo", "the"}));
+		}
+	}
+
+	/**
+	 * 36. 有效的数独
+	 * 请你判断一个 9 x 9 的数独是否有效。只需要 根据以下规则 ，验证已经填入的数字是否有效即可。
+	 * 数字 1-9 在每一行只能出现一次。
+	 * 数字 1-9 在每一列只能出现一次。
+	 * 数字 1-9 在每一个以粗实线分隔的 3x3 宫内只能出现一次。（请参考示例图）
+	 * 注意：
+	 * 一个有效的数独（部分已被填充）不一定是可解的。
+	 * 只需要根据以上规则，验证已经填入的数字是否有效即可。
+	 * 空白格用 '.' 表示。
+	 * 示例 1：
+	 * 输入：board =
+	 * [["5","3",".",".","7",".",".",".","."]
+	 * ,["6",".",".","1","9","5",".",".","."]
+	 * ,[".","9","8",".",".",".",".","6","."]
+	 * ,["8",".",".",".","6",".",".",".","3"]
+	 * ,["4",".",".","8",".","3",".",".","1"]
+	 * ,["7",".",".",".","2",".",".",".","6"]
+	 * ,[".","6",".",".",".",".","2","8","."]
+	 * ,[".",".",".","4","1","9",".",".","5"]
+	 * ,[".",".",".",".","8",".",".","7","9"]]
+	 * 输出：true
+	 * 示例 2：
+	 * 输入：board =
+	 * [["8","3",".",".","7",".",".",".","."]
+	 * ,["6",".",".","1","9","5",".",".","."]
+	 * ,[".","9","8",".",".",".",".","6","."]
+	 * ,["8",".",".",".","6",".",".",".","3"]
+	 * ,["4",".",".","8",".","3",".",".","1"]
+	 * ,["7",".",".",".","2",".",".",".","6"]
+	 * ,[".","6",".",".",".",".","2","8","."]
+	 * ,[".",".",".","4","1","9",".",".","5"]
+	 * ,[".",".",".",".","8",".",".","7","9"]]
+	 * 输出：false
+	 * 解释：除了第一行的第一个数字从 5 改为 8 以外，空格内其他数字均与 示例1 相同。 但由于位于左上角的 3x3 宫内有两个 8 存在, 因此这个数独是无效的。
+	 * 提示：
+	 * <p>
+	 * board.length == 9
+	 * board[i].length == 9
+	 * board[i][j] 是一位数字（1-9）或者 '.'
+	 */
+	public static class IsValidSudoku {
+
+		/**
+		 * 个人思路:
+		 * 对每个9宫格进行遍历时,同时判断行和列是否符合数独条件
+		 *
+		 * @param board
+		 * @return
+		 */
+		public static boolean isValidSudoku(char[][] board) {
+			// 每个九宫格的开始位置
+			int[][] array = new int[][]{
+					{0, 0},
+					{0, 3},
+					{0, 6},
+					{3, 0},
+					{3, 3},
+					{3, 6},
+					{6, 0},
+					{6, 3},
+					{6, 6}
+			};
+			HashMap<Integer, int[]> usedX = new HashMap<>(); // key->第x行,value->存在的值
+			HashMap<Integer, int[]> usedY = new HashMap<>(); // key->第y列,value->存在的值
+			for (int i = 0; i < array.length; i++) {
+				int[] startPoint = array[i]; // 九宫格起始坐标
+				int[] used = new int[10]; // 九宫格已出现过的数字,idx为数字,值为是否出现
+				for (int k = startPoint[0]; k < startPoint[0] + 3; k++) {
+					for (int l = startPoint[1]; l < startPoint[1] + 3; l++) {
+						// 每个九宫格内部进行判断
+						if (board[k][l] != '.') {
+							// 判断九宫格、行、列是否出现过该数字
+							int v = board[k][l] - '0';
+							if (used[v] == 1 || (usedX.get(k) != null && usedX.get(k)[v] == 1) || usedY.get(l) != null && usedY.get(l)[v] == 1) {
+								return false;
+							}
+							used[v] = 1;
+							int[] arrX;
+							if ((arrX = usedX.get(k)) == null) {
+								arrX = new int[10];
+							}
+							arrX[v] = 1;
+							usedX.put(k, arrX);
+							int[] arrY;
+							if ((arrY = usedY.get(l)) == null) {
+								arrY = new int[10];
+							}
+							arrY[v] = 1;
+							usedY.put(l, arrY);
+						}
+					}
+				}
+			}
+			return true;
+		}
+
+		/**
+		 * 官方思路中,最关键是点是,在遍历整个二维数组时,怎么知道当前遍历的位置是属于哪一个九宫格呢?
+		 * i,j 九宫格的位置 [i/3] [j/3] 其中i为[0,2] j为[0,2]时其都出在同一个小九宫格中
+		 * 0<= [i/3] [j/3] < 3
+		 *
+		 * @param board
+		 * @return
+		 */
+		public static boolean isValidSudokuOfficial(char[][] board) {
+			int[][] useRow = new int[9][9];  // 每行已经出现过的数字
+			int[][] useCol = new int[9][9];  // 每列已经出现过的数字
+			int[][][] useBox = new int[3][3][9]; // 每个小九宫格中出现过的数字
+			for (int i = 0; i < 9; i++) {
+				for (int j = 0; j < 9; j++) {
+					if (board[i][j] != '.') {
+						int v = board[i][j] - '0' - 1;
+						useRow[i][v]++;
+						useCol[j][v]++;
+						useBox[i / 3][j / 3][v]++;
+						if (useRow[i][v] > 1 || useCol[j][v] > 1 || useBox[i / 3][j / 3][v] > 1) {
+							return false;
+						}
+					}
+				}
+			}
+			return true;
+		}
+
+		public static void main(String[] args) {
+			System.out.println(isValidSudokuOfficial(new char[][]{
+					{'8', '3', '.', '.', '7', '.', '.', '.', '.'},
+					{'6', '.', '.', '1', '9', '5', '.', '.', '.'},
+					{'.', '9', '8', '.', '.', '.', '.', '6', '.'},
+					{'8', '.', '.', '.', '6', '.', '.', '.', '3'},
+					{'4', '.', '.', '8', '.', '3', '.', '.', '1'},
+					{'7', '.', '.', '.', '2', '.', '.', '.', '6'},
+					{'.', '6', '.', '.', '.', '.', '2', '8', '.'},
+					{'.', '.', '.', '4', '1', '9', '.', '.', '5'},
+					{'.', '.', '.', '.', '8', '.', '.', '7', '9'}
+			}));
 		}
 	}
 }
