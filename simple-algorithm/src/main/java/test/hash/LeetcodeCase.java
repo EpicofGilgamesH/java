@@ -1,9 +1,11 @@
 package test.hash;
 
+import com.sun.javafx.logging.JFRInputEvent;
 import sun.awt.util.IdentityLinkedList;
 
 import javax.swing.text.html.parser.Entity;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class LeetcodeCase {
 
@@ -931,6 +933,393 @@ public class LeetcodeCase {
 
 		public static void main(String[] args) {
 			System.out.println(longestPalindromeI("abccccdd"));
+		}
+	}
+
+	/**
+	 * 290. 单词规律
+	 * 给定一种规律 pattern 和一个字符串 s ，判断 s 是否遵循相同的规律。
+	 * 这里的 遵循 指完全匹配，例如， pattern 里的每个字母和字符串 s 中的每个非空单词之间存在着双向连接的对应规律。
+	 * 示例1:
+	 * 输入: pattern = "abba", s = "dog cat cat dog"
+	 * 输出: true
+	 * 示例 2:
+	 * 输入:pattern = "abba", s = "dog cat cat fish"
+	 * 输出: false
+	 * 示例 3:
+	 * 输入: pattern = "aaaa", s = "dog cat cat dog"
+	 * 输出: false
+	 * 提示:
+	 * 1 <= pattern.length <= 300
+	 * pattern 只包含小写英文字母
+	 * 1 <= s.length <= 3000
+	 * s 只包含小写英文字母和 ' '
+	 * s 不包含 任何前导或尾随对空格
+	 * s 中每个单词都被 单个空格 分隔
+	 */
+	public static class WordPattern {
+
+		/**
+		 * 通过hash存储映射关系 key是pattern中的单个字符,value是映射的单词
+		 * <p>
+		 * 太多要考虑的细节,很容易忽略
+		 *
+		 * @param pattern
+		 * @param s
+		 * @return
+		 */
+		public static boolean wordPattern(String pattern, String s) {
+			Map<Character, String> map = new HashMap<>();
+			StringBuilder stringBuilder = new StringBuilder();
+			int j = 0;
+			for (int i = 0; i < s.length() + 1; ++i) {
+				if (i == s.length() || s.charAt(i) == ' ') {
+					String word = stringBuilder.toString();
+					if (j >= pattern.length()) {
+						return false;
+					}
+					if (!map.containsKey(pattern.charAt(j))) {  // map中不存在,则放入;但是如果value已经存在也不行
+						if (map.containsValue(word)) {
+							return false;
+						}
+						map.put(pattern.charAt(j), word);
+					} else { // map中存在则匹配
+						if (!map.get(pattern.charAt(j)).equals(word)) {
+							return false;
+						}
+					}
+					j++;
+					stringBuilder.delete(0, stringBuilder.length());
+				} else {
+					stringBuilder.append(s.charAt(i));
+				}
+			}
+			return j >= pattern.length();
+		}
+
+		/**
+		 * 细节
+		 * 1.匹配串和原串 数量对应
+		 * 2.匹配串和原串 一一对应
+		 *
+		 * @param pattern
+		 * @param s
+		 * @return
+		 */
+		public static boolean wordPatternI(String pattern, String s) {
+			Map<Character, String> map = new HashMap<>();
+			String[] s1 = s.split(" ");
+			if (s1.length != pattern.length()) {
+				return false;
+			}
+			for (int i = 0; i < s1.length; i++) {
+				if (!map.containsKey(pattern.charAt(i))) {
+					if (map.containsValue(s1[i])) {
+						return false;
+					}
+					map.put(pattern.charAt(i), s1[i]);
+				} else {
+					if (!map.get(pattern.charAt(i)).equals(s1[i])) {
+						return false;
+					}
+				}
+			}
+			return true;
+		}
+
+		public static void main(String[] args) {
+			boolean b = wordPattern("jquery", "jquery");
+			System.out.println(b);
+		}
+	}
+
+	/**
+	 * 49. 字母异位词分组
+	 * 给你一个字符串数组，请你将 字母异位词 组合在一起。可以按任意顺序返回结果列表。
+	 * 字母异位词 是由重新排列源单词的所有字母得到的一个新单词。
+	 * 示例 1:
+	 * 输入: strs = ["eat", "tea", "tan", "ate", "nat", "bat"]
+	 * 输出: [["bat"],["nat","tan"],["ate","eat","tea"]]
+	 * 示例 2:
+	 * 输入: strs = [""]
+	 * 输出: [[""]]
+	 * 示例 3:
+	 * 输入: strs = ["a"]
+	 * 输出: [["a"]]
+	 * 提示：
+	 * 1 <= strs.length <= 104
+	 * 0 <= strs[i].length <= 100
+	 * strs[i] 仅包含小写字母
+	 */
+	public static class GroupAnagrams {
+
+		/**
+		 * 题目要求:由相同字母组成的单词放在同一个集合里面
+		 * 用什么方式判断这些单词是不是由同样的字母构成呢?
+		 * 1.排序后比较字符串是否相同
+		 * 2.计算字符hash值 单词最多100个字母,假设从a-z hash值是[2^0-2^25] 最大为2^26
+		 * 一直int最大为2^31-1 所以用int足够;并且这样组合相加的字母，不会出现碰撞
+		 * 使用2的指数幂作为hash,每个字母只出现一次是不会重复的,每个字母可以出现多次,则需要计算字母的个数是否一样
+		 * 后来发现就算字母数一样,也会有字母不同的情况,比如 :
+		 * hash[h]=128;
+		 * hash[i]=256;
+		 * hash[t]=524288
+		 * hash[u]=1048576
+		 * 那么出现
+		 * hash[t]+hash[t] =hash[u]
+		 * hash[h]+hash[h]=hash[i]
+		 * 则 hash[t]+hash[i]+hash[t] =hash[h]+hash[u]+hash[h]
+		 * 字母数相同,计算出来的hash值也想同出现了碰撞,那通过hash的思路很难解决碰撞问题
+		 * 但是要解决碰撞,又要使用一些方案,比如开发地址法、多次hash法、链表地址法等等
+		 * <p>
+		 * 我们可以使用再hash方式
+		 *
+		 * @param strs
+		 * @return
+		 */
+		public static List<List<String>> groupAnagrams(String[] strs) {
+			Map<String, List<String>> map = new HashMap<>();
+			for (int i = 0; i < strs.length; i++) {
+				String key = getHash(strs[i]) + "-" + strs[i].length() + '-' + getHash1(strs[i]);
+				if (!map.containsKey(key)) {
+					List<String> list = new ArrayList<>();
+					list.add(strs[i]);
+					map.put(key, list);
+				} else {
+					map.get(key).add(strs[i]);
+				}
+			}
+			return new ArrayList<>(map.values());
+		}
+
+		private static int getHash(String s) {
+			int hash = 0;
+			for (int i = 0; i < s.length(); i++) {
+				hash += 1 << s.charAt(i) - 'a';
+			}
+			return hash;
+		}
+
+		private static int getHash1(String s) {
+			int hash = 0;
+			for (int i = 0; i < s.length(); i++) {
+				hash += s.charAt(i) - 'a' + 1;
+			}
+			return hash;
+		}
+
+		/**
+		 * 当然本题的思路也可以不用hash,判断两个单词是否完全使用同样的字母组成
+		 * 可以对单词进行排序,然后比较其是否一样 排序时间复杂度O(log n)
+		 *
+		 * @param strs
+		 * @return
+		 */
+		public static List<List<String>> groupAnagramsI(String[] strs) {
+			Map<String, List<String>> map = new HashMap<>();
+			for (int i = 0; i < strs.length; i++) {
+				char[] charArray = strs[i].toCharArray();
+				Arrays.sort(charArray);
+				// computeIfAbsent 不存在则计算一个value并put到map中,存在则返回value
+				map.computeIfAbsent(String.valueOf(charArray), x -> new ArrayList<>()).add(strs[i]);
+			}
+			return new ArrayList<>(map.values());
+		}
+
+		/**
+		 * 用前26个质数表示字母a-z ,然后字母对应的质数相乘代表hash 因为质数不能被出本身和1以外的数整除,所以质数相乘之后,
+		 * 只能拆分出唯一解的因子集合
+		 * 前26个质数
+		 * 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101
+		 * 显然,很容易就溢出long类型的最大取值范围
+		 *
+		 * @param strs
+		 * @return
+		 */
+		public static List<List<String>> groupAnagramsII(String[] strs) {
+			return null;
+		}
+
+		/**
+		 * 官方思路
+		 * 在比较单词是否为相同的字母组成时,使用字母计数的方式,记录每个字母的个数,转换成字符串作为key
+		 *
+		 * @param strs
+		 * @return
+		 */
+		public static List<List<String>> groupAnagramsOfficial(String[] strs) {
+			Map<String, List<String>> map = new HashMap<>();
+			for (int i = 0; i < strs.length; i++) {
+				String str = strs[i];
+				int[] arr = new int[26];
+				for (int j = 0; j < str.length(); j++) {
+					arr[str.charAt(j) - 'a']++;
+				}
+				StringBuilder sb = new StringBuilder();
+				for (int k = 0; k < 26; k++) {
+					if (arr[k] > 0) {
+						sb.append((char) (k + 'a'));  // 字符个数  作为key
+						sb.append(arr[k]);
+					}
+				}
+				map.computeIfAbsent(sb.toString(), x -> new ArrayList<>()).add(str);
+			}
+			return new ArrayList<>(map.values());
+		}
+
+		public static void main(String[] args) {
+			List<List<String>> lists = groupAnagramsOfficial(new String[]{"eat", "tea", "tan", "ate", "nat", "bat", "ac", "bd", "aac", "bbd", "aacc", "bbdd", "acc", "bdd"});
+			System.out.println(lists);
+		}
+	}
+
+	/**
+	 * 219. 存在重复元素 II
+	 * 给你一个整数数组 nums 和一个整数 k ，判断数组中是否存在两个 不同的索引 i 和 j ，满足 nums[i] == nums[j] 且 abs(i - j) <= k 。
+	 * 如果存在，返回 true ；否则，返回 false 。
+	 * 示例 1：
+	 * 输入：nums = [1,2,3,1], k = 3
+	 * 输出：true
+	 * 示例 2：
+	 * 输入：nums = [1,0,1,1], k = 1
+	 * 输出：true
+	 * 示例 3：
+	 * 输入：nums = [1,2,3,1,2,3], k = 2
+	 * 输出：false
+	 * 提示：
+	 * 1 <= nums.length <= 105
+	 * -109 <= nums[i] <= 109
+	 * 0 <= k <= 105
+	 */
+	public static class ContainsNearbyDuplicate {
+
+		/**
+		 * 个人思路
+		 * 用map存储每个元素前一次出现的位置preIndex,如果下一次出现的index-preIndex > k 则更新index为preIndex
+		 * 因为preIndex不会出现符合条件的下一个元素了.
+		 *
+		 * @param nums
+		 * @param k
+		 * @return
+		 */
+		public static boolean containsNearbyDuplicate(int[] nums, int k) {
+			Map<Integer, Integer> map = new HashMap<>();
+			for (int i = 0; i < nums.length; i++) {
+				if (!map.containsKey(nums[i])) {
+					map.put(nums[i], i);
+				} else {
+					if (i - map.get(nums[i]) <= k) return true;
+					else map.put(nums[i], i);
+				}
+			}
+			return false;
+		}
+
+		/**
+		 * 滑动窗口解题
+		 * 窗口中元素的个数为 k+1,窗口的尾部为i,则头部index=max(0,i-k)
+		 * 依次滑动窗口,如果窗口中有重复的元素则说明满足条件
+		 * 用set保存窗口中的元素,窗口滑动一格,则删除尾部元素,加入新的元素;如果加入新的元素已存在则返回true;不存在则继续滑动窗口
+		 *
+		 * @param nums
+		 * @param k
+		 * @return
+		 */
+		public static boolean containsNearbyDuplicateOfficial(int[] nums, int k) {
+			Set<Integer> set = new HashSet<>();
+			// 窗口的右边界从k开始,一直到数组的结尾
+			for (int i = 0; i < nums.length; i++) {
+				if (i > k) { // 小于k的元素初始化加入到set中,模拟窗口的右边界从k开始
+					set.remove(nums[i - 1 - k]);
+				}
+				if (!set.add(nums[i])) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		public static void main(String[] args) {
+			System.out.println(containsNearbyDuplicate(new int[]{1, 2, 3, 4, 1, 2}, 4));
+		}
+	}
+
+	/**
+	 * 128. 最长连续序列
+	 * 给定一个未排序的整数数组 nums ，找出数字连续的最长序列（不要求序列元素在原数组中连续）的长度。
+	 * 请你设计并实现时间复杂度为 O(n) 的算法解决此问题。
+	 * 示例 1：
+	 * 输入：nums = [100,4,200,1,3,2]
+	 * 输出：4
+	 * 解释：最长数字连续序列是 [1, 2, 3, 4]。它的长度为 4。
+	 * 示例 2：
+	 * 输入：nums = [0,3,7,2,5,8,4,6,0,1]
+	 * 输出：9
+	 * 提示：
+	 * 0 <= nums.length <= 105
+	 * -109 <= nums[i] <= 109
+	 */
+	public static class LongestConsecutive {
+
+		/**
+		 * 个人思路:
+		 * 找出数字连续最长的序列长度
+		 *
+		 * @param nums
+		 * @return
+		 */
+		public static int longestConsecutive(int[] nums) {
+			if (nums == null || nums.length == 0) {
+				return 0;
+			}
+			TreeSet<Integer> set = new TreeSet<>(Comparator.comparingInt(o -> o));
+			for (int i = 0; i < nums.length; i++) {
+				set.add(nums[i]);
+			}
+			int max = 0, count = 1, pre = set.pollFirst().intValue();
+			while (!set.isEmpty()) {
+				int val = set.pollFirst().intValue();
+				if (val - pre == 1) {
+					count++;
+				} else {
+					max = Math.max(max, count);
+					count = 1;
+				}
+				pre = val;
+			}
+			return Math.max(max, count);
+		}
+
+		/**
+		 * 看了官方解法,发现不用TreeSet排序也是可以的
+		 * 直接用HashSet 存在一些技巧,本来问题在于怎么去计算连续的数有多少个?
+		 * HashSet没有排序,怎么去计数连续的数字呢?关键在于num 满足num-1不存在,则从num开始往后进行计数
+		 *
+		 * @param nums
+		 * @return
+		 */
+		public static int longestConsecutiveI(int[] nums) {
+			Set<Integer> set = new HashSet<>();
+			for (int num : nums) {
+				set.add(num);
+			}
+			int max = 0;
+			for (int num : set) {
+				if (!set.contains(num - 1)) { // 如果num不存在比其小1的数,则从num开始计数
+					int cur = num;
+					int count = 1;
+					while (set.contains(cur + 1)) {
+						cur++;
+						count++;
+					}
+					max = Math.max(max, count);
+				}
+			}
+			return max;
+		}
+
+		public static void main(String[] args) {
+			System.out.println(longestConsecutiveI(new int[]{0, 3, 7, 2, 5, 8, 4, 6, 0, 1}));
 		}
 	}
 }

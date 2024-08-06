@@ -1393,4 +1393,211 @@ public class LeetCodeCase {
 			System.out.println(decodeString("3[a]2[bc]"));
 		}
 	}
+
+	/**
+	 * 71. 简化路径
+	 * 给你一个字符串 path ，表示指向某一文件或目录的 Unix 风格 绝对路径 （以 '/' 开头），请你将其转化为更加简洁的规范路径。
+	 * 在 Unix 风格的文件系统中，一个点（.）表示当前目录本身；此外，两个点 （..） 表示将目录切换到上一级（指向父目录）；
+	 * 两者都可以是复杂相对路径的组成部分。任意多个连续的斜杠（即，'//'）都被视为单个斜杠 '/' 。 对于此问题，任何其他格式的点（例如，'...'）均被视为文件/目录名称。
+	 * 请注意，返回的 规范路径 必须遵循下述格式：
+	 * 始终以斜杠 '/' 开头。
+	 * 两个目录名之间必须只有一个斜杠 '/' 。
+	 * 最后一个目录名（如果存在）不能 以 '/' 结尾。
+	 * 此外，路径仅包含从根目录到目标文件或目录的路径上的目录（即，不含 '.' 或 '..'）。
+	 * 返回简化后得到的 规范路径 。
+	 * 示例 1：
+	 * 输入：path = "/home/"
+	 * 输出："/home"
+	 * 解释：注意，最后一个目录名后面没有斜杠。
+	 * 示例 2：
+	 * 输入：path = "/../"
+	 * 输出："/"
+	 * 解释：从根目录向上一级是不可行的，因为根目录是你可以到达的最高级。
+	 * 示例 3：
+	 * 输入：path = "/home//foo/"
+	 * 输出："/home/foo"
+	 * 解释：在规范路径中，多个连续斜杠需要用一个斜杠替换。
+	 * 示例 4：
+	 * 输入：path = "/a/./b/../../c/"
+	 * 输出："/c"
+	 * 提示：
+	 * 1 <= path.length <= 3000
+	 * path 由英文字母，数字，'.'，'/' 或 '_' 组成。
+	 * path 是一个有效的 Unix 风格绝对路径。
+	 */
+	public static class SimplifyPath {
+
+		/**
+		 * 个人思路:
+		 * 本题要通过栈来模拟文件夹的层次关系
+		 * 1.首先用'/'来进行分割,多余的'/'能直接忽略掉
+		 * 2.使用一个栈来模拟文件层次,栈底代表根目录,根目录再往上级目录都是根目录;
+		 * 3.遇到非'.' '..'时,都被视为文件名,'.'表示当前目录 '..'表示上级目录
+		 *
+		 * @param path
+		 * @return
+		 */
+		public static String simplifyPath(String path) {
+			Deque<String> stack = new ArrayDeque<>();
+			String[] arr = path.split("/");
+			for (String s : arr) {
+				if (s.equals("..")) {
+					if (!stack.isEmpty()) stack.pop();
+				} else {
+					if (!s.equals(".")) { // 非 '.'和 '..' 都是文件名
+						if (!s.isEmpty()) stack.push(s);
+					}
+				}
+			}
+			if (stack.isEmpty()) return "/";
+			StringBuilder sb = new StringBuilder();
+			while (!stack.isEmpty()) {
+				sb.append("/").append(stack.pollLast());
+			}
+			return sb.toString();
+		}
+
+		public static void main(String[] args) {
+			System.out.println(simplifyPath("/home//foo/"));
+		}
+	}
+
+	/**
+	 * 224. 基本计算器
+	 * 给你一个字符串表达式 s ，请你实现一个基本计算器来计算并返回它的值。
+	 * 注意:不允许使用任何将字符串作为数学表达式计算的内置函数，比如 eval() 。
+	 * 示例 1：
+	 * 输入：s = "1 + 1"
+	 * 输出：2
+	 * 示例 2：
+	 * 输入：s = " 2-1 + 2 "
+	 * 输出：3
+	 * 示例 3：
+	 * 输入：s = "(1+(4+5+2)-3)+(6+8)"
+	 * 输出：23
+	 * 提示：
+	 * 1 <= s.length <= 3 * 105
+	 * s 由数字、'+'、'-'、'('、')'、和 ' ' 组成
+	 * s 表示一个有效的表达式
+	 * '+' 不能用作一元运算(例如， "+1" 和 "+(2 + 3)" 无效)
+	 * '-' 可以用作一元运算(即 "-1" 和 "-(2 + 3)" 是有效的)
+	 * 输入中不存在两个连续的操作符
+	 * 每个数字和运行的计算将适合于一个有符号的 32位 整数
+	 */
+	public static class Calculate {
+
+		/**
+		 * 个人思路:
+		 * 基本计算器,运用栈来匹配括号和括弧之间的运算字符串,实现先计算括号中的运算的方式
+		 *
+		 * @param s
+		 * @return
+		 */
+		public static int calculate(String s) {
+			Deque<String> stack = new ArrayDeque<>();
+			for (int i = 0; i < s.length(); i++) {
+				char c = s.charAt(i);
+				// 字符出现的场景如下
+				// 1.符号 + -
+				// 2.符号( )
+				// 3.数字 数字可以有多位,需要合并数字;数字前的运算符号如果是- ,则入栈负数
+				if (c != ' ') {
+					if (c == '+' || c == '-' || c == '(') {
+						stack.push(String.valueOf(c));
+					} else if (c == ')') {  // 匹配与之对应的'('
+						long num = 0, pre = 0;
+						boolean flag = false;
+						while (!stack.isEmpty()) {
+							String v = stack.pop();
+							if (v.equals("+")) {
+								num += pre;
+								flag = false;
+							} else if (v.equals("-")) {
+								num -= pre;
+								flag = false;
+							} else if (v.equals("(")) {
+								if (flag) num += pre;
+								break;
+							} else {
+								pre = Long.parseLong(v);
+								flag = true;
+							}
+						}
+						stack.push(String.valueOf(num));
+					} else {  // 数字,需要判断是否有多位
+						long num = 0;
+						while (i < s.length() && Character.isDigit(s.charAt(i))) {
+							num = num * 10 + s.charAt(i) - '0';
+							i++;
+						}
+						stack.push(String.valueOf(num));
+						i--;
+					}
+				}
+			}
+			// stack中没有括号,直接处理
+			long total = 0, pre = 0;
+			boolean flag = false;
+			while (!stack.isEmpty()) {
+				String v = stack.pop();
+				if (v.equals("+")) {
+					total += pre;
+					flag = false;
+				} else if (v.equals("-")) {
+					total -= pre;
+					flag = false;
+				} else {
+					pre = Long.parseLong(v);
+					flag = true;
+				}
+			}
+			return flag ? (int) (pre + total) : (int) total;
+		}
+
+		/**
+		 * 官方思路中没有消除括号的过程,因为该元素仅涉及到 + - 的运算,括号中的计算过程 只需要将其符号调整正确即可
+		 * 当遇到'('时,其前面是'+' 则所有符号不需要变化;其前面是'-'则所有符号均需要反转
+		 * 用一个栈ops专门存放操作符号,每当遇到 '('时,将当前的sign(符号值 取1和-1)压入栈中;每当遇到')'时都从栈中弹出一个符号位;
+		 * 所以这个思路是去掉括号,相当于把括号全部散开
+		 *
+		 * @param s
+		 * @return
+		 */
+		public static int calculateOfficial(String s) {
+			Deque<Integer> ops = new LinkedList<Integer>();
+			ops.push(1);
+			int sign = 1, i = 0, res = 0;
+			while (i < s.length()) {
+				char c = s.charAt(i);
+				if (c == '+') {
+					sign = ops.peek();
+					i++;
+				} else if (c == '-') {
+					sign = -ops.peek();
+					i++;
+				} else if (c == '(') {  // 遇到'('说明()中的所有符号都应该被确定
+					ops.push(sign);
+					i++;
+				} else if (c == ')') {
+					ops.pop();
+					i++;
+				} else if (c == ' ') {
+					i++;
+				} else {  // 数字
+					long num = 0;
+					while (i < s.length() && Character.isDigit(s.charAt(i))) {
+						num = num * 10 + s.charAt(i) - '0';
+						i++;
+					}
+					res += (int) (sign * num);
+				}
+			}
+			return res;
+		}
+
+		public static void main(String[] args) {
+			System.out.println(calculate("(1+(4+5+2)-3)+(6+8)"));
+			System.out.println(calculateOfficial("(1+(4+5+2)-3)+(6+8)"));
+		}
+	}
 }
