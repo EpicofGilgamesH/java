@@ -925,4 +925,516 @@ public class LeetcodeCaseII {
 		}
 	}
 
+	/**
+	 * 2. 两数相加
+	 * 给你两个 非空 的链表，表示两个非负的整数。它们每位数字都是按照 逆序 的方式存储的，并且每个节点只能存储 一位 数字。
+	 * 请你将两个数相加，并以相同形式返回一个表示和的链表。
+	 * 你可以假设除了数字 0 之外，这两个数都不会以 0 开头。
+	 * 示例 1：
+	 * 输入：l1 = [2,4,3], l2 = [5,6,4]
+	 * 输出：[7,0,8]
+	 * 解释：342 + 465 = 807.
+	 * 示例 2：
+	 * 输入：l1 = [0], l2 = [0]
+	 * 输出：[0]
+	 * 示例 3：
+	 * 输入：l1 = [9,9,9,9,9,9,9], l2 = [9,9,9,9]
+	 * 输出：[8,9,9,9,0,0,0,1]
+	 * 提示：
+	 * 每个链表中的节点数在范围 [1, 100] 内
+	 * 0 <= Node.val <= 9
+	 * 题目数据保证列表表示的数字不含前导零
+	 */
+	public static class AddTwoNumbers {
+
+		/**
+		 * 1.链表对应都有的节点处理
+		 * 2.只有一条链表有的节点
+		 *
+		 * @param l1
+		 * @param l2
+		 * @return
+		 */
+		public static ListNode addTwoNumbers(ListNode l1, ListNode l2) {
+			ListNode res = new ListNode(), next = res, pre = res;
+			boolean isCarry = false;
+			while (l1 != null || l2 != null) {
+				int sum = (l1 == null ? 0 : l1.val) + (l2 == null ? 0 : l2.val) + (isCarry ? 1 : 0);
+				int v = sum % 10; // 相加后节点的值
+				isCarry = sum / 10 == 1; // 相加后,后一位是否进位
+				next.val = v;
+				if (l1 != null) l1 = l1.next;
+				if (l2 != null) l2 = l2.next;
+				pre = next;
+				next.next = new ListNode();
+				next = next.next;
+			}
+			// 两个链表都结束遍历后,可能还存在进位
+			if (isCarry) {
+				next.val = 1;
+			} else {
+				pre.next = null;
+			}
+			return res;
+		}
+
+		public static void main(String[] args) {
+			ListNode l1 = new ListNode(9);
+			ListNode l2 = new ListNode(9);
+			ListNode l3 = new ListNode(9);
+			ListNode l4 = new ListNode(9);
+			ListNode l5 = new ListNode(9);
+			ListNode l6 = new ListNode(9);
+			ListNode l7 = new ListNode(9);
+			l1.next = l2;
+			l2.next = l3;
+			l3.next = l4;
+			l4.next = l5;
+			l5.next = l6;
+			l6.next = l7;
+
+			ListNode l2_1 = new ListNode(9);
+			ListNode l2_2 = new ListNode(9);
+			ListNode l2_3 = new ListNode(9);
+			ListNode l2_4 = new ListNode(9);
+			l2_1.next = l2_2;
+			l2_2.next = l2_3;
+			l2_3.next = l2_4;
+
+			/*ListNode l1 = new ListNode(2);
+			ListNode l2 = new ListNode(4);
+			ListNode l3 = new ListNode(3);
+			l1.next = l2;
+			l2.next = l3;
+
+			ListNode l4 = new ListNode(5);
+			ListNode l5 = new ListNode(6);
+			ListNode l6 = new ListNode(4);
+			l4.next = l5;
+			l5.next = l6;*/
+
+			ListNode node = addTwoNumbers(l1, l2_1);
+			System.out.println(node);
+		}
+	}
+
+	/**
+	 * 92. 反转链表 II
+	 * 给你单链表的头指针 head 和两个整数 left 和 right ，其中 left <= right 。请你反转从位置 left 到位置 right 的链表节点，返回 反转后的链表 。
+	 * 示例 1：
+	 * 输入：head = [1,2,3,4,5], left = 2, right = 4
+	 * 输出：[1,4,3,2,5]
+	 * 示例 2：
+	 * 输入：head = [5], left = 1, right = 1
+	 * 输出：[5]
+	 * 提示：
+	 * 链表中节点数目为 n
+	 * 1 <= n <= 500
+	 * -500 <= Node.val <= 500
+	 * 1 <= left <= right <= n
+	 * 进阶： 你可以使用一趟扫描完成反转吗？
+	 * <p>
+	 * todo...该题是超多头部公司的面试题,虽然琢磨了1-2个小时是做出来了,但是中途对于链表的反转思路还是不够清晰,后续需要多回顾思考.
+	 */
+	public static class ReverseBetween {
+
+		/**
+		 * 个人思路:
+		 * 自定的范围内反转链表,需要记录反转的开始节点和结束节点
+		 *
+		 * @param head
+		 * @param left
+		 * @param right
+		 * @return
+		 */
+		public static ListNode reverseBetween(ListNode head, int left, int right) {
+			if (left == right) return head;
+			ListNode lNode = new ListNode(Integer.MIN_VALUE, head);
+			head = lNode;
+			int i = 0;
+			ListNode pre = lNode; // 反转区域的前一个节点
+			while (i < left) {
+				pre = lNode;
+				lNode = lNode.next;
+				i++;
+			}
+			// 进入反转区域 lNode为反转区域的第一个节点
+			ListNode firstIn = lNode;
+			ListNode preIn = null;
+			ListNode cur = lNode;
+			while (i <= right) {
+				ListNode n = cur.next;  // 存储当前节点的下一个节点
+				cur.next = preIn;       // 当前节点指向上一个节点
+				preIn = cur;            // 存储当前节点作为上一个节点
+				cur = n;                // 当前节点向后一个节点移动
+				i++;
+			}
+			// 反转区域完成后,需要处理反转区域左右两边的链表连接
+			pre.next = preIn;
+			firstIn.next = cur;
+			return head.next;
+		}
+
+		public static void main(String[] args) {
+			ListNode node1 = new ListNode(1);
+			ListNode node2 = new ListNode(2);
+			ListNode node3 = new ListNode(3);
+			ListNode node4 = new ListNode(4);
+			ListNode node5 = new ListNode(5);
+			node1.next = node2;
+			node2.next = node3;
+			node3.next = node4;
+			node4.next = node5;
+			ListNode node = reverseBetween(node1, 1, 4);
+			System.out.println(node);
+		}
+	}
+
+	/**
+	 * 25. K 个一组翻转链表
+	 * 给你链表的头节点 head ，每 k 个节点一组进行翻转，请你返回修改后的链表。
+	 * k 是一个正整数，它的值小于或等于链表的长度。如果节点总数不是 k 的整数倍，那么请将最后剩余的节点保持原有顺序。
+	 * 你不能只是单纯的改变节点内部的值，而是需要实际进行节点交换。
+	 * 示例 1：
+	 * 输入：head = [1,2,3,4,5], k = 2
+	 * 输出：[2,1,4,3,5]
+	 * 示例 2：
+	 * 输入：head = [1,2,3,4,5], k = 3
+	 * 输出：[3,2,1,4,5]
+	 * 提示：
+	 * 链表中的节点数目为 n
+	 * 1 <= k <= n <= 5000
+	 * 0 <= Node.val <= 1000
+	 * 进阶：你可以设计一个只用 O(1) 额外内存空间的算法解决此问题吗？
+	 */
+	public static class ReverseKGroup {
+
+		/**
+		 * 类似上一题的思路,前k个节点进行翻转,后k个节点不翻转,依次进行
+		 * 首先要知道链表的长度,确保k不是链表长度倍数时,最后剩下的节点不需要翻转
+		 *
+		 * @param head
+		 * @param k
+		 * @return
+		 */
+		public ListNode reverseKGroup(ListNode head, int k) {
+			ListNode lNode = new ListNode(Integer.MIN_VALUE, head);
+			head = lNode;
+			int i = 0, j = 1;
+			ListNode pre = null, in = lNode, cur = lNode;
+			while (i < k) {
+				ListNode next = cur.next;
+
+			}
+
+			return null;
+		}
+	}
+
+	/**
+	 * 82. 删除排序链表中的重复元素 II
+	 * 给定一个已排序的链表的头 head ， 删除原始链表中所有重复数字的节点，只留下不同的数字 。返回 已排序的链表 。
+	 * 示例 1：
+	 * 输入：head = [1,2,3,3,4,4,5]
+	 * 输出：[1,2,5]
+	 * 示例 2：
+	 * 输入：head = [1,1,1,2,3]
+	 * 输出：[2,3]
+	 * 提示：
+	 * 链表中节点数目在范围 [0, 300] 内
+	 * -100 <= Node.val <= 100
+	 * 题目数据保证链表已经按升序 排列
+	 */
+	public static class DeleteDuplicates {
+
+		/**
+		 * 个人思路
+		 * 遍历链表的同时,记录每个节点的值,当节点的值相同时,进行记录;直到遍历到不同值的节点时,由第一个相同的记录节点的前一个节点
+		 * 指向当前节点
+		 * <p>
+		 * 本题 记录一个前节点当前值,然后遍历节点时依次对比,不太方便
+		 * 官方解题思路是,当前节点的next节点和next->next节点比较值是否相等
+		 *
+		 * @param head
+		 * @return
+		 */
+		public static ListNode deleteDuplicates(ListNode head) {
+			ListNode hair = new ListNode(Integer.MIN_VALUE, head);
+			ListNode cur = hair, pre = hair, ppre = hair;
+			int v = 0;
+			boolean flag = false, end = false;
+			while (cur != null) {
+				if (v == cur.val) {
+					flag = true;
+				} else {  // 不等
+					if (flag) {  // 且前面有相等变为不等时,需要重新指向
+						ppre.next = cur;
+					} else {
+						ppre = pre;
+						pre = cur;
+					}
+					v = cur.val;
+					flag = false;
+				}
+				cur = cur.next;
+				if (cur == null && !end) {
+					cur = new ListNode(Integer.MIN_VALUE);
+					end = true;
+				}
+			}
+			ppre.next = null;
+			return hair.next;
+		}
+
+		/*
+		 * 官方思路：
+		 * 通过查找链表中节点不同 来删除相同的节点不太方便操作
+		 * 官方思路中,是遍历到当前节点时,去比较其下个节点和下下个节点的值是否相同
+		 * 如果相同,就删掉当前节点的下一个节点,同时要记录被删除节点的值x,后续对比,直到next节点不等于x
+		 * 官方思路的关键点在于,需要通过当前几点去比较下个节点和下下个节点,这样删除操作将变得非常简单
+		 */
+		public static ListNode deleteDuplicatesOfficial(ListNode head) {
+			if (head == null) return null;
+			ListNode hair = new ListNode(Integer.MIN_VALUE, head);
+			ListNode cur = hair;
+			while (cur.next != null && cur.next.next != null) {
+				if (cur.next.val == cur.next.next.val) {  // 当前节点的next节点和next.next节点值相等 记录值,同时删掉next节点
+					int v = cur.next.val;
+					cur.next = cur.next.next;
+					while (cur.next != null && cur.next.val == v) {
+						cur.next = cur.next.next;
+					}
+				} else {
+					cur = cur.next;  // 当前节点往后移动一位
+				}
+			}
+			return hair.next;
+		}
+
+		public static void main(String[] args) {
+			/*ListNode l1 = new ListNode(1);
+			ListNode l2 = new ListNode(2);
+			ListNode l3_1 = new ListNode(3);
+			ListNode l3_2 = new ListNode(3);
+			ListNode l3_3 = new ListNode(3);
+			ListNode l4_1 = new ListNode(4);
+			ListNode l4_2 = new ListNode(4);
+			ListNode l5 = new ListNode(5);
+			ListNode l5_1 = new ListNode(5);
+			l1.next = l2;
+			l2.next = l3_1;
+			l3_1.next = l3_2;
+			l3_2.next = l3_3;
+			l3_3.next = l4_1;
+			l4_1.next = l4_2;
+			l4_2.next = l5;
+			l5.next = l5_1;*/
+
+			ListNode l1 = new ListNode(1);
+			ListNode l1_1 = new ListNode(1);
+			ListNode l1_2 = new ListNode(1);
+			ListNode l2 = new ListNode(2);
+			ListNode l3 = new ListNode(3);
+			ListNode l3_1 = new ListNode(3);
+			l1.next = l1_1;
+			l1_1.next = l1_2;
+			l1_2.next = l2;
+			l2.next = l3;
+			l3.next = l3_1;
+			ListNode node = deleteDuplicatesOfficial(l1);
+
+			System.out.println(node);
+		}
+	}
+
+	/**
+	 * 61. 旋转链表
+	 * 给你一个链表的头节点 head ，旋转链表，将链表每个节点向右移动 k 个位置。
+	 * 示例 1：
+	 * 输入：head = [1,2,3,4,5], k = 2
+	 * 输出：[4,5,1,2,3]
+	 * 示例 2：
+	 * 输入：head = [0,1,2], k = 4
+	 * 输出：[2,0,1]
+	 * 提示：
+	 * 链表中节点的数目在范围 [0, 500] 内
+	 * -100 <= Node.val <= 100
+	 * 0 <= k <= 2 * 109
+	 */
+	public static class RotateRight {
+
+		/**
+		 * 个人思路:
+		 * 先要遍历出链表的长度,然后根据k的值,判断需要将最后的k个节点移动到链表的最前面
+		 * 这样需要遍历两次链表
+		 *
+		 * @param head
+		 * @param k
+		 * @return
+		 */
+		public static ListNode rotateRight(ListNode head, int k) {
+			if (head == null || k == 0 || head.next == null) return head;
+			ListNode cur = head;
+			int l = 0;
+			while (cur.next != null) {
+				l++;
+				cur = cur.next;
+			}
+			ListNode tailNode = cur;
+			k = k % (l + 1);
+			if (k == 0) return head;
+			ListNode cur1 = head;
+			int i = l - k;
+			while (i > 0) {
+				cur1 = cur1.next;
+				i--;
+			}
+			// 找到新的头节点
+			ListNode newHead = cur1.next;
+			cur1.next = null;
+			// 重新连接链表
+			tailNode.next = head;
+			return newHead;
+		}
+
+		public static void main(String[] args) {
+			ListNode l1 = new ListNode(1);
+			ListNode l2 = new ListNode(2);
+			ListNode l3 = new ListNode(3);
+			ListNode l4 = new ListNode(4);
+			ListNode l5 = new ListNode(5);
+			l1.next = l2;
+		/*	l2.next = l3;
+			l3.next = l4;
+			l4.next = l5;*/
+			ListNode node = rotateRight(l1, 2);
+			System.out.println();
+		}
+
+	}
+
+	/**
+	 * 146. LRU 缓存
+	 * 请你设计并实现一个满足  LRU (最近最少使用) 缓存 约束的数据结构。
+	 * 实现 LRUCache 类：
+	 * LRUCache(int capacity) 以 正整数 作为容量 capacity 初始化 LRU 缓存
+	 * int get(int key) 如果关键字 key 存在于缓存中，则返回关键字的值，否则返回 -1 。
+	 * void put(int key, int value) 如果关键字 key 已经存在，则变更其数据值 value ；如果不存在，则向缓存中插入该组 key-value 。如果插入操作导致关键字数量超过 capacity ，则应该 逐出 最久未使用的关键字。
+	 * 函数 get 和 put 必须以 O(1) 的平均时间复杂度运行。
+	 * 示例：
+	 * 输入
+	 * ["LRUCache", "put", "put", "get", "put", "get", "put", "get", "get", "get"]
+	 * [[2], [1, 1], [2, 2], [1], [3, 3], [2], [4, 4], [1], [3], [4]]
+	 * 输出
+	 * [null, null, null, 1, null, -1, null, -1, 3, 4]
+	 * 解释
+	 * LRUCache lRUCache = new LRUCache(2);
+	 * lRUCache.put(1, 1); // 缓存是 {1=1}
+	 * lRUCache.put(2, 2); // 缓存是 {1=1, 2=2}
+	 * lRUCache.get(1);    // 返回 1
+	 * lRUCache.put(3, 3); // 该操作会使得关键字 2 作废，缓存是 {1=1, 3=3}
+	 * lRUCache.get(2);    // 返回 -1 (未找到)
+	 * lRUCache.put(4, 4); // 该操作会使得关键字 1 作废，缓存是 {4=4, 3=3}
+	 * lRUCache.get(1);    // 返回 -1 (未找到)
+	 * lRUCache.get(3);    // 返回 3
+	 * lRUCache.get(4);    // 返回 4
+	 * 提示：
+	 * 1 <= capacity <= 3000
+	 * 0 <= key <= 10000
+	 * 0 <= value <= 105
+	 * 最多调用 2 * 105 次 get 和 put
+	 */
+	public static class LRUCache {
+
+		/**
+		 * 本题需要一个HashMap 和双向链表来实现 ;HashMap实现get和put的O(1)
+		 * 双向链表实现缓存淘汰机制
+		 */
+		static class LinkedNode {
+			int key;
+			int val;
+			LinkedNode next;
+			LinkedNode prev;
+
+			public LinkedNode() {
+			}
+
+			public LinkedNode(int key, int val) {
+				this.key = key;
+				this.val = val;
+			}
+		}
+
+		private final Map<Integer, LinkedNode> map = new HashMap<>();
+		private int size;
+		private final int capacity;
+		private final LinkedNode head, tail;  // 头、尾指针
+
+
+		public LRUCache(int capacity) {
+			this.capacity = capacity;
+			this.size = 0;
+			// 初始化头尾指针,伪指针标记界限
+			this.head = new LinkedNode();
+			this.tail = new LinkedNode();
+			this.head.next = this.tail;
+			this.tail.prev = this.head;
+		}
+
+		public int get(int key) {
+			LinkedNode node = map.get(key);
+			if (node == null) return -1;
+			// get操作也会使指定缓存值移动到最前面
+			node.prev.next = node.next;
+			node.next.prev=node.prev;
+			node.next = head.next;
+			head.next.prev=node;
+			head.next = node;
+			node.prev=head;
+			return node.val;
+		}
+
+		public void put(int key, int value) {
+			LinkedNode node;
+			if (map.containsKey(key)) {  // map中存在该key,则节点需要移动到最前面
+				node = map.get(key);
+				node.val = value;
+				node.prev.next = node.next;
+				node.next.prev = node.prev;
+				node.next = head.next;
+				head.next.prev = node;
+				head.next = node;
+				node.prev = head;
+			} else { // map中不存在该key,直接插到头部
+				node = new LinkedNode(key, value);
+				node.next = head.next;
+				head.next.prev = node;
+				head.next = node;
+				node.prev = head;
+				size++;
+				// 超出链表的容量时,同时删除链表尾部节点
+				if (size > capacity) {
+					map.remove(tail.prev.key);
+					tail.prev.prev.next = tail;
+					tail.prev = tail.prev.prev;
+					size--;
+				}
+			}
+			this.map.put(key, node);
+		}
+
+		public static void main(String[] args) {
+			LRUCache cache = new LRUCache(2);
+			cache.put(1, 1);
+			cache.put(2, 2);
+			System.out.println(cache.get(1));
+			cache.put(3, 3);
+			System.out.println(cache.get(2));
+			cache.put(4, 4);
+			System.out.println(cache.get(1));
+			System.out.println(cache.get(3));
+			System.out.println(cache.get(4));
+			System.out.println();
+		}
+	}
 }

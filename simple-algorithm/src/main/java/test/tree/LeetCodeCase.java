@@ -3098,4 +3098,103 @@ public class LeetCodeCase {
 			System.out.println(JSON.toJSONString(map));
 		}
 	}
+
+	/**
+	 * 100. 相同的树
+	 * 给你两棵二叉树的根节点 p 和 q ，编写一个函数来检验这两棵树是否相同。
+	 * 如果两个树在结构上相同，并且节点具有相同的值，则认为它们是相同的。
+	 * 示例 1：
+	 * 输入：p = [1,2,3], q = [1,2,3]
+	 * 输出：true
+	 * 示例 2：
+	 * 输入：p = [1,2], q = [1,null,2]
+	 * 输出：false
+	 * 示例 3：
+	 * 输入：p = [1,2,1], q = [1,1,2]
+	 * 输出：false
+	 * 提示：
+	 * 两棵树上的节点数目都在范围 [0, 100] 内
+	 * -104 <= Node.val <= 104
+	 */
+	public static class IsSameTree {
+
+		/**
+		 * 个人思路：
+		 * 两种方案 1:通过栈,层序遍历,然后对比两棵树是否都一样
+		 * 2:通过递归,深度优先遍历,对比两棵树是否都一样
+		 *
+		 * @param p
+		 * @param q
+		 * @return
+		 */
+		public static boolean isSameTree(TreeNode p, TreeNode q) {
+			if (p == null && q == null) return true;
+			if (p == null || q == null) return false;
+			Deque<TreeNode> a = new LinkedList<>();
+			Deque<TreeNode> b = new LinkedList<>();
+			if (p.val != q.val) return false;
+			a.push(p);
+			b.push(q);
+			while (!a.isEmpty() && !b.isEmpty()) {
+				// 得考虑左右子节点的情况
+				int aSize = a.size();
+				int bSize = b.size();
+				if (aSize != bSize) return false;
+				for (; aSize > 0; aSize--) {
+					TreeNode aCur = a.pollLast();
+					TreeNode bCur = b.pollLast();
+					if (aCur.left != null && bCur.left != null) {
+						if (aCur.left.val != bCur.left.val) return false;
+						a.push(aCur.left);
+						b.push(bCur.left);
+					} else {
+						if (aCur.left != null || bCur.left != null) {
+							return false;
+						}
+					}
+					if (aCur.right != null && bCur.right != null) {
+						if (aCur.right.val != bCur.right.val) return false;
+						a.push(aCur.right);
+						b.push(bCur.right);
+					} else {
+						if (aCur.right != null || bCur.right != null) {
+							return false;
+						}
+					}
+				}
+			}
+			return a.isEmpty() && b.isEmpty();
+		}
+
+		/**
+		 * 递归方式
+		 *
+		 * @param p
+		 * @param q
+		 * @return
+		 */
+		public static boolean isSameTreeI(TreeNode p, TreeNode q) {
+			if (p == null && q == null) return true;
+			if (p == null || q == null) return false;
+			if (p.val != q.val) return false;
+			return isSameTree(p.left, q.left) && isSameTree(p.right, q.right);
+		}
+
+		public static void main(String[] args) {
+			TreeNode node1 = new TreeNode(1);
+			TreeNode node2 = new TreeNode(2);
+			TreeNode node3 = new TreeNode(3);
+			TreeNode node4 = new TreeNode(4);
+			node1.right = node2;
+			/*node1.right = node3;
+			node3.left = node4;*/
+
+			TreeNode node1_1 = new TreeNode(1);
+			TreeNode node2_2 = new TreeNode(2);
+			TreeNode node3_3 = new TreeNode(3);
+			node1_1.left = node2_2;
+			/*node1_1.right = node3_3;*/
+			System.out.println(isSameTreeI(node1, node1_1));
+		}
+	}
 }
