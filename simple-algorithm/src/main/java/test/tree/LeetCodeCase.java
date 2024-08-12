@@ -2502,6 +2502,18 @@ public class LeetCodeCase {
 		}
 
 		/**
+		 * 后序遍历 左-右-根
+		 *
+		 * @param node
+		 */
+		public static void postorder(TreeNode node) {
+			if (node == null) return;
+			postorder(node.left);
+			postorder(node.right);
+			System.out.print(node.val + " ");
+		}
+
+		/**
 		 * 首先拿到这个题后,要求通过一颗树的前序遍历数组和中序遍历数组,来构造出这个树,简直毫无头绪
 		 * 没有头绪的原因是对前序遍历和中序遍历没有深刻的理解,所以首先要分析这两种遍历的特点和规律
 		 * 例如这颗二叉树
@@ -2553,6 +2565,7 @@ public class LeetCodeCase {
 		}
 
 		public static void main(String[] args) {
+
 			// 中序遍历
 			TreeNode n_3 = new TreeNode(3);
 			TreeNode n_9 = new TreeNode(9);
@@ -2574,6 +2587,8 @@ public class LeetCodeCase {
 			inorder(n_3);
 			System.out.println();
 			preorder(n_3);
+			System.out.println();
+			postorder(n_3);
 			System.out.println();
 			TreeNode treeNode = buildTree(new int[]{3, 9, 20, 15, 7}, new int[]{9, 3, 15, 20, 7});
 			System.out.println();
@@ -3195,6 +3210,238 @@ public class LeetCodeCase {
 			node1_1.left = node2_2;
 			/*node1_1.right = node3_3;*/
 			System.out.println(isSameTreeI(node1, node1_1));
+		}
+	}
+
+	/**
+	 * 106. 从中序与后序遍历序列构造二叉树
+	 * 给定两个整数数组 inorder 和 postorder ，其中 inorder 是二叉树的中序遍历， postorder 是同一棵树的后序遍历，请你构造并返回这颗 二叉树 。
+	 * 示例 1:
+	 * 输入：inorder = [9,3,15,20,7], postorder = [9,15,7,20,3]
+	 * 输出：[3,9,20,null,null,15,7]
+	 * 示例 2:
+	 * 输入：inorder = [-1], postorder = [-1]
+	 * 输出：[-1]
+	 * 提示:
+	 * 1 <= inorder.length <= 3000
+	 * postorder.length == inorder.length
+	 * -3000 <= inorder[i], postorder[i] <= 3000
+	 * inorder 和 postorder 都由 不同 的值组成
+	 * postorder 中每一个值都在 inorder 中
+	 * inorder 保证是树的中序遍历
+	 * postorder 保证是树的后序遍历
+	 */
+	public static class BuildTreeI {
+
+		private static Map<Integer, Integer> indexMap;
+
+		/**
+		 * 中序遍历 -> [左树,根,右树]
+		 * 后续遍历 -> [左树,右树,根]
+		 * 通过后续遍历找到根的索引,那么就可以通过中序遍历找到左树和右数的索引范围
+		 *
+		 * @param inorder
+		 * @param postorder
+		 * @return
+		 */
+		public static TreeNode buildTree(int[] inorder, int[] postorder) {
+			indexMap = getIndexMap(inorder);
+			return buildTree(inorder, postorder, 0, inorder.length - 1, 0, postorder.length - 1);
+		}
+
+		public static TreeNode buildTree(int[] inorder, int[] postorder, int is, int ie, int ps, int pe) {
+			if (is > ie) return null;
+			// 找到左树和右树
+			Integer idx = indexMap.get(postorder[pe]);
+			// 构造根节点
+			TreeNode root = new TreeNode(postorder[pe]);
+			// 中序:左树的范围 [s,idx-1] 右数的范围[idx+1,e] 左树的长度为lsize 右树的长度为rsize
+			// 后序:左树的范围 [s1,s1+lsize-1] 右数的范围[s1+lsize,rsize-1]
+			int ls = idx - is, rs = ie - idx;
+			root.left = buildTree(inorder, postorder, is, idx - 1, ps, ps + ls - 1);
+			root.right = buildTree(inorder, postorder, idx + 1, ie, ps + ls, ps + ls + rs - 1);
+			return root;
+		}
+
+		/**
+		 * 因为树的所有节点存储的值都不同,可以使用map存储节点值所对应的索引
+		 */
+		private static Map<Integer, Integer> getIndexMap(int[] inorder) {
+			Map<Integer, Integer> map = new HashMap<>(inorder.length);
+			for (int i = 0; i < inorder.length; i++) {
+				map.put(inorder[i], i);
+			}
+			return map;
+		}
+
+		public static void main(String[] args) {
+			TreeNode treeNode = buildTree(new int[]{9, 3, 15, 20, 7}, new int[]{9, 15, 7, 20, 3});
+			System.out.println();
+		}
+	}
+
+	/**
+	 * 114. 二叉树展开为链表
+	 * 给你二叉树的根结点 root ，请你将它展开为一个单链表：
+	 * 展开后的单链表应该同样使用 TreeNode ，其中 right 子指针指向链表中下一个结点，而左子指针始终为 null 。
+	 * 展开后的单链表应该与二叉树 先序遍历 顺序相同。
+	 * 示例 1：
+	 * 输入：root = [1,2,5,3,4,null,6]
+	 * 输出：[1,null,2,null,3,null,4,null,5,null,6]
+	 * 示例 2：
+	 * 输入：root = []
+	 * 输出：[]
+	 * 示例 3：
+	 * 输入：root = [0]
+	 * 输出：[0]
+	 * 提示：
+	 * 树中结点数在范围 [0, 2000] 内
+	 * -100 <= Node.val <= 100
+	 * 进阶：你可以使用原地算法（O(1) 额外空间）展开这棵树吗？
+	 */
+	public static class Flatten {
+
+		/**
+		 * 个人思路：
+		 * 如果使用额外空间,会比较容易想到
+		 * 1.将先序遍历得到的节点放在集合中,然后构造树;构造树官方思路是通过将子节点连接到根节点上
+		 *
+		 * @param root
+		 */
+		public static void flatten(TreeNode root) {
+			if (root == null || (root.left == null && root.right == null)) return;
+			List<TreeNode> list = new ArrayList<>();
+			inorder(root, list);
+			TreeNode node = list.get(0);
+			for (int i = 1; i < list.size(); i++) {
+				node.right = list.get(i);
+				node.left = null;
+				node = node.right;
+			}
+		}
+
+		private static void inorder(TreeNode root, List<TreeNode> list) {
+			if (root == null) return;
+			list.add(root);
+			inorder(root.left, list);
+			inorder(root.right, list);
+		}
+
+		/**
+		 * 通过迭代模拟先序遍历
+		 * @param root
+		 * @return
+		 */
+		private static List<TreeNode> inorder(TreeNode root) {
+			List<TreeNode> list = new ArrayList<>();
+			if (root == null) return list;
+			Deque<TreeNode> queue = new ArrayDeque<>();
+			// 迭代模式先序遍历,先遍历完所有的左子树,再遍历右子树
+			TreeNode node = root;
+			while (node != null || !queue.isEmpty()) {
+				while (node != null) {
+					queue.push(node);
+					list.add(node);
+					node = node.left;
+				}
+				node = queue.pop();
+				node = node.right;
+			}
+			return list;
+		}
+
+		/**
+		 * 通过迭代模拟先序遍历2
+		 * @param root
+		 * @return
+		 */
+		private static List<TreeNode> inorderI(TreeNode root) {
+			List<TreeNode> list = new ArrayList<>();
+			if (root == null) return list;
+			Deque<TreeNode> queue = new ArrayDeque<>();
+			queue.push(root);
+			while (!queue.isEmpty()) {
+				TreeNode pop = queue.pop();
+				list.add(pop);
+				if (pop.right != null) queue.push(pop.right);
+				if (pop.left != null) queue.push(pop.left);
+			}
+			return list;
+		}
+
+		/**
+		 * 2.通过迭代的方式,而非递归
+		 * @param root
+		 */
+		public static void flattenI(TreeNode root) {
+			List<TreeNode> list = inorder(root);
+			if (list.isEmpty()) return;
+			TreeNode node = list.get(0);
+			for (int i = 1; i < list.size(); i++) {
+				node.right = list.get(i);
+				node.left = null;
+				node = node.right;
+			}
+		}
+
+		/**
+		 * 3.先序遍历的同时,构造成链表;拿到当前节点时需要存储当前节点的左右子节点
+		 * @param root
+		 */
+		public static void flattenOfficial(TreeNode root) {
+			if (root == null) return;
+			Deque<TreeNode> queue = new ArrayDeque<>();
+			queue.push(root);
+			TreeNode prev = null;
+			while (!queue.isEmpty()) {
+				TreeNode node = queue.pop();
+				if (prev != null) {
+					prev.right = node;
+					prev.left = null;
+				}
+				if (node.right != null) queue.push(node.right);
+				if (node.left != null) queue.push(node.left);
+				prev = node;
+			}
+		}
+
+		/**
+		 * 找到当前节点左子树的最右节点,作为前驱节点;当前节点右指针指向其左节点;其右节点指向前面找到的前驱节点
+		 * @param root
+		 */
+		public static void flattenOfficialI(TreeNode root) {
+			while (root != null) {
+				if (root.left == null) {
+					root = root.right;
+				} else {  // 当前节点的左节点不为空
+					// 找到左子树的最右节点
+					TreeNode pre = root.left;
+					while (pre.right != null) {
+						pre = pre.right;
+					}
+					pre.right = root.right;  // 将原找到的左子树最右节点指向当前节点的右节点
+					root.right = root.left;  // 将当前节点右节点指向当前节点的左节点
+					root.left = null;  // 将当前节点的左节点置为空
+				}
+			}
+		}
+
+		public static void main(String[] args) {
+			TreeNode root = new TreeNode(1);
+			TreeNode n2 = new TreeNode(2);
+			TreeNode n3 = new TreeNode(3);
+			TreeNode n4 = new TreeNode(4);
+			TreeNode n5 = new TreeNode(5);
+			TreeNode n6 = new TreeNode(6);
+			root.left = n2;
+			root.right = n5;
+			n2.left = n3;
+			n2.right = n4;
+			n5.right = n6;
+			flattenOfficialI(root);
+			System.out.println();
+
+			//inorder(root);
 		}
 	}
 }
