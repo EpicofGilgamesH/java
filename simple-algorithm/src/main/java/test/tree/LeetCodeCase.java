@@ -1825,6 +1825,72 @@ public class LeetCodeCase {
 			return level;
 		}
 
+		/**
+		 * 发现官方解答更新了
+		 * 1.首先完全二叉树的特性,通过左子节点一直遍历到叶子节点,可以得到树的高度
+		 * 2.得到树的高度h,那么需要确认最后一层节点的个数,范围[2^h-2^(h+1)-1]
+		 * 3.通过二分来确认范围的值,每次减少一半的区间
+		 * 4.指定最后一层的节点序列,如何得知其是否存在呢?我们需要知道它从根节点到最后一层的左右节点指向。
+		 * 例如h=3,那么最后一层节点序列为[8...15] 二进制表位为
+		 * *  8     9   10   11   12   13   14   15
+		 * * 1000 1001 1010 1011 1100 1101 1110 1111
+		 * 所以可以得知根节点为1,其后每一位0代表向左节点,1代表向右节点
+		 * <p>
+		 * [二分查找]范例
+		 *
+		 * @param root
+		 * @return
+		 */
+		public static int countNodesOfficialI(TreeNode root) {
+			if (root == null) return 0;
+			TreeNode node = root;
+			int h = 0;
+			while (node.left != null) {
+				node = node.left;
+				h++;
+			}
+			// 最后一层节点范围[2^h...2^(h+1)-1]
+			// 二分技巧,要找到最有一个存在的节点,那么如果当前节点存在,则起始位置s=pos;当不存在时结束位置e=pos-1
+			// 当s=e时,说明s位置存在,s+1位置不存在,所以返回s位置
+			// 还要注意选取中间位置的计算,需要取中间值+1,否则会进入死循环
+			int s = 1 << h, e = (s << 1) - 1;
+			while (s < e) {
+				int pos = s + (e - s + 1) / 2;
+				boolean exist = isExist(root, pos, h);
+				if (exist) {
+					s = pos;
+				} else {
+					e = pos - 1;
+				}
+			}
+			return s;
+		}
+
+		/**
+		 * 得到pos的二进制位上某一位是否为0 即与上这一位是1的二进制位
+		 * 例如 pos=7; 二进制位: 111
+		 * 则需要 与上           010  得到其第二位的值
+		 * 再    与上            001 得到其第三位的值
+		 *
+		 * @param root
+		 * @param pos
+		 * @param h
+		 * @return
+		 */
+		private static boolean isExist(TreeNode root, int pos, int h) {
+			TreeNode node = root;
+			int bit = 1 << (h - 1);
+			while (node != null && bit > 0) {
+				if ((pos & bit) == 0) {
+					node = node.left;
+				} else {
+					node = node.right;
+				}
+				bit = bit >> 1;
+			}
+			return node != null;
+		}
+
 		public static void main(String[] args) {
 			TreeNode n1 = new TreeNode(1);
 			TreeNode n2 = new TreeNode(2);
@@ -1837,8 +1903,8 @@ public class LeetCodeCase {
 			n2.left = n4;
 			n2.right = n5;
 			n3.left = n6;
-			int i = countNodesOfficial(n1);
-			System.out.println(i);
+			System.out.println(countNodesOfficial(n1));
+			System.out.println(countNodesOfficialI(n1));
 		}
 	}
 
@@ -3406,7 +3472,7 @@ public class LeetCodeCase {
 		}
 
 		/**
-		 * 找到当前节点左子树的最右节点,作为前驱节点;当前节点右指针指向其左节点;其右节点指向前面找到的前驱节点
+		 * 4.找到当前节点左子树的最右节点,作为前驱节点;当前节点右指针指向其左节点;其右节点指向前面找到的前驱节点
 		 * @param root
 		 */
 		public static void flattenOfficialI(TreeNode root) {
@@ -3426,6 +3492,24 @@ public class LeetCodeCase {
 			}
 		}
 
+		private static TreeNode prev;
+
+		/**
+		 * 后续遍历 [左树,右树,根]
+		 * 在遍历到根时,一定是先遍历了左树和右树了.此时把左节点放在有节点指针上,然后把左节点置为空
+		 *
+		 * @param root
+		 */
+		public static void flattenII(TreeNode root) {
+			if (root == null) return;
+			flattenII(root.right);
+			flattenII(root.left);
+			// 定义一个前驱节点全部变量,更新当前节点右指针为prev,左指针为null
+			root.right = prev;
+			root.left = null;
+			prev = root;
+		}
+
 		public static void main(String[] args) {
 			TreeNode root = new TreeNode(1);
 			TreeNode n2 = new TreeNode(2);
@@ -3438,10 +3522,703 @@ public class LeetCodeCase {
 			n2.left = n3;
 			n2.right = n4;
 			n5.right = n6;
-			flattenOfficialI(root);
+			flattenII(root);
 			System.out.println();
 
 			//inorder(root);
+		}
+	}
+
+	/**
+	 * 112. 路径总和
+	 * 给你二叉树的根节点 root 和一个表示目标和的整数 targetSum 。判断该树中是否存在 根节点到叶子节点 的路径，这条路径上所有节点值相加等于目标和 targetSum 。
+	 * 如果存在，返回 true ；否则，返回 false 。
+	 * 叶子节点 是指没有子节点的节点。
+	 * 示例 1：
+	 * 输入：root = [5,4,8,11,null,13,4,7,2,null,null,null,1], targetSum = 22
+	 * 输出：true
+	 * 解释：等于目标和的根节点到叶节点路径如上图所示。
+	 * 示例 2：
+	 * 输入：root = [1,2,3], targetSum = 5
+	 * 输出：false
+	 * 解释：树中存在两条根节点到叶子节点的路径：
+	 * (1 --> 2): 和为 3
+	 * (1 --> 3): 和为 4
+	 * 不存在 sum = 5 的根节点到叶子节点的路径。
+	 * 示例 3：
+	 * 输入：root = [], targetSum = 0
+	 * 输出：false
+	 * 解释：由于树是空的，所以不存在根节点到叶子节点的路径。
+	 * 提示：
+	 * 树中节点的数目在范围 [0, 5000] 内
+	 * -1000 <= Node.val <= 1000
+	 * -1000 <= targetSum <= 1000
+	 */
+	public static class HasPathSum {
+
+		private static boolean flag = false;
+
+		/**
+		 * dfs
+		 * 回溯记录路径数据,当遍历到叶子节点时,计算路径是否等于targetSum
+		 * 首先回顾下二叉树遍历的路径,打印出路径
+		 *
+		 * @param root
+		 * @param targetSum
+		 * @return
+		 */
+		public static boolean hasPathSum(TreeNode root, int targetSum) {
+			if (root == null) return false
+					;
+			Deque<Integer> depth = new LinkedList<>();
+			depth.addLast(root.val);
+			dfs(root, targetSum - root.val, depth);
+			return flag;
+		}
+
+		/**
+		 * 二叉树深度优先遍历,路径回溯  找到符合条件的结果后,还会继续遍历知道树遍历完成
+		 *
+		 * @param node
+		 * @param sum
+		 * @param depth
+		 */
+		private static void dfs(TreeNode node, int sum, Deque<Integer> depth) {
+			if (node.left == null && node.right == null) {  // 叶子节点
+				if (sum == 0) {
+					flag = true;
+					printfPath(depth);
+					return;
+				}
+			}
+			if (node.left != null) {
+				depth.addLast(node.left.val);
+				dfs(node.left, sum - node.left.val, depth);
+				depth.removeLast();
+			}
+			if (node.right != null) {
+				depth.addLast(node.right.val);
+				dfs(node.right, sum - node.right.val, depth);
+				depth.removeLast();
+			}
+		}
+
+		/**
+		 * 不需要得到遍历路径,只计算路径上的值
+		 *
+		 * @param root
+		 * @param targetSum
+		 * @return
+		 */
+		public static boolean hasPathSumI(TreeNode root, int targetSum) {
+			if (root == null) return false;
+			dfs1(root, targetSum - root.val);
+			return flag;
+		}
+
+		/**
+		 * 计算路径上的节点值总和时为什么不需要回溯呢?
+		 * 因为递归每次进入一个新的方法时,其方法栈中都会保存一个sum变量当回到上一个方法栈时,sum中存储的是上一个方法栈中的sum变量值
+		 *
+		 * @param node
+		 * @param sum
+		 */
+		private static void dfs1(TreeNode node, int sum) {
+			if (node.left == null && node.right == null) {
+				if (sum == 0) {
+					flag = true;
+					return;
+				}
+			}
+			if (node.left != null) {
+				dfs1(node.left, sum - node.left.val);
+			}
+			if (node.right != null) {
+				dfs1(node.right, sum - node.right.val);
+			}
+		}
+
+		private static void printfPath(Deque<Integer> depth) {
+			Deque<Integer> path = new ArrayDeque<>(depth);
+			StringBuilder sb = new StringBuilder();
+			while (!path.isEmpty()) {
+				sb.append(path.pollFirst()).append("->");
+			}
+			System.out.println(sb.substring(0, sb.length() - 2));
+		}
+
+		/**
+		 * bfs思路,层序遍历的同时记录从根节点到当前节点的总和,当遍历到叶子节点时,计算值是否相等
+		 * 关键点在于分层遍历时,在栈中保存节点的同时保存这个节点经历的路径和;弹出和压入保持 [一致性].
+		 * 这样,遍历到叶子节点时,当前保存路路径和的栈,也始终同步
+		 *
+		 * @param root
+		 * @param targetSum
+		 * @return
+		 */
+		public static boolean hasPathSumII(TreeNode root, int targetSum) {
+			if (root == null) return false;
+			Deque<TreeNode> deque = new LinkedList<>();  // 遍历节点
+			Deque<Integer> sum = new LinkedList<>(); // 存放节点路径和
+			sum.push(root.val);
+			deque.push(root);
+			while (!deque.isEmpty()) {
+				int size = deque.size();
+				for (; size > 0; size--) {
+					// 节点的弹出和节点和的弹出保持一致性
+					TreeNode cur = deque.pollLast();
+					int v = sum.pollLast();
+					if (cur.left != null) {
+						deque.push(cur.left);
+						sum.push(cur.left.val + v);
+					}
+					if (cur.right != null) {
+						deque.push(cur.right);
+						sum.push(cur.right.val + v);
+					}
+					if (cur.left == null && cur.right == null) {
+						if (targetSum == v) {
+							return true;
+						}
+					}
+				}
+			}
+			return false;
+		}
+
+		public static void main(String[] args) {
+			TreeNode root = new TreeNode(5);
+			TreeNode n4 = new TreeNode(4);
+			TreeNode n11 = new TreeNode(11);
+			TreeNode n7 = new TreeNode(7);
+			TreeNode n2 = new TreeNode(2);
+			TreeNode n8 = new TreeNode(8);
+			TreeNode n13 = new TreeNode(13);
+			TreeNode n4_1 = new TreeNode(4);
+			TreeNode n1 = new TreeNode(1);
+			root.left = n4;
+			root.right = n8;
+			n4.left = n11;
+			n11.left = n7;
+			n11.right = n2;
+			n8.left = n13;
+			n8.right = n4_1;
+			n4_1.right = n1;
+			boolean b = hasPathSumII(root, 22);
+			System.out.println(b);
+		}
+	}
+
+	/**
+	 * 129. 求根节点到叶节点数字之和
+	 * 给你一个二叉树的根节点 root ，树中每个节点都存放有一个 0 到 9 之间的数字。
+	 * 每条从根节点到叶节点的路径都代表一个数字：
+	 * 例如，从根节点到叶节点的路径 1 -> 2 -> 3 表示数字 123 。
+	 * 计算从根节点到叶节点生成的 所有数字之和 。
+	 * 叶节点 是指没有子节点的节点。
+	 * 示例 1：
+	 * 输入：root = [1,2,3]
+	 * 输出：25
+	 * 解释：
+	 * 从根到叶子节点路径 1->2 代表数字 12
+	 * 从根到叶子节点路径 1->3 代表数字 13
+	 * 因此，数字总和 = 12 + 13 = 25
+	 * 示例 2：
+	 * 输入：root = [4,9,0,5,1]
+	 * 输出：1026
+	 * 解释：
+	 * 从根到叶子节点路径 4->9->5 代表数字 495
+	 * 从根到叶子节点路径 4->9->1 代表数字 491
+	 * 从根到叶子节点路径 4->0 代表数字 40
+	 * 因此，数字总和 = 495 + 491 + 40 = 1026
+	 * 提示：
+	 * 树中节点的数目在范围 [1, 1000] 内
+	 * 0 <= Node.val <= 9
+	 * 树的深度不超过 10
+	 */
+	public static class SumNumbers {
+
+		private static int total = 0;
+
+		/**
+		 * dfs
+		 *
+		 * @param root
+		 * @return
+		 */
+		public static int sumNumbers(TreeNode root) {
+			dfs(root, root.val);
+			return total;
+		}
+
+		/**
+		 * dfs 到叶子节点计算值
+		 *
+		 * @param node
+		 * @param sum
+		 * @return
+		 */
+		private static void dfs(TreeNode node, int sum) {
+			if (node.left != null) dfs(node.left, sum * 10 + node.left.val);
+			if (node.right != null) dfs(node.right, sum * 10 + node.right.val);
+			if (node.left == null && node.right == null) {
+				total += sum;
+			}
+		}
+
+		/**
+		 * bfs 层序遍历,同步保存节点值在栈中
+		 *
+		 * @param root
+		 * @return
+		 */
+		public static int sumNumbersI(TreeNode root) {
+			int total1 = 0;
+			Deque<TreeNode> deque = new LinkedList<>();
+			Deque<Integer> sum = new LinkedList<>();
+			deque.addFirst(root);
+			sum.addFirst(root.val);
+			while (!deque.isEmpty()) {
+				int size = deque.size();
+				for (; size > 0; size--) {
+					TreeNode cur = deque.pollLast();
+					int v = sum.pollLast();
+					if (cur.left != null) {
+						deque.addFirst(cur.left);
+						sum.addFirst(v * 10 + cur.left.val);
+					}
+					if (cur.right != null) {
+						deque.addFirst(cur.right);
+						sum.addFirst(v * 10 + cur.right.val);
+					}
+					if (cur.left == null && cur.right == null) {
+						total1 += v;
+					}
+				}
+			}
+			return total1;
+		}
+
+		public static void main(String[] args) {
+			TreeNode root = new TreeNode(4);
+			TreeNode n9 = new TreeNode(9);
+			TreeNode n0 = new TreeNode(0);
+			TreeNode n5 = new TreeNode(5);
+			TreeNode n1 = new TreeNode(1);
+			root.left = n9;
+			root.right = n0;
+			n9.left = n5;
+			n9.right = n1;
+			int i = sumNumbersI(root);
+			System.out.println(i);
+		}
+	}
+
+	/**
+	 * 124. 二叉树中的最大路径和
+	 * 二叉树中的 路径 被定义为一条节点序列，序列中每对相邻节点之间都存在一条边。同一个节点在一条路径序列中 至多出现一次 。该路径 至少包含一个 节点，且不一定经过根节点。
+	 * 路径和 是路径中各节点值的总和。
+	 * 给你一个二叉树的根节点 root ，返回其 最大路径和 。
+	 * 示例 1：
+	 * 输入：root = [1,2,3]
+	 * 输出：6
+	 * 解释：最优路径是 2 -> 1 -> 3 ，路径和为 2 + 1 + 3 = 6
+	 * 示例 2：
+	 * 输入：root = [-10,9,20,null,null,15,7]
+	 * 输出：42
+	 * 解释：最优路径是 15 -> 20 -> 7 ，路径和为 15 + 20 + 7 = 42
+	 * 提示：
+	 * 树中节点数目范围是 [1, 3 * 104]
+	 * -1000 <= Node.val <= 1000
+	 */
+	public static class MaxPathSum {
+
+		/**
+		 * 本题的关键点在于,dfs深度优先遍历,怎么样才能找到最大的路径呢?
+		 * 首先需要引入一个概念:节点的贡献值
+		 * 1.叶子节点的贡献值为其本身的值
+		 * 2.非叶子节点的最大贡献值为 v+max(left,right)
+		 * 3.经过当前节点的最大路径和 就是v+left+right
+		 * <p>
+		 * 有这个概念后,思路将为很清晰,我们需要先遍历叶子节点,然后遍历根节点,(后序遍历)这样就可以计算出所有节点的贡献值
+		 * 然后比较每个节点的贡献值,就可得出最优路径值
+		 *
+		 * @param root
+		 * @return
+		 */
+		public static int maxPathSum(TreeNode root) {
+			dfs(root);
+			return sum;
+		}
+
+		private static int sum = Integer.MIN_VALUE;
+
+		/**
+		 * 思路存在问题,重复计算的节点的贡献值
+		 *
+		 * @param node
+		 * @return
+		 */
+		@Deprecated
+		private static int dfs(TreeNode node) {
+			if (node.left == null && node.right == null) return node.val;
+			int lv = Integer.MIN_VALUE, rv = Integer.MIN_VALUE, cv;
+			if (node.left != null) lv = dfs(node.left);
+			if (node.right != null) rv = dfs(node.right);
+			if (node.val >= 0) {
+				// 当前节点值>0 ,左右子节点贡献值都>0   都<0
+				if (lv >= 0 & rv >= 0) {
+					cv = node.val + lv + rv;
+				} else if (lv < 0 && rv < 0) {
+					cv = node.val;
+				} else {  // 有一个小于0
+					cv = node.val + Math.max(lv, rv);
+				}
+			} else {
+				cv = Math.max(Math.max(lv, rv), node.val);
+			}
+			sum = Math.max(sum, cv);
+			return cv;
+		}
+
+		private static int dfsOfficial(TreeNode node) {
+			if (node == null) return 0;
+			// 当左右节点的贡献值大于0时,才选取对应的子节点
+			int lv = Math.max(dfsOfficial(node.left), 0);
+			int rv = Math.max(dfsOfficial(node.right), 0);
+			// 当前节点的贡献值
+			int price = node.val + lv + rv;
+			sum = Math.max(price, sum);
+			return node.val + Math.max(lv, rv);
+		}
+
+		public static void main(String[] args) {
+			TreeNode root = new TreeNode(1);
+			TreeNode n9 = new TreeNode(-2);
+			TreeNode n20 = new TreeNode(-3);
+			TreeNode n15 = new TreeNode(1);
+			TreeNode n7 = new TreeNode(3);
+			TreeNode n8 = new TreeNode(-1);
+			TreeNode n10 = new TreeNode(-1);
+			root.left = n9;
+			root.right = n20;
+			n9.left = n15;
+			n9.right = n7;
+			n15.left = n8;
+			n20.left = n10;
+			int i = maxPathSum(root);
+			System.out.println(i);
+		}
+	}
+
+	/**
+	 * 173. 二叉搜索树迭代器
+	 * 实现一个二叉搜索树迭代器类BSTIterator ，表示一个按中序遍历二叉搜索树（BST）的迭代器：
+	 * BSTIterator(TreeNode root) 初始化 BSTIterator 类的一个对象。BST 的根节点 root 会作为构造函数的一部分给出。
+	 * 指针应初始化为一个不存在于 BST 中的数字，且该数字小于 BST 中的任何元素。
+	 * boolean hasNext() 如果向指针右侧遍历存在数字，则返回 true ；否则返回 false 。
+	 * int next()将指针向右移动，然后返回指针处的数字。
+	 * 注意，指针初始化为一个不存在于 BST 中的数字，所以对 next() 的首次调用将返回 BST 中的最小元素。
+	 * 你可以假设 next() 调用总是有效的，也就是说，当调用 next() 时，BST 的中序遍历中至少存在一个下一个数字。
+	 * 示例：
+	 * 输入
+	 * ["BSTIterator", "next", "next", "hasNext", "next", "hasNext", "next", "hasNext", "next", "hasNext"]
+	 * [[[7, 3, 15, null, null, 9, 20]], [], [], [], [], [], [], [], [], []]
+	 * 输出
+	 * [null, 3, 7, true, 9, true, 15, true, 20, false]
+	 * 解释
+	 * BSTIterator bSTIterator = new BSTIterator([7, 3, 15, null, null, 9, 20]);
+	 * bSTIterator.next();    // 返回 3
+	 * bSTIterator.next();    // 返回 7
+	 * bSTIterator.hasNext(); // 返回 True
+	 * bSTIterator.next();    // 返回 9
+	 * bSTIterator.hasNext(); // 返回 True
+	 * bSTIterator.next();    // 返回 15
+	 * bSTIterator.hasNext(); // 返回 True
+	 * bSTIterator.next();    // 返回 20
+	 * bSTIterator.hasNext(); // 返回 False
+	 * 提示：
+	 * 树中节点的数目在范围 [1, 105] 内
+	 * 0 <= Node.val <= 106
+	 * 最多调用 105 次 hasNext 和 next 操作
+	 * 进阶：
+	 * 你可以设计一个满足下述条件的解决方案吗？next() 和 hasNext() 操作均摊时间复杂度为 O(1) ，并使用 O(h) 内存。其中 h 是树的高度。
+	 */
+	public static class BSTIterator {
+
+		private int idx;
+		private List<Integer> list;
+
+		/**
+		 * 非进阶的情况下,将树进行中序遍历,存放在List中
+		 * 时间复杂度: next(),hasNext() 为O(1)  初始化为O(n)
+		 * 空间复杂度: O(n)
+		 *
+		 * @param root
+		 */
+		public BSTIterator(TreeNode root) {
+			list = new ArrayList<>();
+			inorder(root);
+			idx = 0;
+		}
+
+		public int next() {
+			return list.get(idx++);
+		}
+
+		public boolean hasNext() {
+			return idx < list.size();
+		}
+
+		private void inorder(TreeNode root) {
+			if (root == null) return;
+			inorder(root.left);
+			list.add(root.val);
+			inorder(root.right);
+		}
+
+		public static void main(String[] args) {
+			TreeNode n7 = new TreeNode(7);
+			TreeNode n3 = new TreeNode(3);
+			TreeNode n15 = new TreeNode(15);
+			TreeNode n9 = new TreeNode(9);
+			TreeNode n20 = new TreeNode(20);
+			n7.left = n3;
+			n7.right = n15;
+			n15.left = n9;
+			n15.right = n20;
+			BSTIterator bstIterator = new BSTIterator(n7);
+			System.out.println(bstIterator.next());
+			System.out.println(bstIterator.next());
+			System.out.println(bstIterator.hasNext());
+			System.out.println(bstIterator.next());
+			System.out.println(bstIterator.hasNext());
+			System.out.println(bstIterator.next());
+			System.out.println(bstIterator.hasNext());
+			System.out.println(bstIterator.next());
+			System.out.println(bstIterator.hasNext());
+		}
+	}
+
+	/**
+	 * 迭代方式,做中序遍历
+	 */
+	public static class BSTIteratorI {
+
+		private TreeNode cur;
+		private Deque<TreeNode> stack;
+
+
+		public BSTIteratorI(TreeNode root) {
+			cur = root;
+			stack = new LinkedList<>();
+		}
+
+		public int next() {
+			while (cur != null) {
+				stack.push(cur);
+				cur = cur.left;
+			}
+			cur = stack.poll();
+			int val = cur.val;
+			cur = cur.right;
+			return val;
+		}
+
+		public boolean hasNext() {
+			return cur != null || !stack.isEmpty();
+		}
+	}
+
+	/**
+	 * 530. 二叉搜索树的最小绝对差
+	 * 给你一个二叉搜索树的根节点 root ，返回 树中任意两不同节点值之间的最小差值 。
+	 * 差值是一个正数，其数值等于两值之差的绝对值。
+	 * 示例 1：
+	 * 输入：root = [4,2,6,1,3]
+	 * 输出：1
+	 * 示例 2：
+	 * 输入：root = [1,0,48,null,null,12,49]
+	 * 输出：1
+	 * 提示：
+	 * 树中节点的数目范围是 [2, 104]
+	 * 0 <= Node.val <= 105
+	 */
+	public static class GetMinimumDifference {
+
+		private static int val = Integer.MAX_VALUE;
+		private static int pre = Integer.MAX_VALUE;
+
+		private static int preI = -1;
+
+		public static int getMinimumDifference(TreeNode root) {
+			dfs(root);
+			return val;
+		}
+
+		/**
+		 * 搜索二叉树特性,左树所有节点值小于根节点 右树所有节点值大于根节点
+		 * 那么最小的节点差值应该是在一个节点与其左右子节点中产生 错误**********************
+		 * 举例说明
+		 * *        236
+		 * *        / \
+		 * *      104  701
+		 * *       \     \
+		 * *       227   911
+		 * 两个节点间最小差 (236,227) 他们并不是一个根节点的左右子节点
+		 * 那么最小的差值是产生在哪里呢?
+		 * 理解搜索二叉树的特性,中序遍历后,节点值递增,那么只需要比较相邻两个节点的差值即可以找到最小差值
+		 *
+		 * @param root
+		 */
+		private static void dfs(TreeNode root) {
+			if (root.left != null) dfs(root.left);
+			val = Math.min(Math.abs(pre - root.val), val);
+			pre = root.val;
+			if (root.right != null) dfs(root.right);
+		}
+
+		public static int getMinimumDifferenceI(TreeNode root) {
+			dfsI(root);
+			return val;
+		}
+
+		private static void dfsI(TreeNode node) {
+			if (node != null) {
+				dfsI(node.left);
+				val = Math.min(Math.abs(pre - node.val), val);  // 此处可以不用abs,因为二叉搜索树中序遍历后是升序的
+				pre = node.val;
+				dfsI(node.right);
+			}
+		}
+
+		private static void dfsII(TreeNode node) {
+			if (node != null) {
+				dfsI(node.left);
+				if (pre == -1) {
+					pre = node.val;
+				} else {
+					val = Math.min(node.val - pre, val);
+					pre = node.val;
+				}
+				dfsI(node.right);
+			}
+		}
+
+		public static void main(String[] args) {
+			TreeNode n1 = new TreeNode(236);
+			TreeNode n2 = new TreeNode(104);
+			TreeNode n3 = new TreeNode(701);
+			TreeNode n4 = new TreeNode(227);
+			TreeNode n5 = new TreeNode(911);
+
+			n1.left = n2;
+			n1.right = n3;
+			n2.right = n4;
+			n3.right = n5;
+			System.out.println(getMinimumDifference(n1));
+		}
+	}
+
+	/**
+	 * 98. 验证二叉搜索树
+	 * 给你一个二叉树的根节点 root ，判断其是否是一个有效的二叉搜索树。
+	 * 有效 二叉搜索树定义如下：
+	 * 节点的左
+	 * 子树
+	 * 只包含 小于 当前节点的数。
+	 * 节点的右子树只包含 大于 当前节点的数。
+	 * 所有左子树和右子树自身必须也是二叉搜索树。
+	 * 示例 1：
+	 * 输入：root = [2,1,3]
+	 * 输出：true
+	 * 示例 2：
+	 * 输入：root = [5,1,4,null,null,3,6]
+	 * 输出：false
+	 * 解释：根节点的值是 5 ，但是右子节点的值是 4 。
+	 * 提示：
+	 * 树中节点数目范围在[1, 104] 内
+	 * -231 <= Node.val <= 231 - 1
+	 */
+	public static class IsValidBST {
+
+		private static Integer pre;
+		private static boolean flag = true;
+
+		/**
+		 * 验证搜索二叉树中序遍历是递增序列即可
+		 * @param root
+		 * @return
+		 */
+		public static boolean isValidBST(TreeNode root) {
+			dfs(root);
+			return flag;
+		}
+
+		private static void dfs(TreeNode node) {
+			if (node == null) return;
+			dfs(node.left);
+			if (pre == null) {
+				pre = node.val;
+			} else {
+				if (pre >= node.val) {
+					flag = false;
+					return;
+				}
+				pre = node.val;
+			}
+			System.out.println(node.val);
+			dfs(node.right);
+		}
+
+		public static boolean isValidBSTI(TreeNode root) {
+			return isValidBST(root, Long.MIN_VALUE, Long.MAX_VALUE);
+		}
+
+		private static boolean isValidBST(TreeNode node, long lower, long upper) {
+			if (node == null) return true;
+			if (node.val <= lower || node.val >= upper) return false;
+			return isValidBST(node.left, lower, node.val) && isValidBST(node.right, node.val, upper);
+		}
+
+		/**
+		 * 迭代中序遍历
+		 * @param root
+		 * @return
+		 */
+		public static boolean isValidBSTII(TreeNode root) {
+			Deque<TreeNode> stack = new LinkedList<>();
+			while (!stack.isEmpty() || root != null) {
+				while (root != null) {  // 一直到最左的左节点
+					stack.push(root);
+					root = root.left;
+				}
+				root = stack.pop();
+				// 中序遍历中进行比较
+				if (pre == null) {
+					pre = root.val;
+				} else {
+					if (pre >= root.val) {
+						return false;
+					}
+					pre = root.val;
+				}
+				root = root.right;
+			}
+			return true;
+		}
+
+		public static void main(String[] args) {
+			TreeNode n5 = new TreeNode(5);
+			TreeNode n1 = new TreeNode(1);
+			TreeNode n4 = new TreeNode(4);
+			TreeNode n3=new TreeNode(3);
+			TreeNode n6=new TreeNode(6);
+			n5.left=n1;
+			n5.right=n4;
+			n4.left=n3;
+			n4.right=n6;
+			System.out.println(isValidBST(n5));
 		}
 	}
 }
