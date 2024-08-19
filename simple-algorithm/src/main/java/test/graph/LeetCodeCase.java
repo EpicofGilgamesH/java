@@ -1,5 +1,7 @@
 package test.graph;
 
+import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
+
 import java.util.*;
 
 /**
@@ -190,6 +192,238 @@ public class LeetCodeCase {
 			n4.neighbors.add(n3);
 			Node node = cloneGraphI(n1);
 			System.out.println();
+		}
+	}
+
+	/**
+	 * 399. 除法求值
+	 */
+	public static class CalcEquation {
+
+		static class Pair {
+			int index;
+			double value;
+
+			Pair(int index, double value) {
+				this.index = index;
+				this.value = value;
+			}
+		}
+
+		/**
+		 * 本题看了解题还是觉得很难写出来代码
+		 * 思路是构建有权向量图
+		 *
+		 * @param equations
+		 * @param values
+		 * @param queries
+		 * @return
+		 */
+		public static double[] calcEquation(List<List<String>> equations, double[] values, List<List<String>> queries) {
+			int nvars = 0;
+			Map<String, Integer> variables = new HashMap<>();
+			int n = equations.size();
+			for (int i = 0; i < n; i++) {
+				if (!variables.containsKey(equations.get(i).get(0))) {
+					variables.put(equations.get(i).get(0), nvars++);
+				}
+				if (!variables.containsKey(equations.get(i).get(1))) {
+					variables.put(equations.get(i).get(1), nvars++);
+				}
+			}
+			// 对每个节点构建权重值
+			List<Pair>[] edges = new List[nvars];
+			for (int i = 0; i < nvars; i++) {
+				edges[i] = new ArrayList<>();
+			}
+			// 对于每个节点构建有序权重向量图
+			for (int i = 0; i < n; i++) {
+				int va = variables.get(equations.get(i).get(0)), vb = variables.get(equations.get(i).get(1));
+				edges[va].add(new Pair(vb, values[i]));
+				edges[vb].add(new Pair(va, 1.0 / values[i]));
+			}
+			int queriesCount = queries.size();
+			double[] ret = new double[queriesCount];
+			for (int i = 0; i < queriesCount; i++) {
+				List<String> query = queries.get(i);
+				double result = -1.0;
+				if (variables.containsKey(query.get(0)) && variables.containsKey(query.get(1))) {
+					int ia = variables.get(query.get(0)), ib = variables.get(query.get(1));
+					if (ia == ib) {  // 同一个节点
+						result = 1.0;
+					} else {
+						Queue<Integer> points = new LinkedList<>();
+						points.offer(ia);
+						double[] ratios = new double[nvars];
+						Arrays.fill(ratios, -1.0);
+						ratios[ia] = 1.0;
+						while (!points.isEmpty() && ratios[ib] < 0) {
+							int x = points.poll();
+							for (Pair pair : edges[x]) {
+								int y = pair.index;
+								double val = pair.value;
+								if (ratios[y] < 0) {
+									ratios[y] = ratios[x] * val;
+									points.offer(y);
+								}
+							}
+						}
+						result = ratios[ib];
+					}
+				}
+				ret[i] = result;
+			}
+			return ret;
+		}
+	}
+
+	/**
+	 * 210. 课程表 II
+	 */
+	public static class FindOrder {
+
+		/**
+		 * 广度优先遍历-构建拓扑图并记录入度值
+		 * 1.如果A->B 学习A课程必须先学习B课程,那A有一条有向边指向B;且B的入度+1;这样做的原因是 有一个特性,当课程入度为0时,说明其没有
+		 * 前置的学习条件,那么它就可以学习了
+		 * 2.如何简单的构造拓扑图、记录入度数呢?   --这个是比较没有头绪的一个点
+		 * 按照一般的思路,创建一个节点对象Node,其有课程名、有向边集合、入度值这三个成员;
+		 * 但是本题课程为数字,且为包含0的正整数,可以使用索引下标来标记课程名;所以可以用List<List<>>结构
+		 * 此时入度但是用int[]数组来存放,同样使用索引下标来标记课程名;
+		 * 3.如何找出课程的安排序列呢?
+		 * 特性:入度为0的课程即可以直接学习的课程.
+		 * * 1)首先找出所有入度为0的课程,放入队列中;
+		 * * 2)每次出队一个课程X,相当于安排该课程进行学习;找到X的有向边,将其入度-1(当X被安排后,X的有向边所指的课程入度都会-1)
+		 * *   此时如有其有向边入度为0了,说明其下一步可以被安排,将其放入队列中;
+		 * *   如果其有向边入度都不为0;X课程处理完
+		 * * 3)当队列中的节点处理完,但已安排的课程数量不等于总的课程数量,说明拓扑图存在环,有课程永远也没法安排
+		 *
+		 * @param numCourses
+		 * @param prerequisites
+		 * @return
+		 */
+		public static int[] findOrder(int numCourses, int[][] prerequisites) {
+			// 拓扑图
+			List<List<Integer>> topology = new ArrayList<>();
+			// 存储每个节点的入度
+			int[] degrees = new int[numCourses];
+			// 存储节点序列答案
+			int[] result = new int[numCourses];
+			// 答案数组的当前下标序列
+			int idx = 0;
+			for (int i = 0; i < numCourses; i++) {
+				topology.add(new ArrayList<>());
+			}
+			for (int i = 0; i < prerequisites.length; i++) {
+				topology.get(prerequisites[i][1]).add(prerequisites[i][0]);
+				++degrees[prerequisites[i][0]];
+			}
+			Deque<Integer> deque = new LinkedList<>();
+			// 将入度为0的节点放入队列中
+			for (int i = 0; i < degrees.length; i++) {
+				if (degrees[i] == 0) deque.offer(i);
+			}
+			while (!deque.isEmpty()) {
+				Integer cur = deque.poll();
+				// 出队的节点放入答案中
+				result[idx++] = cur;
+				// 将其有向边的入度-1
+				List<Integer> sides = topology.get(cur);
+				for (int side : sides) {
+					if (--degrees[side] == 0) {
+						deque.offer(side);
+					}
+				}
+			}
+			// 当处理完后,以安排的节点数量不等于总课程数量,说明拓扑图存在环,有课程没法安排
+			if (idx != numCourses) {
+				return new int[0];
+			}
+			return result;
+		}
+
+		// 有向图
+		private static List<List<Integer>> edges;
+		// 标记每个节点的状态:0=未搜索 1=搜索中 2=已完成
+		private static int[] visited;
+		// 数组模拟队列 idx=0 为栈顶 idx=n-1为栈底
+		private static int[] result;
+		// 有向图是否存在环
+		private static boolean valid = true;
+		// result模拟栈的下标
+		private static int index;
+
+		/**
+		 * 深度优先遍历-拓扑图
+		 * 相当于广度优先遍历来说,深度优先遍历更像一种逆向的解决思路;总是找到最深的一个节点,然后回溯回来
+		 * 对于任意个节点,搜索过程中有三种状态
+		 * 1.未搜索:还没有搜索到这个节点
+		 * 2.搜索中:搜索过这个节点,但还没回溯到该节点,该节点还未入栈,存在相邻的节点没有所有完成
+		 * 3.已完成:搜索过且已回溯过这个节点,该节点已入栈,并且所有该节点的相邻节点出现在站的更底部的位置,满足拓扑排序的要求.
+		 * 搜索流程:
+		 * 1.将当前搜索的节点u标记为[搜索中],遍历该节点的每一个相邻节点v;
+		 * * 1)如果v为[未搜索] 开始搜索v,搜索完成回溯到u;
+		 * * 2)如果v为[搜查中] 说明存在环,不存储拓扑排序
+		 * * 3)如果v为[已完成] 说明搜索并回溯过这个节点;该节点相关的相邻节点都已处理;
+		 * 2.当u的所有相邻节点都为[以完成],将u入栈,并标记为[已完成]
+		 *
+		 * @param numCourses
+		 * @param prerequisites
+		 * @return
+		 */
+		public static int[] findOrderI(int numCourses, int[][] prerequisites) {
+			edges = new ArrayList<>();
+			for (int i = 0; i < numCourses; ++i) {
+				edges.add(new ArrayList<>());
+			}
+			visited = new int[numCourses];
+			result = new int[numCourses];
+			index = numCourses - 1;
+			for (int[] info : prerequisites) {
+				edges.get(info[1]).add(info[0]);
+			}
+			// 每次挑选一个「未搜索」的节点，开始进行深度优先搜索
+			for (int i = 0; i < numCourses && valid; ++i) {
+				if (visited[i] == 0) {
+					dfs(i);
+				}
+			}
+			if (!valid) {
+				return new int[0];
+			}
+			// 如果没有环，那么就有拓扑排序
+			return result;
+		}
+
+		public static void dfs(int u) {
+			// 将节点标记为「搜索中」
+			visited[u] = 1;
+			// 搜索其相邻节点
+			// 只要发现有环，立刻停止搜索
+			for (int v : edges.get(u)) {
+				// 如果「未搜索」那么搜索相邻节点
+				if (visited[v] == 0) {
+					dfs(v);
+					if (!valid) {
+						return;
+					}
+				}
+				// 如果「搜索中」说明找到了环
+				else if (visited[v] == 1) {
+					valid = false;
+					return;
+				}
+			}
+			// 将节点标记为「已完成」
+			visited[u] = 2;
+			// 将节点入栈
+			result[index--] = u;
+		}
+
+		public static void main(String[] args) {
+			int[][] prerequisites = new int[][]{{1, 0}, {2, 0}, {3, 1}, {3, 2}};
+			int[] order = findOrderI(4, prerequisites);
+			System.out.println(Arrays.toString(order));
 		}
 	}
 }
