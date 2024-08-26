@@ -2529,4 +2529,200 @@ public class LeetCodeCase {
 			}
 		}
 	}
+
+	/**
+	 * 17. 电话号码的字母组合
+	 * 给定一个仅包含数字 2-9 的字符串，返回所有它能表示的字母组合。答案可以按 任意顺序 返回。
+	 * 给出数字到字母的映射如下（与电话按键相同）。注意 1 不对应任何字母。
+	 * 示例 1：
+	 * 输入：digits = "23"
+	 * 输出：["ad","ae","af","bd","be","bf","cd","ce","cf"]
+	 * 示例 2：
+	 * 输入：digits = ""
+	 * 输出：[]
+	 * 示例 3：
+	 * 输入：digits = "2"
+	 * 输出：["a","b","c"]
+	 * 提示：
+	 * 0 <= digits.length <= 4
+	 * digits[i] 是范围 ['2', '9'] 的一个数字。
+	 */
+	public static class LetterCombinations {
+
+		/**
+		 * 回溯
+		 *
+		 * @param digits
+		 * @return
+		 */
+		public static List<String> letterCombinations(String digits) {
+			Character[][] arr = new Character[8][4];
+			arr[0] = new Character[]{'a', 'b', 'c'};
+			arr[1] = new Character[]{'d', 'e', 'f'};
+			arr[2] = new Character[]{'g', 'h', 'i'};
+			arr[3] = new Character[]{'j', 'k', 'l'};
+			arr[4] = new Character[]{'m', 'n', 'o'};
+			arr[5] = new Character[]{'p', 'q', 'r', 's'};
+			arr[6] = new Character[]{'t', 'u', 'v'};
+			arr[7] = new Character[]{'w', 'x', 'y', 'z'};
+			List<String> list = new ArrayList<>();
+			if (digits.isEmpty()) return list;
+			buildString(arr, new StringBuilder(), list, digits, 0);
+			return list;
+		}
+
+		/**
+		 * 思路跟普通的递归树不太一样,所以思路也不太好想
+		 *
+		 * @param arr
+		 * @param sb
+		 * @param list
+		 * @param digits
+		 * @param idx
+		 */
+		public static void buildString(Character[][] arr, StringBuilder sb, List<String> list, String digits, int idx) {
+			if (idx == digits.length()) {
+				list.add(sb.toString());
+			} else {
+				char c = digits.charAt(idx);
+				Character[] characters = arr[Character.getNumericValue(c) - 2];
+				for (int i = 0; i < characters.length; i++) {
+					sb.append(characters[i]);
+					buildString(arr, sb, list, digits, idx + 1);
+					sb.deleteCharAt(idx);
+				}
+			}
+		}
+
+		public static void main(String[] args) {
+			List<String> strings = letterCombinations("23");
+			System.out.println(strings);
+		}
+	}
+
+	/**
+	 * 22. 括号生成
+	 * 数字 n 代表生成括号的对数，请你设计一个函数，用于能够生成所有可能的并且 有效的 括号组合。
+	 * 示例 1：
+	 * 输入：n = 3
+	 * 输出：["((()))","(()())","(())()","()(())","()()()"]
+	 * 示例 2：
+	 * 输入：n = 1
+	 * 输出：["()"]
+	 * 提示：
+	 * 1 <= n <= 8
+	 */
+	public static class GenerateParenthesis {
+
+		/**
+		 * n对括号
+		 * 这题的关键点是 比如n=3时,有一种情况 (()())
+		 *
+		 * @param n
+		 * @return
+		 */
+		public static List<String> generateParenthesis(int n) {
+			List<String> list = new ArrayList<>();
+			buildParenthesis(list, n, new StringBuilder());
+			return list;
+		}
+
+		private static void buildParenthesis(List<String> list, int n, StringBuilder sb) {
+			if (n == 0) {
+				list.add(sb.toString());
+			}
+			int m = n;
+			for (; m > 0; m--) {
+				sb.append(getStr(m));
+				buildParenthesis(list, n - m, sb);
+				sb.delete(sb.length() - m * 2, sb.length());
+			}
+		}
+
+		private static String getStr(int n) {
+			String res = "";
+			switch (n) {
+				case 1:
+					res = "()";
+					break;
+				case 2:
+					res = "(())";
+					break;
+				case 3:
+					res = "((()))";
+					break;
+			}
+			return res;
+		}
+
+		/**
+		 * 动态规划
+		 * 递推公式 f(n)='('+ f(i)+')' + f(n-i-1) i范围[0,n-1]
+		 *
+		 * @param n
+		 * @return
+		 */
+		public static List<String> generateParenthesisI(int n) {
+			List<String>[] list = new List[n + 1];
+			list[0] = Collections.singletonList("");
+			List<String> l1 = new ArrayList<>();
+			l1.add("()");
+			list[1] = l1;
+			// 从n=2开始往后进行推进
+			for (int i = 2; i <= n; i++) {
+				List<String> temp = new ArrayList<>();
+				for (int j = 0; j < i; j++) {
+					List<String> dp1 = list[j];
+					List<String> dp2 = list[i - 1 - j];
+					for (String k : dp1) {
+						for (String l : dp2) {
+							StringBuilder sb = new StringBuilder();
+							temp.add(sb.append("(").append(k).append(")").append(l).toString());
+						}
+					}
+				}
+				list[i] = temp;
+			}
+			return list[n];
+		}
+
+		/**
+		 * 回溯的主要思路是 枚举出所有的符合规范的情况
+		 * 我们在回溯时,先输入左括号,再输入右括号;这样保证一对扩号中,左括号一定要右括号的前面
+		 * 那怎么才能规范其组合呢?
+		 * 1.当左括号数量< n时才可以填充左括号
+		 * 2.当右括号数量< 左括号数量 才可以填充右括号
+		 *
+		 * @param n
+		 * @return
+		 */
+		public static List<String> generateParenthesisII(int n) {
+			List<String> list = new ArrayList<>();
+			backtrack(list, new StringBuilder(), 0, 0, n);
+			return list;
+		}
+
+		private static void backtrack(List<String> list, StringBuilder sb, int open, int close, int max) {
+			if (sb.length() == max * 2) {
+				list.add(sb.toString());
+				return;
+			}
+			if (open < max) {
+				sb.append("(");
+				backtrack(list, sb, open + 1, close, max);
+				sb.deleteCharAt(sb.length() - 1);
+			}
+			if (close < open) {
+				sb.append(")");
+				backtrack(list, sb, open, close + 1, max);
+				sb.deleteCharAt(sb.length() - 1);
+			}
+		}
+
+		public static void main(String[] args) {
+			List<String> strings = generateParenthesisII(3);
+			System.out.println(strings);
+		}
+
+	}
 }

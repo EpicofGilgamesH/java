@@ -1,5 +1,7 @@
 package test.bit;
 
+import javax.print.attribute.standard.PrinterURI;
+
 /**
  * 位运算
  */
@@ -314,6 +316,178 @@ public class LeetCodeCase {
 
 		public static void main(String[] args) {
 			System.out.println(singleNumber(new int[]{-2,-2,1,1,4,1,4,4,-4,-2}));
+		}
+	}
+
+	/**
+	 * 67. 二进制求和
+	 * 给你两个二进制字符串 a 和 b ，以二进制字符串的形式返回它们的和。
+	 * 示例 1：
+	 * 输入:a = "11", b = "1"
+	 * 输出："100"
+	 * 示例 2：
+	 * 输入：a = "1010", b = "1011"
+	 * 输出："10101"
+	 * 提示：
+	 * 1 <= a.length, b.length <= 104
+	 * a 和 b 仅由字符 '0' 或 '1' 组成
+	 * 字符串如果不是 "0" ，就不含前导零
+	 */
+	public static class AddBinary {
+
+		/**
+		 * 简单来看可以用位上的数字相加
+		 *
+		 * @param a
+		 * @param b
+		 * @return
+		 */
+		public static String addBinary(String a, String b) {
+			int l1 = a.length(), l2 = b.length();
+			int i = 0, carry = 0;
+			StringBuilder sb = new StringBuilder();
+			while (i < l1 || i < l2) {
+				int va = 0, vb = 0;
+				if (i < l1) va = a.charAt(l1 - i - 1) - '0';
+				if (i < l2) vb = b.charAt(l2 - i - 1) - '0';
+				int v = va + vb + carry;
+				sb.append(v % 2);
+				carry = v / 2;
+				i++;
+			}
+			if (carry == 1) sb.append(carry);
+			return sb.reverse().toString();
+		}
+
+		public static void main(String[] args) {
+			String s = addBinary("111", "11");
+			System.out.println(s);
+		}
+	}
+
+	/**
+	 * 190. 颠倒二进制位
+	 * 颠倒给定的 32 位无符号整数的二进制位。
+	 * 提示：
+	 * 请注意，在某些语言（如 Java）中，没有无符号整数类型。在这种情况下，输入和输出都将被指定为有符号整数类型，并且不应影响您的实现，因为无论整数是有符号的还是无符号的，其内部的二进制表示形式都是相同的。
+	 * 在 Java 中，编译器使用二进制补码记法来表示有符号整数。因此，在 示例 2 中，输入表示有符号整数 -3，输出表示有符号整数 -1073741825。
+	 * 示例 1：
+	 * 输入：n = 00000010100101000001111010011100
+	 * 输出：964176192 (00111001011110000010100101000000)
+	 * 解释：输入的二进制串 00000010100101000001111010011100 表示无符号整数 43261596，
+	 * 因此返回 964176192，其二进制表示形式为 00111001011110000010100101000000。
+	 * 示例 2：
+	 * 输入：n = 11111111111111111111111111111101
+	 * 输出：3221225471 (10111111111111111111111111111111)
+	 * 解释：输入的二进制串 11111111111111111111111111111101 表示无符号整数 4294967293，
+	 * 因此返回 3221225471 其二进制表示形式为 10111111111111111111111111111111 。
+	 * 提示：
+	 * 输入是一个长度为 32 的二进制字符串
+	 * 进阶: 如果多次调用这个函数，你将如何优化你的算法？
+	 */
+	public static class ReverseBits {
+
+		/**
+		 * java 32位整数,都是有符号的
+		 * 32位二进制,索引从0-31 其中第0位颠倒之后就是在31的位置,1颠倒在30的位置, i -> 31-i
+		 *
+		 * @param n
+		 * @return
+		 */
+		public static int reverseBits(int n) {
+			int res = 0;
+			for (int i = 0; i < 32; i++) {
+				if (((n >> i) & 1) == 1) {
+					res += 1 << (31 - i);
+				}
+			}
+			return res;
+		}
+
+		/**
+		 * 分治思想
+		 * 00000010100101000001111010011100
+		 * 将32位分成2份,每份16位;然后处理这16位的颠倒,同理这16位可以分成8位;依次最后可以分成2位,2位进行颠倒操作;
+		 * 所以按分治的思想,先分成最小份,2位进行颠倒,然后上一步4位进行颠倒...
+		 *
+		 * @param n
+		 * @return
+		 */
+		private static final int M1 = 0x55555555; // 01010101010101010101010101010101
+		private static final int M2 = 0x33333333; // 00110011001100110011001100110011
+		private static final int M4 = 0x0f0f0f0f; // 00001111000011110000111100001111
+		private static final int M8 = 0x00ff00ff; // 00000000111111110000000011111111
+
+		public static int reverseBitsI(int n) {
+			n = n >>> 1 & M1 | (n & M1) << 1;  // 奇数和偶数位颠倒
+			n = n >>> 2 & M2 | (n & M2) << 2;  // 2位和2位之间进行颠倒
+			n = n >>> 4 & M4 | (n & M4) << 4;  // 4位和4位之间进行颠倒
+			n = n >>> 8 & M8 | (n & M8) << 8;  // 4位和4位之间进行颠倒
+			return n >>> 16 | n << 16;  // 两个16位进行颠倒
+		}
+
+		public static void main(String[] args) {
+			int i = reverseBitsI(43261596);
+			System.out.println(i);
+		}
+	}
+
+	/**
+	 * 201. 数字范围按位与
+	 * 给你两个整数 left 和 right ，表示区间 [left, right] ，返回此区间内所有数字 按位与 的结果（包含 left 、right 端点）。
+	 * 示例 1：
+	 * 输入：left = 5, right = 7
+	 * 输出：4
+	 * 示例 2：
+	 * 输入：left = 0, right = 0
+	 * 输出：0
+	 * 示例 3：
+	 * 输入：left = 1, right = 2147483647
+	 * 输出：0
+	 * 提示：
+	 * 0 <= left <= right <= 231 - 1
+	 */
+	public static class RangeBitwiseAnd {
+
+		/**
+		 * left= 5 right=7
+		 * [0101,0110,0111]
+		 * 在某一位上,如果范围的开始和结束不同,则在这个范围上,肯定会出现这一位为0和1的场景;
+		 * 那么与时,这一位肯定为0;所以本题可以简化成范围的开始和结束数字中,相同的前缀位
+		 * <p>
+		 * 这里有个细节,如何找到公共前缀,在将两个二进制位进行 右移的同时,当这两个数相等,则说明只剩下公共前缀了****
+		 *
+		 * @param left
+		 * @param right
+		 * @return
+		 */
+		public static int rangeBitwiseAnd(int left, int right) {
+			int num = 0;
+			while (left < right) {
+				left >>= 1;
+				right >>= 1;
+				num++;
+			}
+			return left << num;
+		}
+
+		/**
+		 * 消除掉最右边的1
+		 * 对于范围[m,n] 清除n最右边的1直到n<=m这个时候,剩下的就是公共前缀,其余位都为0
+		 *
+		 * @param left
+		 * @param right
+		 * @return
+		 */
+		public static int rangeBitwiseAndI(int left, int right) {
+			while (left < right) {
+				right &= right - 1;
+			}
+			return right;
+		}
+
+		public static void main(String[] args) {
+			System.out.println(rangeBitwiseAndI(5, 7));
 		}
 	}
 }
