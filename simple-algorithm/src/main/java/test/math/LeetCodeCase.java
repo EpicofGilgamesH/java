@@ -797,4 +797,258 @@ public class LeetCodeCase {
 			System.out.println(countDigitOneI(1234567));
 		}
 	}
+
+	/**
+	 * 9. 回文数
+	 * 给你一个整数 x ，如果 x 是一个回文整数，返回 true ；否则，返回 false 。
+	 * 回文数
+	 * 是指正序（从左向右）和倒序（从右向左）读都是一样的整数。
+	 * 例如，121 是回文，而 123 不是。
+	 * 示例 1：
+	 * 输入：x = 121
+	 * 输出：true
+	 * 示例 2：
+	 * 输入：x = -121
+	 * 输出：false
+	 * 解释：从左向右读, 为 -121 。 从右向左读, 为 121- 。因此它不是一个回文数。
+	 * 示例 3：
+	 * 输入：x = 10
+	 * 输出：false
+	 * 解释：从右向左读, 为 01 。因此它不是一个回文数。
+	 * 提示：
+	 * -231 <= x <= 231 - 1
+	 * 进阶：你能不将整数转为字符串来解决这个问题吗？
+	 */
+	public static class IsPalindrome {
+
+		/**
+		 * 不转换成字符串来解决,那么我们还是需要这个数字每一位的值,然后匹配其是否对称
+		 *
+		 * @param x
+		 * @return
+		 */
+		public static boolean isPalindrome(int x) {
+			if (x < 0) return false;
+			List<Integer> list = new ArrayList<>();
+			while (x > 0) {
+				list.add(x % 10);
+				x /= 10;
+			}
+			for (int i = 0; i < list.size() / 2; i++) {
+				if (!Objects.equals(list.get(i), list.get(list.size() - i - 1))) {
+					return false;
+				}
+			}
+			return true;
+		}
+
+		/**
+		 * 优化的地方在于,不用把数字的所有位都计算出来,计算一半即可与另一半进行比较
+		 *
+		 * @param x
+		 * @return
+		 */
+		public static boolean isPalindromeI(int x) {
+			if (x < 0 || (x % 10 == 0 && x != 0)) return false;
+			int reverse = 0;  // 后一半数字
+			while (x > reverse) {
+				reverse = reverse * 10 + x % 10;
+				x /= 10;
+			}
+			return x == reverse || x == reverse / 10; // 位数为奇数时,reverse会多一位
+		}
+
+		public static void main(String[] args) {
+			System.out.println(isPalindrome(121121));
+		}
+	}
+
+	/**
+	 * 172. 阶乘后的零
+	 * 给定一个整数 n ，返回 n! 结果中尾随零的数量。
+	 * 提示 n! = n * (n - 1) * (n - 2) * ... * 3 * 2 * 1
+	 * 示例 1：
+	 * 输入：n = 3
+	 * 输出：0
+	 * 解释：3! = 6 ，不含尾随 0
+	 * 示例 2：
+	 * 输入：n = 5
+	 * 输出：1
+	 * 解释：5! = 120 ，有一个尾随 0
+	 * 示例 3：
+	 * 输入：n = 0
+	 * 输出：0
+	 * 提示：
+	 * 0 <= n <= 104
+	 * 进阶：你可以设计并实现对数时间复杂度的算法来解决此问题吗？
+	 */
+	public static class TrailingZeroes {
+
+		/**
+		 * 阶乘后尾随0的个数,只有当2x5时才会出现0
+		 * 而阶乘的规律是递减数字的乘积,例如 10!=10*9*8*7*6*5*4*3*2*1
+		 * 其中10可以转换为2*5 4可以转换为2*2*2 4可以转换为2*2
+		 * 可以看出,10的阶乘中5出现2次,2出现了6次,每间隔一个数字就会出现2,所以2出现的次数一定大于5;
+		 * 所以本题可以转换成,阶乘的乘法因子中出现5的次数
+		 * 阶乘中每隔5个数,就会出现一个5
+		 * 1,2,3,4,5...(2*5)....(3*5)...
+		 * 阶乘中每隔25个数,会出现两个5
+		 * 1,2,3,4,5....(1*5*5)....(2*5*5)
+		 * 阶乘中每隔125个数,会出现3个5
+		 * n/5+(n-5)/5+...+5/5
+		 * 1,2,3,4,5....(1*5*5*5)....(2*5*5*5)...
+		 * 那么计算总共出现5的个数,即每隔5个数出现5的个数+每隔25个数出现5的个数+每隔125个数出现的5的个数+...
+		 * 即 n/5+n/25+n/125+...+n/(5*5*5...)
+		 *
+		 * @param n
+		 * @return
+		 */
+		public static int trailingZeroes(int n) {
+			int count = 0;
+			while (n != 0) {
+				n /= 5;
+				count += n;
+			}
+			return count;
+		}
+
+		public static void main(String[] args) {
+			System.out.println(trailingZeroes(10));
+		}
+	}
+
+	/**
+	 * 149. 直线上最多的点数
+	 * 给你一个数组 points ，其中 points[i] = [xi, yi] 表示 X-Y 平面上的一个点。求最多有多少个点在同一条直线上。
+	 * 示例 1：
+	 * 输入：points = [[1,1],[2,2],[3,3]]
+	 * 输出：3
+	 * 示例 2：
+	 * 输入：points = [[1,1],[3,2],[5,3],[4,1],[2,3],[1,4]]
+	 * 输出：4
+	 * 提示：
+	 * 1 <= points.length <= 300
+	 * points[i].length == 2
+	 * -104 <= xi, yi <= 104
+	 * points 中的所有点 互不相同
+	 */
+	public static class MaxPoints {
+
+		/**
+		 * 按照常规的思路思路,2点确认一条直线
+		 * 要找出一条直线上点最多的场景,需要把所有的直线全部计算一遍有多少个点经过
+		 * 直线的方程:y=ax+b 先确认这个方程,然后将其他点带入方程,计算是否符合条件
+		 * 但是可以计算斜率,k=Δx/Δy
+		 * 那么会有三种情况
+		 * 1.Δx和Δy都不为0,正常情况
+		 * 2.Δx=0 则直线方程与y轴平行,只需要x坐标值相同即可
+		 * 3.Δy=0 则直线方程与x轴平行,只需要y坐标值相同即可
+		 *
+		 * @param points
+		 * @return
+		 */
+		public static int maxPoints(int[][] points) {
+			if (points.length <= 1) return 1;
+			int max = 0;
+			for (int i = 0; i < points.length; i++) {
+				for (int j = i + 1; j < points.length; j++) {
+					// 先使用两点确认一条直线
+					int count = 0;
+					int[] a = points[i], b = points[j];
+					int dx = b[0] - a[0], dy = b[1] - a[1];
+					if (dx == 0) {  // 水平线,寻找x坐标相同的点
+						for (int l = 0; l < points.length; l++) {
+							if (l == i || l == j || points[l][0] == a[0]) {
+								count++;
+							}
+						}
+					} else if (dy == 0) {   // 垂直线,寻找y坐标相同的点
+						for (int l = 0; l < points.length; l++) {
+							if (l == i || l == j || points[l][1] == a[1]) {
+								count++;
+							}
+						}
+					} else {  // 其他线
+						double k = (double) dy / dx;
+						for (int l = 0; l < points.length; l++) {
+							if (l == i || l == j || (double) (points[l][1] - a[1]) / (points[l][0] - a[0]) == k) {
+								count++;
+							}
+						}
+					}
+					max = Math.max(count, max);
+				}
+			}
+			return max;
+		}
+
+		/**
+		 * 上个解题方法中在计算斜率的值  斜率k=Δx/Δy
+		 * 除法会出现小数点,然后损失精度,可以用乘法替代,所以也不用考虑除法中分母为0的情况
+		 *
+		 * @param points
+		 * @return
+		 */
+		public static int maxPointsI(int[][] points) {
+			if (points.length <= 1) return 1;
+			int max = 0;
+			for (int i = 0; i < points.length; i++) {
+				for (int j = i + 1; j < points.length; j++) {
+					// 先使用两点确认一条直线
+					int count = 2;
+					int[] a = points[i], b = points[j];
+					int dx = b[0] - a[0], dy = b[1] - a[1];
+					for (int l = j + 1; l < points.length; l++) {
+						int[] p = points[l];
+						if (dy * (p[0] - b[0]) == dx * (p[1] - b[1])) {
+							count++;
+						}
+					}
+					max = Math.max(count, max);
+				}
+			}
+			return max;
+		}
+
+
+		/**
+		 * 官方解题有一些优化点
+		 * 1.当点数小于2时,直接返回点数的数量
+		 * 2.当枚举到点i时,只需要考虑大于i的点到点i的斜率,因为小于点i的点,在之前肯定已经枚举过了,如果在同一条直线上,那么也已经计数过了
+		 * 3.当这条直线经过的点数量超过了所有点的一半时,说明该条直线上经过的点最多,后续的直线不需要遍历了
+		 * 4.当枚举到点i时,至多能找到n-1个共线点,如果此前找到的共线点数量的最大值为k,如果k>=n-i,那么这条直线就是要找的直线
+		 *
+		 * @param points
+		 * @return
+		 */
+		public static int maxPointsII(int[][] points) {
+			int n = points.length, ans = 1;
+			for (int i = 0; i < n; i++) {
+				int[] x = points[i];
+				for (int j = i + 1; j < n; j++) {
+					int cnt = 2;
+					int[] y = points[j];
+					for (int k = j + 1; k < n; k++) {
+						int[] p = points[k];
+						int s1 = (y[1] - x[1]) * (p[0] - y[0]);
+						int s2 = (p[1] - y[1]) * (y[0] - x[0]);
+						if (s1 == s2) cnt++;
+					}
+					if (cnt > n / 2) {
+						return cnt;
+					}
+					ans = Math.max(ans, cnt);
+					if (ans >= n - i) {
+						return ans;
+					}
+				}
+			}
+			return ans;
+		}
+
+		public static void main(String[] args) {
+			int i = maxPointsII(new int[][]{{1,1},{3,2},{5,3},{4,1},{2,3},{1,4}});
+			System.out.println(i);
+		}
+	}
 }
