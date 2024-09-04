@@ -2,6 +2,8 @@ package test.binary;
 
 import com.alibaba.fastjson.JSON;
 
+import java.util.Random;
+
 /**
  * @Description 二分 LeeCode 案例
  * @Date 2022-08-11 17:12
@@ -348,6 +350,343 @@ public class LeeCodeCase {
 		public static int findDuplicate(int[] nums) {
 
 			return 0;
+		}
+	}
+
+	/**
+	 * 74. 搜索二维矩阵
+	 * 给你一个满足下述两条属性的 m x n 整数矩阵：
+	 * 每行中的整数从左到右按非严格递增顺序排列。
+	 * 每行的第一个整数大于前一行的最后一个整数。
+	 * 给你一个整数 target ，如果 target 在矩阵中，返回 true ；否则，返回 false 。
+	 * 示例 1：
+	 * 输入：matrix = [[1,3,5,7],[10,11,16,20],[23,30,34,60]], target = 3
+	 * 输出：true
+	 * 示例 2：
+	 * 输入：matrix = [[1,3,5,7],[10,11,16,20],[23,30,34,60]], target = 13
+	 * 输出：false
+	 * 提示：
+	 * m == matrix.length
+	 * n == matrix[i].length
+	 * 1 <= m, n <= 100
+	 * -104 <= matrix[i][j], target <= 104
+	 */
+	static class SearchMatrix {
+
+		/**
+		 * 因为矩阵的每行和没列间都遵循单调递增的特性,所以可以使用二分查找
+		 * 此处二分的关键点在于,如何通过二分找到的中间点pos,转换成矩阵的坐标
+		 * 初始 s=0,e=m*n-1 pos=(s+e)/2  pos转换成矩阵的坐标
+		 * x=pos/m y=pos%
+		 */
+		public static boolean searchMatrix(int[][] matrix, int target) {
+			int m = matrix.length, n = matrix[0].length;
+			int s = 0, e = m * n - 1;
+			while (s <= e) {
+				int pos = s + ((e - s) >> 1);
+				int va = matrix[pos / n][pos % n];
+				if (va > target) {
+					e = pos - 1;
+				} else if (va < target) {
+					s = pos + 1;
+				} else {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		public static void main(String[] args) {
+			// boolean b = searchMatrix(new int[][]{{1, 3, 5, 7}, {10, 11, 16, 20}, {23, 30, 34, 60}}, 3);
+			boolean b = searchMatrix(new int[][]{{1}, {1}}, 2);
+			System.out.println(b);
+		}
+	}
+
+	/**
+	 * 162. 寻找峰值
+	 * 峰值元素是指其值严格大于左右相邻值的元素。
+	 * 给你一个整数数组 nums，找到峰值元素并返回其索引。数组可能包含多个峰值，在这种情况下，返回 任何一个峰值 所在位置即可。
+	 * 你可以假设 nums[-1] = nums[n] = -∞ 。
+	 * 你必须实现时间复杂度为 O(log n) 的算法来解决此问题。
+	 * 示例 1：
+	 * 输入：nums = [1,2,3,1]
+	 * 输出：2
+	 * 解释：3 是峰值元素，你的函数应该返回其索引 2。
+	 * 示例 2：
+	 * 输入：nums = [1,2,1,3,5,6,4]
+	 * 输出：1 或 5
+	 * 解释：你的函数可以返回索引 1，其峰值元素为 2；
+	 * 或者返回索引 5， 其峰值元素为 6。
+	 * 提示：
+	 * 1 <= nums.length <= 1000
+	 * -231 <= nums[i] <= 231 - 1
+	 * 对于所有有效的 i 都有 nums[i] != nums[i + 1]
+	 */
+	static class FindPeakElement {
+
+		/**
+		 * 首先nums[-1] = nums[n] = -∞ ,加上数组中每个元素的值都不同,那么一定存在波峰;
+		 * 1.可以遍历数组,找到最大的那个值,肯定为波峰,时间复杂度为O(n)需要完整的遍历一次数组
+		 * 2.根据题意可以得知,如果i->i+1 值在递增,则一定会在后面找到一个波峰;因为两端都是波谷
+		 * 3.随机找到一个点,看起左右两边,哪边是走上坡的,走上坡的那一边一定会存在波峰
+		 *
+		 * @param nums
+		 * @return
+		 */
+		public static int findPeakElement(int[] nums) {
+			int idx = 0, max = nums[0];
+			for (int i = 1; i < nums.length; ++i) {
+				if (nums[i] > max) {
+					idx = i;
+					max = nums[i];
+				}
+			}
+			return idx;
+		}
+
+		/**
+		 * 时间复杂度O(n)当随机到0且向右移动时,则需要遍历n次
+		 *
+		 * @param nums
+		 * @return
+		 */
+		public static int findPeakElementI(int[] nums) {
+			if (nums.length == 1) return 0;
+			if (nums.length == 2) {
+				if (nums[0] > nums[1]) return 0;
+				else return 1;
+			}
+			Random r = new Random();
+			int idx = r.nextInt(nums.length - 2) + 1; // 随机数取值时排除了第一个和最后一个元素,所以得处理长度为1和2的情况
+			if (nums[idx] < nums[idx + 1]) {  // 向左
+				int i = idx + 1;
+				while (i < nums.length - 1 && nums[i] < nums[i + 1]) {
+					i++;
+				}
+				return i;
+			} else if (nums[idx] > nums[idx + 1] && nums[idx] > nums[idx - 1]) {
+				return idx;
+			} else { // 向左
+				int i = idx - 1;
+				while (i > 0 && nums[i] < nums[i - 1]) {
+					i--;
+				}
+				return i;
+			}
+		}
+
+		public static int findPeakElementII(int[] nums) {
+			Random r = new Random();
+			int s = 0, e = nums.length - 1, pos;
+			while (s <= e) {
+				pos = r.nextInt(e - s + 1) + s;
+				int next = pos + 1 == nums.length ? Integer.MIN_VALUE : nums[pos + 1];
+				int pre = pos - 1 == -1 ? Integer.MIN_VALUE : nums[pos - 1];
+				if (nums[pos] < pre) {  // 从左边取值
+					e = pos - 1;
+				} else if (nums[pos] < next) { // 从右边取值
+					s = pos + 1;
+				} else {
+					return pos;
+				}
+			}
+			return nums[0];
+		}
+
+		public static void main(String[] args) {
+			System.out.println(findPeakElementI(new int[]{2, 1}));
+		}
+	}
+
+	/**
+	 * 33. 搜索旋转排序数组
+	 * 整数数组 nums 按升序排列，数组中的值 互不相同 。
+	 * 在传递给函数之前，nums 在预先未知的某个下标 k（0 <= k < nums.length）上进行了 旋转，使数组变为 [nums[k], nums[k+1], ..., nums[n-1], nums[0], nums[1], ..., nums[k-1]]（下标 从 0 开始 计数）。例如， [0,1,2,4,5,6,7] 在下标 3 处经旋转后可能变为 [4,5,6,7,0,1,2] 。
+	 * 给你 旋转后 的数组 nums 和一个整数 target ，如果 nums 中存在这个目标值 target ，则返回它的下标，否则返回 -1 。
+	 * 你必须设计一个时间复杂度为 O(log n) 的算法解决此问题。
+	 * 示例 1：
+	 * 输入：nums = [4,5,6,7,0,1,2], target = 0
+	 * 输出：4
+	 * 示例 2：
+	 * 输入：nums = [4,5,6,7,0,1,2], target = 3
+	 * 输出：-1
+	 * 示例 3：
+	 * 输入：nums = [1], target = 0
+	 * 输出：-1
+	 * 提示：
+	 * 1 <= nums.length <= 5000
+	 * -104 <= nums[i] <= 104
+	 * nums 中的每个值都 独一无二
+	 * 题目数据保证 nums 在预先未知的某个下标上进行了旋转
+	 * -104 <= target <= 104
+	 */
+	static class Search {
+
+		/**
+		 * 在某处旋转的升序数组有什么特性呢?
+		 * 1.中间存在最大值,最大值和最小值相接
+		 * 2.前部分升序数列都大于第一个数first;后部分升序数列都小于最后一个数end
+		 * 那么在使用二分时,设置当前值为cur,前个值为pre,后个值为next
+		 * 可以通过比较cur与first和end的大小来判断当前元素处在哪个升序数列中
+		 * a:如果target > first答案会在第一个升序数列中 b:target < first答案会在第二个升序队列
+		 * 1.首先看cur所在的升序队列是否正确,其次比较cur和target的大小
+		 * 2.cur < target 往右缩小范围
+		 * 3.cur > target 往左缩小范围
+		 *
+		 * @param nums
+		 * @param target
+		 * @return
+		 */
+		public static int search(int[] nums, int target) {
+			int first = nums[0];
+			boolean isBefore = target >= first;
+			int s = 0, e = nums.length - 1, cur;
+			while (s <= e) {
+				cur = s + ((e - s) >> 1);
+				if (nums[cur] == target) {
+					return cur;
+				}
+				if ((nums[cur] >= first) == isBefore) {  // cur在正确的升序数列
+					if (nums[cur] > target) { // 向左
+						e = cur - 1;
+					} else {   // 向右
+						s = cur + 1;
+					}
+				} else {
+					if (nums[cur] > target) {  // 向右
+						s = cur + 1;
+					} else {
+						e = cur - 1;
+					}
+				}
+			}
+			return -1;
+		}
+
+		/**
+		 * 当然更简单的思路是先找到旋转点,判断target在前后哪个升序数列中,然后二分查找
+		 * 找旋转点也需要使用二分,O(nLog n)
+		 *
+		 * @param nums
+		 * @param target
+		 * @return
+		 */
+		public static int searchI(int[] nums, int target) {
+			int lo = 0, hi = nums.length - 1, mid = 0;
+			while (lo <= hi) {
+				mid = lo + (hi - lo) / 2;
+				if (nums[mid] == target) {
+					return mid;
+				}
+				// 先根据 nums[mid] 与 nums[lo] 的关系判断 mid 是在左段还是右段
+				if (nums[mid] >= nums[lo]) {
+					// 再判断 target 是在 mid 的左边还是右边，从而调整左右边界 lo 和 hi
+					if (target >= nums[lo] && target < nums[mid]) {
+						hi = mid - 1;
+					} else {
+						lo = mid + 1;
+					}
+				} else {
+					if (target > nums[mid] && target <= nums[hi]) {
+						lo = mid + 1;
+					} else {
+						hi = mid - 1;
+					}
+				}
+			}
+			return -1;
+		}
+
+		public static void main(String[] args) {
+			int search = searchI(new int[]{3, 1}, 1);
+			System.out.println(search);
+		}
+	}
+
+	/**
+	 * 153. 寻找旋转排序数组中的最小值
+	 * 已知一个长度为 n 的数组，预先按照升序排列，经由 1 到 n 次 旋转 后，得到输入数组。例如，原数组 nums = [0,1,2,4,5,6,7] 在变化后可能得到：
+	 * 若旋转 4 次，则可以得到 [4,5,6,7,0,1,2]
+	 * 若旋转 7 次，则可以得到 [0,1,2,4,5,6,7]
+	 * 注意，数组 [a[0], a[1], a[2], ..., a[n-1]] 旋转一次 的结果为数组 [a[n-1], a[0], a[1], a[2], ..., a[n-2]] 。
+	 * 给你一个元素值 互不相同 的数组 nums ，它原来是一个升序排列的数组，并按上述情形进行了多次旋转。请你找出并返回数组中的 最小元素 。
+	 * 你必须设计一个时间复杂度为 O(log n) 的算法解决此问题。
+	 * 示例 1：
+	 * 输入：nums = [3,4,5,1,2]
+	 * 输出：1
+	 * 解释：原数组为 [1,2,3,4,5] ，旋转 3 次得到输入数组。
+	 * 示例 2：
+	 * 输入：nums = [4,5,6,7,0,1,2]
+	 * 输出：0
+	 * 解释：原数组为 [0,1,2,4,5,6,7] ，旋转 3 次得到输入数组。
+	 * 示例 3：
+	 * 输入：nums = [11,13,15,17]
+	 * 输出：11
+	 * 解释：原数组为 [11,13,15,17] ，旋转 4 次得到输入数组。
+	 * 提示：
+	 * n == nums.length
+	 * 1 <= n <= 5000
+	 * -5000 <= nums[i] <= 5000
+	 * nums 中的所有整数 互不相同
+	 * nums 原来是一个升序排序的数组，并进行了 1 至 n 次旋转
+	 */
+	static class FindMin {
+
+		/**
+		 * 旋转n次的数组,其最后会出现整体升序,或者两次升序的情况
+		 * 1.当first > last 出现两次升序
+		 * 2.当first < last 整体升序 最小为first
+		 * 3.出现两次升序的情况,需要找最小;即要知道cur < prev && cur < next
+		 * 如果next > cur > prev 且cur在左边升序序列,则范围向右移动;cur在右边升序序列,则范围向左移动
+		 *
+		 * @param nums
+		 * @return
+		 */
+		public static int findMin(int[] nums) {
+			int first = nums[0], last = nums[nums.length - 1];
+			if (first < last) { // 整体升序
+				return first;
+			}
+			int s = 0, e = nums.length - 1;
+			while (s <= e) {
+				int idx = s + ((e - s) >> 1);
+				int cur = nums[idx], prev = idx - 1 >= 0 ? nums[idx - 1] : Integer.MAX_VALUE, next = idx + 1 < nums.length ? nums[idx + 1] : Integer.MAX_VALUE;
+				if (cur < prev && cur < next) {
+					return cur;
+				} else if (cur >= first) {
+					s = idx + 1;
+				} else {
+					e = idx - 1;
+				}
+			}
+			return -1;
+		}
+
+		/**
+		 * 当前cur 大于其范围区间的high 就向右缩小范围区间
+		 * 当前cur 小于其范围区间的high 就向左缩小范围区间
+		 *
+		 * @param nums
+		 * @return
+		 */
+		public static int findMinI(int[] nums) {
+			int low = 0, high = nums.length - 1;
+			// 由于nums中的元素都不相同,只要区间长度不为1,pivot就不会与high重合;而如果区间长度为1,则说明已经找到了最小值
+			while (low < high) {
+				int pivot = low + (high - low) / 2;
+				if (nums[pivot] < nums[high]) {
+					high = pivot;
+				} else {
+					low = pivot + 1;
+				}
+			}
+			return nums[low];
+		}
+
+		public static void main(String[] args) {
+			int min = findMinI(new int[]{2,1});
+			System.out.println(min);
 		}
 	}
 }
