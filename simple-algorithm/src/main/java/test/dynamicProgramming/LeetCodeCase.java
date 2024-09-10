@@ -1337,5 +1337,825 @@ public class LeetCodeCase {
 		}
 	}
 
+	/**
+	 * 120. 三角形最小路径和
+	 * 给定一个三角形 triangle ，找出自顶向下的最小路径和。
+	 * 每一步只能移动到下一行中相邻的结点上。相邻的结点 在这里指的是 下标 与 上一层结点下标 相同或者等于 上一层结点下标 + 1 的两个结点。也就是说，如果正位于当前行的下标 i ，那么下一步可以移动到下一行的下标 i 或 i + 1 。
+	 * 示例 1：
+	 * 输入：triangle = [[2],[3,4],[6,5,7],[4,1,8,3]]
+	 * 输出：11
+	 * 解释：如下面简图所示：
+	 * *   2
+	 * *  3 4
+	 * * 6 5 7
+	 * 4 1 8 3
+	 * 自顶向下的最小路径和为 11（即，2 + 3 + 5 + 1 = 11）。
+	 * 示例 2：
+	 * 输入：triangle = [[-10]]
+	 * 输出：-10
+	 * 提示：
+	 * 1 <= triangle.length <= 200
+	 * triangle[0].length == 1
+	 * triangle[i].length == triangle[i - 1].length + 1
+	 * -104 <= triangle[i][j] <= 104
+	 * 进阶：
+	 * 你可以只使用 O(n) 的额外空间（n 为三角形的总行数）来解决这个问题吗？
+	 */
+	public static class MinimumTotalI {
+
+		/**
+		 * 三角形的路径和,下一层的路径和取决于上一层的路径和+本层的数值
+		 * 第i层的第j个路径和f(i,j)=min(f(i-1,j-1),f(i-1,j))+a(i,j)
+		 *
+		 * @param triangle
+		 * @return
+		 */
+		public static int minimumTotal(List<List<Integer>> triangle) {
+			List<List<Integer>> dp = new ArrayList<>();
+			dp.add(Collections.singletonList(triangle.get(0).get(0)));
+			for (int i = 1; i < triangle.size(); i++) {
+				List<Integer> layer = triangle.get(i); // 层
+				// 当前层第一个元素处理
+				List<Integer> dpLayer = new ArrayList<>();
+				dpLayer.add(dp.get(i - 1).get(0) + layer.get(0));
+				for (int j = 1; j < layer.size() - 1; j++) {
+					dpLayer.add(Math.min(dp.get(i - 1).get(j - 1), dp.get(i - 1).get(j)) + layer.get(j));
+				}
+				// 当前层最后一个元素
+				dpLayer.add(dp.get(i - 1).get(layer.size() - 2) + layer.get(layer.size() - 1));
+				dp.add(dpLayer);
+			}
+			List<Integer> list = dp.get(dp.size() - 1);
+			int min = list.get(0);
+			for (Integer v : list) {
+				min = Math.min(v, min);
+			}
+			return min;
+		}
+
+		/**
+		 * 在原三角形上进行操作
+		 *
+		 * @param triangle
+		 * @return
+		 */
+		public static int minimumTotalI(List<List<Integer>> triangle) {
+			for (int i = 1; i < triangle.size(); i++) {
+				List<Integer> prev = triangle.get(i - 1);// 上一层
+				List<Integer> layer = triangle.get(i);   // 当前层
+				// 当前层第一个元素处理
+				layer.set(0, prev.get(0) + layer.get(0));
+				for (int j = 1; j < layer.size() - 1; j++) {
+					layer.set(j, Math.min(prev.get(j - 1), prev.get(j)) + layer.get(j));
+				}
+				// 当前层最后一个元素
+				layer.set(layer.size() - 1, prev.get(layer.size() - 2) + layer.get(layer.size() - 1));
+			}
+			List<Integer> list = triangle.get(triangle.size() - 1);
+			int min = list.get(0);
+			for (Integer v : list) {
+				min = Math.min(v, min);
+			}
+			return min;
+		}
+
+		/**
+		 * dp用数组实现
+		 * 状态转移方程:第i层的第j个路径和f(i,j)=min(f(i-1,j-1),f(i-1,j))+a(i,j)
+		 * 可以看出,第i层的dp数据中,第j个数据取决于其上一层dp的第j和j-1个数据
+		 * 当dp从后往前进行覆盖时,位置j的数据取决于j(原位置)和j-1(前一个位置)的数据,所以dp数据不会丢失
+		 *
+		 * @param triangle
+		 * @return
+		 */
+		public static int minimumTotalII(List<List<Integer>> triangle) {
+			int[] dp = new int[triangle.size()];
+			dp[0] = triangle.get(0).get(0);
+			for (int i = 1; i < triangle.size(); i++) {
+				int size = triangle.get(i).size();
+				dp[size - 1] = dp[size - 2] + triangle.get(i).get(size - 1);
+				for (int j = triangle.get(i).size() - 2; j > 0; j--) {
+					dp[j] = Math.min(dp[j], dp[j - 1]) + triangle.get(i).get(j);
+				}
+				dp[0] = dp[0] + triangle.get(i).get(0);
+			}
+			int min = dp[0];
+			for (int i = 1; i < dp.length; i++) {
+				min = Math.min(min, dp[i]);
+			}
+			return min;
+		}
+
+		/**
+		 * ***********
+		 * 三角形从底部向上进行计算
+		 * dp数组初始化为三角形的最下一层,每上升一层,dp[i]= min(dp[i],dp[i+1])+a(i)
+		 * 这样在dp数组滚动更新时,不会丢失数据
+		 *
+		 * @param triangle
+		 * @return
+		 */
+		public static int minimumTotalIII(List<List<Integer>> triangle) {
+			int n = triangle.size();
+			int[] dp = new int[n];
+			for (int i = 0; i < n; i++) {
+				dp[i] = triangle.get(n - 1).get(i);
+			}
+			for (int i = n - 2; i >= 0; i--) {
+				for (int j = 0; j <= i; j++) {
+					dp[j] = Math.min(dp[j], dp[j + 1]) + triangle.get(i).get(j);
+				}
+			}
+			return dp[0];
+		}
+
+		private static int min = Integer.MAX_VALUE;
+
+		/**
+		 * 递归方式
+		 * 画出递归树,跟二叉树的深度优先遍历类似
+		 *
+		 * @param triangle
+		 * @return
+		 */
+		public static int minimumTotalIV(List<List<Integer>> triangle) {
+			Integer[][] visited = new Integer[triangle.size()][triangle.size()];
+			dfs(triangle, 0, 0, 0, visited);
+			return min;
+		}
+
+		/**
+		 * 像二叉树一样从顶点往叶子节点遍历的方式,不太好做剪枝操作
+		 *
+		 * @param triangle
+		 * @param i
+		 * @param j
+		 * @param v
+		 * @param visited
+		 */
+		private static void dfs(List<List<Integer>> triangle, int i, int j, int v, Integer[][] visited) {
+			v += triangle.get(i).get(j);
+			if (visited[i][j] != null && visited[i][j] <= v) {
+				return;
+			}
+			visited[i][j] = v;
+			if (i + 1 < triangle.size()) {
+				if (j + 1 <= i + 1) {
+					dfs(triangle, i + 1, j, v, visited);
+					dfs(triangle, i + 1, j + 1, v, visited);
+				}
+			} else {
+				min = Math.min(v, min);
+			}
+		}
+
+		/**
+		 * 换一种思路,从下往上,每个节点上的路径和值,取决于它下一层临接的两个节点
+		 * 递归公式 f(i,j)=min(f(i+1,j),f(i+1,j+1))+a(i,j)
+		 * 由于无后效性,所以可以动态规划
+		 *
+		 * @param triangle
+		 * @return
+		 */
+		public static int minimumTotalV(List<List<Integer>> triangle) {
+			Integer[][] visited = new Integer[triangle.size()][triangle.size()];
+			return dfs(triangle, 0, 0, visited);
+		}
+
+		private static int dfs(List<List<Integer>> triangle, int i, int j, Integer[][] visited) {
+			// 假设最下一层的下一层全部为0
+			if (i == triangle.size()) {
+				return 0;
+			}
+			if (visited[i][j] != null) {
+				return visited[i][j];
+			}
+			// j+1为什么不会超出索引,因为i始终小于triangle.size(),j和i同步递增,所以j+1也始终小于triangle.size()
+			return Math.min(dfs(triangle, i + 1, j, visited), dfs(triangle, i + 1, j + 1, visited)) + triangle.get(i).get(j);
+		}
+
+		public static void main(String[] args) {
+			List<List<Integer>> list = new ArrayList<>();
+			list.add(Arrays.asList(2));
+			list.add(Arrays.asList(3, 4));
+			list.add(Arrays.asList(6, 5, 7));
+			list.add(Arrays.asList(4, 1, 8, 3));
+			int i = minimumTotalV(list);
+			System.out.println(i);
+		}
+	}
+
+	/**
+	 * 5. 最长回文子串
+	 * 给你一个字符串 s，找到 s 中最长的回文子串。
+	 * 示例 1：
+	 * 输入：s = "babad"
+	 * 输出："bab"
+	 * 解释："aba" 同样是符合题意的答案。
+	 * 示例 2：
+	 * 输入：s = "cbbd"
+	 * 输出："bb"
+	 * 提示：
+	 * 1 <= s.length <= 1000
+	 * s 仅由数字和英文字母组成
+	 */
+	public static class LongestPalindrome {
+
+		/**
+		 * 先尝试用暴力的方式解题
+		 * 即切割出所有长度的字符串,当然长度为1的字符回文串长度也等于1;所以需要判断长度>=2的字符串是否为回文串
+		 * 时间复杂度O(n^3)
+		 */
+		public static String longestPalindrome(String s) {
+			if (s.length() < 2) return s;
+			// 最长回文串的长度
+			int max = 1, mi = 0;
+			char[] arr = s.toCharArray();
+			for (int i = 0; i < arr.length - 1; i++) {
+				for (int j = i + 1; j < arr.length; j++) {
+					// 字符串长度更大,且是回文串,则需要记录
+					if (j - i + 1 > max && isPalindrome(s, i, j)) {
+						max = j - i + 1;
+						mi = i;
+					}
+				}
+			}
+			return s.substring(mi, mi + max);
+		}
+
+		private static boolean isPalindrome(String s, int i, int j) {
+			while (i < j) {
+				if (s.charAt(i) == s.charAt(j)) {
+					i++;
+					j--;
+				} else {
+					return false;
+				}
+			}
+			return true;
+		}
+
+		/**
+		 * 如果s[i+1,j-1]为回文串,那么当s[i]==s[j]时,s[i,j]也为回文串,否则s[i,j]肯定不是回文串
+		 * 当i==j时 s[i,j]肯定为回文串
+		 * 当i+1==j时,如果s[i]==s[j] 那么s[i,j]也是回文串
+		 * 由于s[i,j]是否为回文串,取决于s[i+1,j-1]是否为回文串的结果,那么必须先得到s[i+1,j-1]是否为回文串
+		 * 可以看出s[i+1,j-1]是s[i,j]的子集范围 如果s[0,3] 取决于 s[1,2] ; s[0,2] 取决于s[1,1]
+		 * 所以想要判断长度为n的字符串是否为回文串,就必须先得到所有长度为n-1的字符串是否为回文串;
+		 * 那么以字符串的长度为遍历调整,构造出不同长度的字符串
+		 * <p>
+		 * 时间复杂度O(n^2)
+		 *
+		 * @param s
+		 * @return
+		 */
+		public static String longestPalindromeDp(String s) {
+			boolean[][] dp = new boolean[s.length()][s.length()];
+			// 单个字符肯定是回文串
+			for (int i = 0; i < dp.length; i++) {
+				dp[i][i] = true;
+			}
+			int max = 1, start = 0, l = 2;
+			for (; l <= s.length(); l++) {
+				for (int i = 0; i <= s.length() - l; i++) {
+					int j = i + l - 1;
+					if (s.charAt(i) == s.charAt(j)) {
+						if (l == 2) {
+							dp[i][j] = true;
+						} else {
+							dp[i][j] = dp[i + 1][j - 1];
+						}
+					} else {
+						dp[i][j] = false;
+					}
+					if (dp[i][j] && l > max) {
+						max = l;
+						start = i;
+					}
+				}
+			}
+			return s.substring(start, start + max);
+		}
+
+		/**
+		 * 中心点向两边拓展,拓展的方式有两种,一个元素向两边拓展,两个相同的元素向两边拓展
+		 *
+		 * @param s
+		 * @return
+		 */
+		public static String longestPalindromeII(String s) {
+			if (s.length() == 1) return s;
+			int start = 0, end = 0;
+			for (int i = 0; i < s.length(); i++) {  // i需要从0开始
+				int len1 = expendAroundCenter(s, i, i);
+				int len2 = expendAroundCenter(s, i, i + 1);
+				int len = Math.max(len1, len2);
+				if (len > end - start + 1) {  // 当出现更大长度的回文串时
+					start = i - (len - 1) / 2;
+					end = len / 2 + i;
+				}
+			}
+			return s.substring(start, end + 1);
+		}
+
+		/**
+		 * 从s[i,j]向两边扩展
+		 *
+		 * @param s
+		 * @param i
+		 * @param j
+		 * @return
+		 */
+		private static int expendAroundCenter(String s, int i, int j) {
+			while (i >= 0 && j < s.length() && s.charAt(i) == s.charAt(j)) {
+				i--;
+				j++;
+			}
+			return j - i - 1;  // 当i和j不符合回文串时,i和j都多加了1 所以与正确的长度差了2
+		}
+
+		public static void main(String[] args) {
+			String s = longestPalindromeII("bb");
+			System.out.println(s);
+		}
+	}
+
+	/**
+	 * 97. 交错字符串
+	 * 给定三个字符串 s1、s2、s3，请你帮忙验证 s3 是否是由 s1 和 s2 交错 组成的。
+	 * 两个字符串 s 和 t 交错 的定义与过程如下，其中每个字符串都会被分割成若干 非空
+	 * 子字符串
+	 * ：
+	 * s = s1 + s2 + ... + sn
+	 * t = t1 + t2 + ... + tm
+	 * |n - m| <= 1
+	 * 交错 是 s1 + t1 + s2 + t2 + s3 + t3 + ... 或者 t1 + s1 + t2 + s2 + t3 + s3 + ...
+	 * 注意：a + b 意味着字符串 a 和 b 连接。
+	 * 示例 1：
+	 * 输入：s1 = "aabcc", s2 = "dbbca", s3 = "aadbbcbcac"
+	 * 输出：true
+	 * 示例 2：
+	 * 输入：s1 = "aabcc", s2 = "dbbca", s3 = "aadbbbaccc"
+	 * 输出：false
+	 * 示例 3：
+	 * 输入：s1 = "", s2 = "", s3 = ""
+	 * 输出：true
+	 * 提示：
+	 * 0 <= s1.length, s2.length <= 100
+	 * 0 <= s3.length <= 200
+	 * s1、s2、和 s3 都由小写英文字母组成
+	 * 进阶：您能否仅使用 O(s2.length) 额外的内存空间来解决它?
+	 */
+	public static class IsInterleave {
+
+		/**
+		 * 首先|n-m|<=1,说明吗s1和s2的长度相差最多为1;
+		 * 题目中要求s1,s2交错拼接成为s3,假设s1连续拼接了两次,那这两次其实就可以作为一次来拼接;由于两个字符串长度相差1;
+		 * 所以拼接肯定是交替的.
+		 * 首先使用暴力搜索的方式,用i代表s1将要搜索到的字符位置,j代表s2将要搜索到的字符位置 那么i+j就是s3现在需要匹配的字符位置
+		 * 当s1[i]=s3[i+j] 说明  s1[i]可以匹配,那么继续下一位s1[i+1]和s3[i+j+1]是否匹配
+		 * 同理当s2[j]=s3[i+j] 说明s2[j]可以匹配,那么继续下一位s2[j+1]和s3[i+j+1]是否匹配
+		 *
+		 * @param s1
+		 * @param s2
+		 * @param s3
+		 * @return
+		 */
+
+		private static char[] c1, c2, c3;
+		private static int m, n, l;
+
+		public static boolean isInterleave(String s1, String s2, String s3) {
+			c1 = s1.toCharArray();
+			c2 = s2.toCharArray();
+			c3 = s3.toCharArray();
+			n = s1.length();
+			m = s2.length();
+			l = s3.length();
+			if (n + m != l) return false;
+			return dfs(0, 0);
+		}
+
+		/**
+		 * 当出现s1[i]!=s3[i+j]且s2[j]!=s3[i+j] 则说明无法构造出s3,当有一个条件可以构造,都可以继续往后面进行搜索
+		 *
+		 * @param i
+		 * @param j
+		 * @return
+		 */
+		private static boolean dfs(int i, int j) {
+			if (i + j == l) return true;
+			boolean ans = false;
+			if (i < n && c1[i] == c3[i + j]) ans |= dfs(i + 1, j);
+			if (j < m && c2[j] == c3[i + j]) ans |= dfs(i, j + 1);
+			return ans;
+		}
+
+		/**
+		 * 记忆化搜索,在s1=aac s2=bbd 交错方案中的aabbcd 和 aabbdc 有着相同的前缀aabb 所以可以记忆化
+		 *
+		 * @param s1
+		 * @param s2
+		 * @param s3
+		 * @return
+		 */
+		public static boolean isInterleaveI(String s1, String s2, String s3) {
+			c1 = s1.toCharArray();
+			c2 = s2.toCharArray();
+			c3 = s3.toCharArray();
+			n = s1.length();
+			m = s2.length();
+			l = s3.length();
+			if (n + m != l) return false;
+			int[][] visited = new int[n + 1][m + 1];
+			return dfs(0, 0, visited);
+		}
+
+		private static boolean dfs(int i, int j, int[][] visited) {
+			if (visited[i][j] != 0) return visited[i][j] == 1;
+			if (i + j == l) return true;
+			boolean ans = false;
+			if (i < n && c1[i] == c3[i + j]) ans |= dfs(i + 1, j, visited);
+			if (j < m && c2[j] == c3[i + j]) ans |= dfs(i, j + 1, visited);
+			visited[i][j] = ans ? 1 : -1;
+			return ans;
+		}
+
+		/**
+		 * dp[i][j]表示s3的前i+j个字符由s1的前i个字符和s2的前j个字符组成
+		 * dp[i][j]取决于dp[i-1][j]&&s1[i]==s3[i+j] 或者dp[i][j-1]&&s2[j]==s3[i+j]
+		 * dp[0][0]=true;
+		 *
+		 * @param s1
+		 * @param s2
+		 * @param s3
+		 * @return
+		 */
+		public static boolean isInterleaveDp(String s1, String s2, String s3) {
+			int n = s1.length(), m = s2.length(), t = s3.length();
+			if (m + n != t) return false;
+			boolean[][] dp = new boolean[n + 1][m + 1];
+			dp[0][0] = true;
+			for (int i = 0; i <= n; i++) {
+				for (int j = 0; j <= m; j++) {
+					int p = i + j - 1;
+					if (i > 0) dp[i][j] = dp[i][j] || (dp[i - 1][j] && s1.charAt(i - 1) == s3.charAt(p));
+					if (j > 0) dp[i][j] = dp[i][j] || (dp[i][j - 1] && s2.charAt(j - 1) == s3.charAt(p));
+				}
+			}
+			return dp[n][m];
+		}
+
+		/**
+		 * 由于dp二位数组数组中,第i行只和第i-1行相关;那么前面的i-1前面的行是不需要的,可以使用滚动数组
+		 *
+		 * @param s1
+		 * @param s2
+		 * @param s3
+		 * @return
+		 */
+		public static boolean isInterleaveDpI(String s1, String s2, String s3) {
+			int n = s1.length(), m = s2.length(), t = s3.length();
+			if (m + n != t) return false;
+			boolean[] dp = new boolean[m + 1];
+			dp[0] = true;
+			for (int i = 0; i <= n; i++) {
+				for (int j = 0; j <= m; j++) {
+					int p = i + j - 1;
+					if (i > 0) dp[j] = dp[j] && s1.charAt(i - 1) == s3.charAt(p);
+					if (j > 0) dp[j] = dp[j] || dp[j - 1] && s2.charAt(j - 1) == s3.charAt(p);
+				}
+			}
+			return dp[m];
+		}
+
+		public static void main(String[] args) {
+			boolean interleaveI = isInterleaveDpI("aabcc", "dbbca", "aadbbcbcac");
+			System.out.println(interleaveI);
+		}
+	}
+
+
+	/**
+	 * 72. 编辑距离
+	 * 给你两个单词 word1 和 word2， 请返回将 word1 转换成 word2 所使用的最少操作数  。
+	 * 你可以对一个单词进行如下三种操作：
+	 * 插入一个字符
+	 * 删除一个字符
+	 * 替换一个字符
+	 * 示例 1：
+	 * 输入：word1 = "horse", word2 = "ros"
+	 * 输出：3
+	 * 解释：
+	 * horse -> rorse (将 'h' 替换为 'r')
+	 * rorse -> rose (删除 'r')
+	 * rose -> ros (删除 'e')
+	 * 示例 2：
+	 * 输入：word1 = "intention", word2 = "execution"
+	 * 输出：5
+	 * 解释：
+	 * intention -> inention (删除 't')
+	 * inention -> enention (将 'i' 替换为 'e')
+	 * enention -> exention (将 'n' 替换为 'x')
+	 * exention -> exection (将 'n' 替换为 'c')
+	 * exection -> execution (插入 'u')
+	 * 提示：
+	 * 0 <= word1.length, word2.length <= 500
+	 * word1 和 word2 由小写英文字母组成
+	 */
+	public static class MinDistance {
+
+		private static int min = Integer.MAX_VALUE;
+
+		/**
+		 * 先使用递归的方式解题,后面再分析状态转移表达式
+		 *
+		 * @param word1
+		 * @param word2
+		 * @return
+		 */
+		public static int minDistance(String word1, String word2) {
+			dfs(word1, word2, 0, 0, 0);
+			return min;
+		}
+
+		/**
+		 * 针对word2将word1进行改造,改造的方式有三种
+		 * 1.新增
+		 * 2.修改
+		 * 3.删除 当word1中的字符已经没有时,不能删除;当word2中已经不存在字符时,只能删除
+		 *
+		 * @param i
+		 * @param j
+		 * @return
+		 */
+		private static void dfs(String word1, String word2, int i, int j, int v) {
+			if (i >= word1.length()) {  // word1已经到末尾了只能新增word1
+				min = Math.min(min, v + word2.length() - j);
+				return;
+			}
+			if (j >= word2.length()) {  // word2已经到了末尾了只能删除word1
+				min = Math.min(min, v + word1.length() - i);
+				return;
+			}
+			if (word1.charAt(i) != word2.charAt(j)) {
+				// 三种场景
+				// 1.新增
+				dfs(word1, word2, i, j + 1, v + 1);
+				// 2.删除
+				dfs(word1, word2, i + 1, j, v + 1);
+				// 3.编辑
+				dfs(word1, word2, i + 1, j + 1, v + 1);
+			} else {
+				dfs(word1, word2, i + 1, j + 1, v);  // 匹配到了,直接匹配下一个字符
+			}
+		}
+
+		/**
+		 * 思考如何剪枝?
+		 *
+		 * @param word1
+		 * @param word2
+		 * @return
+		 */
+		public static int minDistanceI(String word1, String word2) {
+			Integer[][] visited = new Integer[word1.length()][word2.length()];
+			dfs(word1, word2, 0, 0, 0, visited);
+			return min;
+		}
+
+		/**
+		 * 剪枝
+		 *
+		 * @param word1
+		 * @param word2
+		 * @param i
+		 * @param j
+		 * @param v
+		 * @param visited
+		 */
+		private static void dfs(String word1, String word2, int i, int j, int v, Integer[][] visited) {
+			if (i >= word1.length()) {  // word1已经到末尾了只能新增word1
+				min = Math.min(min, v + word2.length() - j);
+				return;
+			}
+			if (j >= word2.length()) {  // word2已经到了末尾了只能删除word1
+				min = Math.min(min, v + word1.length() - i);
+				return;
+			}
+			Integer v1;
+			if ((v1 = visited[i][j]) != null && v > v1) {  // 已经搜索过的直接返回
+				return;
+			}
+			visited[i][j] = v;
+			if (word1.charAt(i) != word2.charAt(j)) {
+				// 三种场景
+				// 1.新增
+				dfs(word1, word2, i, j + 1, v + 1, visited);
+				// 2.删除
+				dfs(word1, word2, i + 1, j, v + 1, visited);
+				// 3.编辑
+				dfs(word1, word2, i + 1, j + 1, v + 1, visited);
+			} else {
+				dfs(word1, word2, i + 1, j + 1, v, visited);  // 匹配到了,直接匹配下一个字符
+			}
+		}
+
+		/**
+		 * 动态规划
+		 * 设置两个字符串为A,B
+		 * dp[i][j-1]为A的前i个字符和b的前j-1个字符;那dp[i][j]即是在其基础上对A的第i+1的位置添加一个字符
+		 * dp[i-1][j]为A的前i-1个字符和b的前j个字符;那dp[i][j]即是在其基础上对A的i的位置删除一个字符
+		 * dp[i-1][j-1]为A的前i-1个字符和b的前j-1个字符;那dp[i][j]即是在其基础上对A的i位置修改一个字符
+		 * 当最后需要比较的字符相同时,则不需要操作,直接跳过
+		 * 状态转移表达式:
+		 * 若需要比较的字符相同
+		 * dp[i][j]=min(dp[i][j-1]+1,dp[i-1][j]+1,dp[i-1][j-1])
+		 * 若需要比较的字符不同
+		 * dp[i][j]=min(dp[i][j-1]+1,dp[i-1][j]+1,dp[i-1][j-1]+1)
+		 */
+		public static int minDistanceDp(String word1, String word2) {
+			int n = word1.length(), m = word2.length();
+			if (m * n == 0) return m + n;
+			int[][] dp = new int[n + 1][m + 1];
+			for (int i = 0; i <= n; i++) {
+				dp[i][0] = i;
+			}
+			for (int j = 0; j <= m; j++) {
+				dp[0][j] = j;
+			}
+			for (int i = 1; i <= n; i++) {
+				for (int j = 1; j <= m; j++) {
+					int left = dp[i - 1][j] + 1;
+					int down = dp[i][j - 1] + 1;
+					int left_down = dp[i - 1][j - 1];
+					if (word1.charAt(i - 1) != word2.charAt(j - 1)) {
+						left_down++;
+					}
+					dp[i][j] = Math.min(left, Math.min(down, left_down));
+				}
+			}
+			return dp[n][m];
+		}
+
+		public static int minDistanceDpI(String word1, String word2) {
+			int n = word1.length(), m = word2.length();
+			if (m * n == 0) return m + n;
+			int[][] dp = new int[n + 1][m + 1];
+			for (int i = 0; i <= n; i++) {
+				dp[i][0] = i;
+			}
+			for (int j = 0; j <= m; j++) {
+				dp[0][j] = j;
+			}
+			for (int i = 1; i <= n; i++) {
+				for (int j = 1; j <= m; j++) {
+					int left = dp[i - 1][j] + 1;
+					int down = dp[i][j - 1] + 1;
+					int left_down = dp[i - 1][j - 1];
+					if (word1.charAt(i - 1) == word2.charAt(j - 1)) {
+						dp[i][j] = left_down;
+					} else {
+						dp[i][j] = Math.min(left, Math.min(down, left_down + 1));
+					}
+				}
+			}
+			return dp[n][m];
+		}
+
+		public static void main(String[] args) {
+			int i = minDistanceDpI("horse", "ros");
+			System.out.println(i);
+		}
+	}
+
+	/**
+	 * 221. 最大正方形
+	 * 在一个由 '0' 和 '1' 组成的二维矩阵内，找到只包含 '1' 的最大正方形，并返回其面积。
+	 * 示例 1：
+	 * 输入：matrix = [["1","0","1","0","0"],["1","0","1","1","1"],["1","1","1","1","1"],["1","0","0","1","0"]]
+	 * 输出：4
+	 * 示例 2：
+	 * 输入：matrix = [["0","1"],["1","0"]]
+	 * 输出：1
+	 * 示例 3：
+	 * 输入：matrix = [["0"]]
+	 * 输出：0
+	 * 提示：
+	 * m == matrix.length
+	 * n == matrix[i].length
+	 * 1 <= m, n <= 300
+	 * matrix[i][j] 为 '0' 或 '1'
+	 */
+	public static class MaximalSquare {
+
+		/**
+		 * 如何判断1所覆盖的正方行呢?岛屿问题中有计算过最大的岛屿面积
+		 * 正方形取决于当前位置a[i][j]的左,上,左上方向坐标的值是否为1
+		 * 如都都为,那么当前坐标位置可以构成一个正方形且边长为2;
+		 * 通过画出图形可知,当前坐标可以构成正方形的变成为dp[i],如果a[i][j]=0 => dp[i][j]=0
+		 * 如果a[i][j]=1 => dp[i][j]=Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1])+1
+		 */
+		public static int maximalSquare(char[][] matrix) {
+			int n = matrix.length, m = matrix[0].length, max = 0;
+			int[][] dp = new int[n][m];
+			for (int i = 0; i < n; i++) {
+				dp[i][0] = matrix[i][0] - '0';
+				max = Math.max(max, dp[i][0]);
+			}
+			for (int j = 0; j < m; j++) {
+				dp[0][j] = matrix[0][j] - '0';
+				max = Math.max(max, dp[0][j]);
+			}
+			for (int i = 1; i < n; i++) {
+				for (int j = 1; j < m; j++) {
+					if (matrix[i][j] == '1') {
+						dp[i][j] = Math.min(dp[i - 1][j], Math.min(dp[i][j - 1], dp[i - 1][j - 1])) + 1;
+						max = Math.max(max, dp[i][j]);
+					} else {
+						dp[i][j] = 0;
+					}
+				}
+			}
+			return max * max;
+		}
+
+		/**
+		 * 代码技巧,初始化第一行第一列,可以放在循环中进行
+		 *
+		 * @param matrix
+		 * @return
+		 */
+		public static int maximalSquareI(char[][] matrix) {
+			int n = matrix.length, m = matrix[0].length, max = 0;
+			int[][] dp = new int[n][m];
+			for (int i = 0; i < n; i++) {
+				for (int j = 0; j < m; j++) {
+					if (matrix[i][j] == '1') {
+						if (i == 0 || j == 0) {
+							dp[i][j] = 1;
+						} else {
+							dp[i][j] = Math.min(dp[i - 1][j], Math.min(dp[i][j - 1], dp[i - 1][j - 1])) + 1;
+						}
+						max = Math.max(max, dp[i][j]);
+					}
+				}
+			}
+			return max * max;
+		}
+
+		public static int maximalSquareII(char[][] matrix) {
+			int n = matrix.length, m = matrix[0].length, max = 0;
+			int[] dp = new int[m + 1];
+			for (int i = 0; i < n; i++) {
+				int left_up = 0;
+				for (int j = 0; j < m; j++) {
+					int newLeft_up = dp[j + 1];
+					if (matrix[i][j] == '1') {
+						dp[j + 1] = Math.min(Math.min(dp[j], dp[j + 1]), left_up) + 1;
+						max = Math.max(max, dp[j + 1]);
+					} else {
+						dp[j + 1] = 0;
+					}
+					left_up = newLeft_up;
+				}
+			}
+			return max * max;
+		}
+
+		// 终版代码
+		public static int maximalSquareIII(char[][] matrix) {
+			if (matrix == null || matrix.length < 1 || matrix[0].length < 1) return 0;
+			int height = matrix.length;
+			int width = matrix[0].length;
+			int maxSide = 0;
+
+			int[] dp = new int[width + 1];
+
+			for (char[] chars : matrix) {
+				int northwest = 0; // 个人建议放在这里声明，而非循环体外
+				for (int col = 0; col < width; col++) {
+					int nextNorthwest = dp[col + 1];
+					if (chars[col] == '1') {
+						dp[col + 1] = Math.min(Math.min(dp[col], dp[col + 1]), northwest) + 1;
+						maxSide = Math.max(maxSide, dp[col + 1]);
+					} else dp[col + 1] = 0;
+					northwest = nextNorthwest;
+				}
+			}
+			return maxSide * maxSide;
+		}
+
+		public static void main(String[] args) {
+			char[][] matrix = new char[][]{{'1', '1', '1', '1', '1'}, {'1', '1', '1', '1', '1'}, {'0', '0', '0', '0', '0'}, {'1', '1', '1', '1', '1'}, {'1', '1', '1', '1', '1'}};
+			/*char[][] matrix = new char[][]{
+					{'0', '1'},
+					{'1', '0'}
+			};*/
+			int i = maximalSquareIII(matrix);
+			System.out.println(i);
+		}
+	}
+
 }
 
