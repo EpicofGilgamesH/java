@@ -774,4 +774,86 @@ public class LeetCodeCase {
 			}));
 		}
 	}
+
+	/**
+	 * 283. 移动零
+	 * 给定一个数组 nums，编写一个函数将所有 0 移动到数组的末尾，同时保持非零元素的相对顺序。
+	 * 请注意 ，必须在不复制数组的情况下原地对数组进行操作。
+	 * 示例 1:
+	 * 输入: nums = [0,1,0,3,12]
+	 * 输出: [1,3,12,0,0]
+	 * 示例 2:
+	 * 输入: nums = [0]
+	 * 输出: [0]
+	 * 提示:
+	 * 1 <= nums.length <= 104
+	 * -231 <= nums[i] <= 231 - 1
+	 * 进阶：你能尽量减少完成的操作次数吗？
+	 */
+	public static class MoveZeroes {
+
+		/**
+		 * 原地移动,且尽量减少移动的次数,那么首先要想到的就是交换
+		 * 设置i,j两个指针,i是游标指针,j是记录当前数组中首个0的位置
+		 * 首先找到第一个出现的0,当这个0后面出现了第一个不为0的数,即交换他们的位置;次数不为0的数顺序不变
+		 * 一直到i遍历完数组
+		 * [0,1,0,3,12]
+		 * [1,0,0,3,12]
+		 * [1,3,0,0,12]
+		 * [1,2,12,0,0]
+		 *
+		 * @param nums
+		 */
+		public static void moveZeroes(int[] nums) {
+			int i = 0, j = 0;
+			while (i < nums.length) {
+				if (nums[i] == 0) {
+					j = i;
+					break;
+				}
+				i++;
+			}
+			i++;
+			while (i < nums.length) {
+				if (nums[i] != 0) {
+					// swap
+					int temp = nums[i];
+					nums[i] = nums[j];
+					nums[j] = temp;
+					j++;
+				}
+				i++;
+			}
+		}
+
+		public static void moveZeroesI(int[] nums) {
+			int j = 0;
+			for (int i = 0; i < nums.length; i++) {
+				if (nums[i] == 0) {
+					continue;
+				}
+				// swap
+				if (i > j) {
+					int temp = nums[i];
+					nums[i] = nums[j];
+					nums[j] = temp;
+				}
+				j++;
+			}
+		}
+
+		public static void main(String[] args) {
+			int[] arr = {2, 1};
+			moveZeroesI(arr);
+			System.out.println();
+			List<Integer> list = new ArrayList<>();
+			list.add(1);
+			list.add(2);
+			List<Integer> list1 = new ArrayList<>();
+			list1.add(3);
+			list1.addAll(list);
+			list.clear();
+			System.out.println(list1);
+		}
+	}
 }
