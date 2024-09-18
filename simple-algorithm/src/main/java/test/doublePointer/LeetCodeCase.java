@@ -856,4 +856,119 @@ public class LeetCodeCase {
 			System.out.println(list1);
 		}
 	}
+
+	/**
+	 * 560. 和为 K 的子数组
+	 * 给你一个整数数组 nums 和一个整数 k ，请你统计并返回 该数组中和为 k 的子数组的个数 。
+	 * 子数组是数组中元素的连续非空序列。
+	 * 示例 1：
+	 * 输入：nums = [1,1,1], k = 2
+	 * 输出：2
+	 * 示例 2：
+	 * 输入：nums = [1,2,3], k = 3
+	 * 输出：2
+	 * 提示：
+	 * 1 <= nums.length <= 2 * 104
+	 * -1000 <= nums[i] <= 1000
+	 * -107 <= k <= 107
+	 */
+	public static class SubarraySum {
+
+		/**
+		 * 双指针的方式,s,e分别指向子数组的首尾两端
+		 * 1.当sum < k时,e向后移动,并更新sum
+		 * 2.当sum > k时,s向后移动,并更新sum
+		 * 3.当sum = k时,s和e同时向后移动
+		 * 移动的过程中保证s<=e,如果是负数呢?
+		 * 以上考虑数组中元素都为正数的情况*************
+		 *
+		 * @param nums
+		 * @param k
+		 * @return
+		 */
+		@Deprecated
+		public static int subarraySum(int[] nums, int k) {
+			int s = 0, e = 0, sum = nums[0], count = 0;
+			while (true) {
+				if (sum < k) {
+					e++;
+					if (e == nums.length) break;
+					sum += nums[e];
+				} else if (sum > k) {
+					int pre = nums[s];
+					s++;
+					if (s == nums.length) break;
+					sum -= pre;
+					if (s > e) {
+						e++;
+						sum += nums[e];
+					}
+				} else {
+					count++;
+					sum -= nums[s];
+					s++;
+					e++;
+					sum += nums[e];
+				}
+			}
+			return count;
+		}
+
+		@Deprecated
+		public static int subarraySumI(int[] nums, int k) {
+			int s = 0, e = 0, sum = nums[0], count = 0;
+			while (true) {
+				if (sum < k) {
+					if (e + 1 == nums.length) break;
+					sum += nums[++e];
+				} else if (sum > k) {
+					if (s + 1 == nums.length) break;
+					sum -= nums[s++];
+					if (s > e) {
+						sum += nums[++e];
+					}
+				} else {
+					count++;
+					if (e + 1 == nums.length || s + 1 == nums.length) break;
+					sum -= nums[s++];
+					sum += nums[++e];
+				}
+			}
+			return count;
+		}
+
+		/**
+		 * 官方思路
+		 * 数组的前i个元素和为pre[i]=pre[i-1]+nums[i]
+		 * 那[j...i]的和如果为k,就有pre[i]-pre[j-1]=k
+		 * pre[j-1]=pre[i]-k
+		 * 通过以上公式,要找出[0...i]之前和等于k的元素,就必须遍历所有的pre[i]-k 等于pre[j-1]
+		 * 也就是说前i个元素和减去k的值,是前j-1个元素的和 其中0<=j<=i
+		 *
+		 * @param nums
+		 * @param k
+		 * @return
+		 */
+		public static int subarraySumOfficial(int[] nums, int k) {
+			int count = 0, pre = 0;
+			Map<Integer, Integer> map = new HashMap<>();
+			// 为什么初始化前i项和为0的数量是1,pre[j-1]=pre[i]-k ;也就是pre[j-1]=0时,pre[i]-k==0
+			// 即pre[i]==k 那就是前i项和为k;即初始化前i项和为k的数量是1;当前i项和刚好等于k时,此时i=j
+			// 但是pre[i]还未初始化,因为每次计算pre[i]之后再统计pre[j]是否满足,所以不初始化会漏掉这种情况
+			map.put(0, 1);
+			for (int i = 0; i < nums.length; i++) {
+				pre += nums[i];
+				if (map.containsKey(pre - k)) {
+					count += map.get(pre - k);
+				}
+				map.put(pre, map.getOrDefault(pre, 0) + 1);
+			}
+			return count;
+		}
+
+		public static void main(String[] args) {
+			int i = subarraySumOfficial(new int[]{1, -1, 0}, 0);
+			System.out.println(i);
+		}
+	}
 }

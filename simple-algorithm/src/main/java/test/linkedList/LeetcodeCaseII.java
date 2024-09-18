@@ -2,10 +2,7 @@ package test.linkedList;
 
 import lombok.val;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class LeetcodeCaseII {
 
@@ -1435,6 +1432,102 @@ public class LeetcodeCaseII {
 			System.out.println(cache.get(3));
 			System.out.println(cache.get(4));
 			System.out.println();
+		}
+	}
+
+	/**
+	 * 234. 回文链表
+	 * 给你一个单链表的头节点 head ，请你判断该链表是否为
+	 * 回文链表
+	 * 。如果是，返回 true ；否则，返回 false 。
+	 * 示例 1：
+	 * 输入：head = [1,2,2,1]
+	 * 输出：true
+	 * 示例 2：
+	 * 输入：head = [1,2]
+	 * 输出：false
+	 * 提示：
+	 * 链表中节点数目在范围[1, 105] 内
+	 * 0 <= Node.val <= 9
+	 * 进阶：你能否用 O(n) 时间复杂度和 O(1) 空间复杂度解决此题？
+	 */
+	public static class IsPalindrome {
+
+		/**
+		 * 转换成数组,然后判断数组是否为回文数组
+		 *
+		 * @param head
+		 * @return
+		 */
+		public static boolean isPalindrome(ListNode head) {
+			if (head == null) return true;
+			List<Integer> list = new ArrayList<>();
+			while (head != null) {
+				list.add(head.val);
+				head = head.next;
+			}
+			for (int i = 0; i < list.size() / 2; i++) {
+				if (!Objects.equals(list.get(i), list.get(list.size() - i - 1))) {
+					return false;
+				}
+			}
+			return true;
+		}
+
+		/**
+		 * 可以找到找到链表的中心点;反转前部分链表,然后分别遍历前后两部分链表
+		 *
+		 * @param head
+		 * @return
+		 */
+		public static boolean isPalindromeI(ListNode head) {
+			if (head == null) return true;
+			int count = 0;
+			ListNode node = head;
+			while (node != null) {
+				count++;
+				node = node.next;
+			}
+			if (count == 1) return true;
+			if (count == 2) return head.val == head.next.val;
+			if (count == 3) return head.val == head.next.next.val;
+			int mid = count / 2;
+			boolean odd = count % 2 != 0;
+			ListNode pre = head, cur = head.next, next = null;
+			pre.next = null; // 头指针指向null
+			while (mid - 1 > 0) {  // 反正中间位置的链表
+				next = cur.next;
+				cur.next = pre;
+				pre = cur;
+				cur = next;
+				mid--;
+			}
+			ListNode left = pre, right = odd ? next.next : next;
+			while (left != null) {
+				if (left.val != right.val) {
+					return false;
+				}
+				left = left.next;
+				right = right.next;
+			}
+			return true;
+		}
+
+		public static void main(String[] args) {
+			ListNode head = new ListNode(1);
+			ListNode node2 = new ListNode(2);
+			ListNode node3 = new ListNode(3);
+/*			ListNode node4 = new ListNode(4);
+			ListNode node3_1 = new ListNode(3);
+			ListNode node2_1 = new ListNode(2);
+			ListNode node1_1 = new ListNode(1);*/
+			head.next = node2;
+			node2.next = node3;
+		/*	node3.next = node4;
+			node4.next = node3_1;
+			node3_1.next = node2_1;
+			node2_1.next = node1_1;*/
+			System.out.println(isPalindromeI(head));
 		}
 	}
 }

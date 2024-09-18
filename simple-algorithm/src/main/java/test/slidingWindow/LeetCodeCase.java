@@ -102,4 +102,127 @@ public class LeetCodeCase {
 			System.out.println(anagrams);
 		}
 	}
+
+	/**
+	 * 76. 最小覆盖子串
+	 * 给你一个字符串 s 、一个字符串 t 。返回 s 中涵盖 t 所有字符的最小子串。如果 s 中不存在涵盖 t 所有字符的子串，则返回空字符串 "" 。
+	 * 注意：
+	 * 对于 t 中重复字符，我们寻找的子字符串中该字符数量必须不少于 t 中该字符数量。
+	 * 如果 s 中存在这样的子串，我们保证它是唯一的答案。
+	 * 示例 1：
+	 * 输入：s = "ADOBECODEBANC", t = "ABC"
+	 * 输出："BANC"
+	 * 解释：最小覆盖子串 "BANC" 包含来自字符串 t 的 'A'、'B' 和 'C'。
+	 * 示例 2：
+	 * 输入：s = "a", t = "a"
+	 * 输出："a"
+	 * 解释：整个字符串 s 是最小覆盖子串。
+	 * 示例 3:
+	 * 输入: s = "a", t = "aa"
+	 * 输出: ""
+	 * 解释: t 中两个字符 'a' 均应包含在 s 的子串中，
+	 * 因此没有符合条件的子字符串，返回空字符串。
+	 * 提示：
+	 * m == s.length
+	 * n == t.length
+	 * 1 <= m, n <= 105
+	 * s 和 t 由英文字母组成
+	 * 进阶：你能设计一个在 o(m+n) 时间内解决此问题的算法吗？
+	 */
+	public static class MinWindow {
+
+		/**
+		 * 滑动窗口,窗口的大小不固定
+		 * 窗口的左右边界为left,right;初始情况下,当窗体中出现的字符不符合t中出现字符的个数时,right不停地想右移动
+		 * 之后开始移动left,直到窗体没有覆盖t中出现的字符;
+		 * 重复以上步骤
+		 * 在找到覆盖t的窗口时,更新ansLeft和ansRight,如何更新呢?当right-left更小时,即更新
+		 *
+		 * @param s
+		 * @param t
+		 * @return
+		 */
+		public static String minWindow(String s, String t) {
+			int ansLeft = -1, ansRight = s.length(), left = 0;
+			int[] cntT = new int[128];  // 所有的ASCII字符
+			int[] cntS = new int[128];
+			for (int i = 0; i < t.length(); i++) {  // 记录t中每个字符出现的次数
+				cntT[t.charAt(i)]++;
+			}
+			for (int right = 0; right < s.length(); right++) {
+				char crrRight = s.charAt(right);
+				cntS[crrRight]++;
+				while (isCovered(cntS, cntT)) { // 如果覆盖了,更新ansLeft,ansRight
+					if (right - left < ansRight - ansLeft) {
+						ansLeft = left;
+						ansRight = right;
+					}
+					cntS[s.charAt(left++)]--;
+				}
+			}
+			return ansLeft < 0 ? "" : s.substring(ansLeft, ansRight + 1);
+		}
+
+		private static boolean isCovered(int[] cntS, int[] cntT) {
+			for (int i = 'A'; i <= 'Z'; i++) {
+				if (cntS[i] < cntT[i]) {
+					return false;
+				}
+			}
+			for (int i = 'a'; i <= 'z'; i++) {
+				if (cntS[i] < cntT[i]) {
+					return false;
+				}
+			}
+			return true;
+		}
+
+		/**
+		 * 优化方法,避免每次都去比较cntS出现字母的次数覆盖所有cntT
+		 * 因为每次cntS都只会移入right或者移除left,那么用less表示cntS相对于cntT中字母缺失的字母种类
+		 * 比如cntT= [A:1,B:1,C:1] 那么初始化时cntS确实的字母种类为3
+		 * 那么在cntS移入right时,如果cntS[right]==cntT[right] 那么说明right字母数量相等了,后续可能cntS[right] > cntT[right]
+		 * 但是less只能减一,减去这种字母的缺失
+		 * 那么在cntS移除left时,如果cntS[left]==cntT[left] 那么说明left字母数量相等了,后续可能cntS[left] < cntT[left],
+		 * 但是同样less只能+1,加上这种字母的缺失
+		 * 所以始终只需要在cntS移入和移除元素时,对less进行维护;当less=0时,说明cntS相对于cntT中字母缺失的字母种类为0
+		 * <p>
+		 * 相当巧妙的方法,滑动窗体常遇场景
+		 *
+		 * @param s
+		 * @param t
+		 * @return
+		 */
+		public static String minWindowI(String s, String t) {
+			int ansLeft = -1, ansRight = s.length(), left = 0, less = 0;
+			int[] cntT = new int[128];  // 所有的ASCII字符
+			int[] cntS = new int[128];
+			for (int i = 0; i < t.length(); i++) {  // 记录t中每个字符出现的次数
+				if (cntT[t.charAt(i)]++ == 0) {  // less记录t中出现的字母种类个数
+					less++;
+				}
+			}
+			for (int right = 0; right < s.length(); right++) {
+				char crrRight = s.charAt(right);
+				if (++cntS[crrRight] == cntT[crrRight]) {  // crrRight字母数量相同时,less减一
+					less--;
+				}
+				while (less == 0) { // cntS相对于cntT中字母缺失的字母种类为0
+					if (right - left < ansRight - ansLeft) {
+						ansLeft = left;
+						ansRight = right;
+					}
+					char crrLeft = s.charAt(left++);
+					if (cntS[crrLeft]-- == cntT[crrLeft]) {  // 从覆盖为前提,窗口左边后移时,字母crrLeft可能从等于变成小于
+						less++;
+					}
+				}
+			}
+			return ansLeft < 0 ? "" : s.substring(ansLeft, ansRight + 1);
+		}
+
+		public static void main(String[] args) {
+			System.out.println(minWindowI("ADOBECODEBANC", "ABC"));
+		}
+	}
 }
