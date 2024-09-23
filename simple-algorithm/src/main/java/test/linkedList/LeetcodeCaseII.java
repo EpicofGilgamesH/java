@@ -1,7 +1,5 @@
 package test.linkedList;
 
-import lombok.val;
-
 import java.util.*;
 
 public class LeetcodeCaseII {
@@ -1528,6 +1526,150 @@ public class LeetcodeCaseII {
 			node3_1.next = node2_1;
 			node2_1.next = node1_1;*/
 			System.out.println(isPalindromeI(head));
+		}
+	}
+
+	/**
+	 * 147. 对链表进行插入排序
+	 * 给定单个链表的头 head ，使用 插入排序 对链表进行排序，并返回 排序后链表的头 。
+	 * 插入排序 算法的步骤:
+	 * 插入排序是迭代的，每次只移动一个元素，直到所有元素可以形成一个有序的输出列表。
+	 * 每次迭代中，插入排序只从输入数据中移除一个待排序的元素，找到它在序列中适当的位置，并将其插入。
+	 * 重复直到所有输入数据插入完为止。
+	 * 下面是插入排序算法的一个图形示例。部分排序的列表(黑色)最初只包含列表中的第一个元素。每次迭代时，从输入数据中删除一个元素(红色)，并就地插入已排序的列表中。
+	 * 对链表进行插入排序。
+	 * 示例 1：
+	 * 输入: head = [4,2,1,3]
+	 * 输出: [1,2,3,4]
+	 * 示例 2：
+	 * 输入: head = [-1,5,3,4,0]
+	 * 输出: [-1,0,3,4,5]
+	 * 提示：
+	 * 列表中的节点数在 [1, 5000]范围内
+	 * -5000 <= Node.val <= 5000
+	 */
+	public static class InsertionSortList {
+
+		/**
+		 * 插入排序的思路,分为已排区和未排区;每次从未排区拿出一个元素,与已排区元素逐个比较,找到放入的位置进行插入操作
+		 *
+		 * @param head
+		 * @return
+		 */
+		public static ListNode insertionSortList(ListNode head) {
+			if (head == null || head.next == null) return head;
+			ListNode sortHead = head, unSortHead = head.next;
+			sortHead.next = null;
+			while (unSortHead != null) {  // 未排区头节点不为null
+				ListNode sortNode = sortHead, sortPre = null, unSortNex = unSortHead.next;
+				unSortHead.next = null; // 未排区头节点从未排区删除
+				boolean flag = false;
+				while (sortNode != null) {
+					if (unSortHead.val < sortNode.val) {  // 未排区头节点插入到sortNode的前面
+						flag = true;
+						if (sortPre == null) {
+							unSortHead.next = sortHead;
+							sortHead = unSortHead;
+						} else {
+							sortPre.next = unSortHead;  // 插入中间
+							unSortHead.next = sortNode;
+						}
+						break;
+					}
+					sortPre = sortNode;
+					sortNode = sortNode.next;
+				}
+				if (!flag) sortPre.next = unSortHead;
+				unSortHead = unSortNex;
+
+			}
+			return sortHead;
+		}
+
+		/**
+		 * 记录已排序区的最后一个节点,如果当前插入元素大于等于已排区最后一个元素时,直接将其放在最后
+		 *
+		 * @param head
+		 * @return
+		 */
+		public static ListNode insertionSortListI(ListNode head) {
+			if (head == null) return head;
+			ListNode sortHead = head, sortTail = head, unSortHead = head.next;
+			sortHead.next = null;
+			while (unSortHead != null) {  // 未排区头节点不为null
+				ListNode sortNode = sortHead, sortPre = null, unSortNex = unSortHead.next;
+				unSortHead.next = null; // 未排区头节点从未排区删除
+				if (sortTail.val <= unSortHead.val) { // 未排区头节点值大于等于已排区最后一个节点值时,应该放在末尾
+					sortTail.next = unSortHead;
+					sortTail = unSortHead;
+				} else {
+					while (sortNode != null) {
+						if (unSortHead.val < sortNode.val) {  // 未排区头节点插入到sortNode的前面
+							if (sortPre == null) {
+								unSortHead.next = sortHead;
+								sortHead = unSortHead;
+							} else {
+								sortPre.next = unSortHead;  // 插入中间
+								unSortHead.next = sortNode;
+							}
+							break;
+						}
+						sortPre = sortNode;
+						sortNode = sortNode.next;
+					}
+				}
+				unSortHead = unSortNex;
+			}
+			return sortHead;
+		}
+
+		/**
+		 * 官方思路中,已排区最后一个元素lastSorted,还有一个作用,即其next为为排区的第一个元素
+		 * 这样代码将会非常简洁
+		 *
+		 * @param head
+		 * @return
+		 */
+		public static ListNode insertionSortListII(ListNode head) {
+			if (head == null) return null;
+			ListNode dummyHead = new ListNode(0);
+			dummyHead.next = head;
+			ListNode lastSorted = head, curr = head.next;
+			while (curr != null) {
+				if (lastSorted.val <= curr.val) {
+					lastSorted = lastSorted.next;
+				} else {
+					ListNode prev = dummyHead;
+					while (prev.next.val <= curr.val) {
+						prev = prev.next;
+					}
+					lastSorted.next = curr.next;
+					curr.next = prev.next;
+					prev.next = curr;
+				}
+				curr = lastSorted.next;
+			}
+			return dummyHead.next;
+		}
+
+		public static void main(String[] args) {
+			ListNode head = new ListNode(6);
+			ListNode n5 = new ListNode(5);
+			ListNode n3 = new ListNode(3);
+			ListNode n1 = new ListNode(1);
+			ListNode n8 = new ListNode(8);
+			ListNode n7 = new ListNode(7);
+			ListNode n2 = new ListNode(2);
+			ListNode n4 = new ListNode(4);
+			head.next = n5;
+			n5.next = n3;
+			n3.next = n1;
+			n1.next = n8;
+			n8.next = n7;
+			n7.next = n2;
+			n2.next = n4;
+			ListNode node = insertionSortListI(head);
+			System.out.println(node);
 		}
 	}
 }

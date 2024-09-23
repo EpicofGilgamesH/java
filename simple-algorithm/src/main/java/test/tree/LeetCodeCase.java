@@ -1,7 +1,6 @@
 package test.tree;
 
 import com.alibaba.fastjson.JSON;
-import sun.reflect.generics.tree.Tree;
 
 import java.util.*;
 
@@ -4265,6 +4264,192 @@ public class LeetCodeCase {
 		public static void main(String[] args) {
 			TreeNode treeNode = sortedArrayToBST(new int[]{-10, -3, 0, 5, 9});
 			System.out.println();
+		}
+	}
+
+	/**
+	 * 543. 二叉树的直径
+	 * 给你一棵二叉树的根节点，返回该树的 直径 。
+	 * 二叉树的 直径 是指树中任意两个节点之间最长路径的 长度 。这条路径可能经过也可能不经过根节点 root 。
+	 * 两节点之间路径的 长度 由它们之间边数表示。
+	 * 示例 1：
+	 * 输入：root = [1,2,3,4,5]
+	 * 输出：3
+	 * 解释：3 ，取路径 [4,2,1,3] 或 [5,2,1,3] 的长度。
+	 * 示例 2：
+	 * 输入：root = [1,2]
+	 * 输出：1
+	 * 提示：
+	 * 树中节点数目在范围 [1, 104] 内
+	 * -100 <= Node.val <= 100
+	 */
+	public static class DiameterOfBinaryTree {
+
+
+		private static int max = 0;
+
+		/**
+		 * 二叉树中任意两个节点之间最长路径的长度,其实就是找到所有的非叶子节点,然后统计其左树和右树的高度之和
+		 *
+		 * @param root
+		 * @return
+		 */
+		public static int diameterOfBinaryTree(TreeNode root) {
+			if (root.left == null && root.right == null) return 0;
+			dfsTree(root);
+			return max;
+		}
+
+		private static void dfsTree(TreeNode root) {
+			if (root == null || (root.left == null && root.right == null)) return; // 叶子节点其左右子树的高度相加肯定不是最大
+			int leftHigh = dfs(root.left);
+			int rightHigh = dfs(root.right);
+			max = Math.max(leftHigh + rightHigh, max);
+			dfsTree(root.left);
+			dfsTree(root.right);
+		}
+
+		/**
+		 * 给出一个节点,求出其高度
+		 *
+		 * @param node
+		 * @return
+		 */
+		private static int dfs(TreeNode node) {
+			if (node == null) return 0;
+			return Math.max(dfs(node.left), dfs(node.right)) + 1;
+		}
+
+		private static int res = 1;
+
+		/**
+		 * 在计算一个节点左右子树的深度时,就能计算其经历过的所有节点;同时还能计算其节点的深度
+		 * 每次计算一个节点的左右子树深度和,同时计算该节点的深度
+		 *
+		 * @param root
+		 * @return
+		 */
+		public static int diameterOfBinaryTreeI(TreeNode root) {
+			depth(root);
+			return res - 1;
+		}
+
+		private static int depth(TreeNode node) {
+			if (node == null) return 0;
+			int ld = depth(node.left);
+			int rd = depth(node.right);
+			res = Math.max(res, ld + rd + 1); // 当前节点直径即左右子树的深度相加再加一
+			return Math.max(ld, rd) + 1;  // 当前节点为根的子树深度
+		}
+
+		public static void main(String[] args) {
+			TreeNode node1 = new TreeNode(1);
+			TreeNode node2 = new TreeNode(2);
+			TreeNode node3 = new TreeNode(3);
+			TreeNode node4 = new TreeNode(4);
+			TreeNode node5 = new TreeNode(5);
+			node1.left = node2;
+/*			node1.right = node3;
+			node2.left = node4;
+			node2.right = node5;*/
+			int i = diameterOfBinaryTree(node1);
+			System.out.println(i);
+		}
+	}
+
+	/**
+	 * 437. 路径总和 III
+	 * 给定一个二叉树的根节点 root ，和一个整数 targetSum ，求该二叉树里节点值之和等于 targetSum 的 路径 的数目。
+	 * 路径 不需要从根节点开始，也不需要在叶子节点结束，但是路径方向必须是向下的（只能从父节点到子节点）。
+	 * 示例 1：
+	 * 输入：root = [10,5,-3,3,2,null,11,3,-2,null,1], targetSum = 8
+	 * 输出：3
+	 * 解释：和等于 8 的路径有 3 条，如图所示。
+	 * 示例 2：
+	 * 输入：root = [5,4,8,11,null,13,4,7,2,null,null,5,1], targetSum = 22
+	 * 输出：3
+	 * 提示:
+	 * 二叉树的节点个数的范围是 [0,1000]
+	 * -109 <= Node.val <= 109
+	 * -1000 <= targetSum <= 1000
+	 */
+	public static class PathSum {
+
+		/**
+		 * 对于每一个节点而言,设置递归方法dfs(node,sum);那么他的子节点应该满足dfs(node.left,sum-node.val) 和dfs(node.right,sum-node.val)
+		 * 所以依次从根节点向下遍历,其中会经历两层深度优先遍历
+		 *
+		 * @param root
+		 * @param targetSum
+		 * @return
+		 */
+		public static int pathSum(TreeNode root, int targetSum) {
+			if (root == null) return 0;
+			int res = rootSum(root, targetSum);   // 当前节点满足条件的数量
+			res += pathSum(root.left, (int) (long) targetSum); // 递归其子节点并执行查找数量
+			res += pathSum(root.right, (int) (long) targetSum);
+			return res;
+		}
+
+		/**
+		 * 计算指定节点下满足条件的节点数量
+		 *
+		 * @param root
+		 * @param sum
+		 * @return
+		 */
+		private static int rootSum(TreeNode root, long sum) {
+			long res = 0;
+			if (root == null) return 0;
+			long val = root.val;
+			if (val == sum) {
+				res++;
+			}
+			res += rootSum(root.left, sum - root.val);
+			res += rootSum(root.right, sum - root.val);
+			return (int) res;
+		}
+
+		/**
+		 * 计算根节点到当前节点的所有前缀和,存放在HashMap中,那么当遍历到一个节点node时,需要计算从root到node这些节点一直到节点node的和,
+		 * sum[root,node] 表示节点root到node的和;sum[root,node]-target=val,如果val在HashMap中存在,说明sum[x,node]中存在等于target的情况
+		 * 前缀和还是很不好理解的
+		 *
+		 * @param root
+		 * @param targetSum
+		 * @return
+		 */
+		public static int pathSumI(TreeNode root, int targetSum) {
+			Map<Long, Integer> prefix = new HashMap<>();
+			prefix.put(0L, 1);
+			return dfs(root, prefix, 0, targetSum);
+		}
+
+		public static int dfs(TreeNode root, Map<Long, Integer> prefix, long curr, int targetSum) {
+			if (root == null) return 0;
+			int ret = 0;
+			curr += root.val;
+			ret = prefix.getOrDefault(curr - targetSum, 0);
+			prefix.put(curr, prefix.getOrDefault(curr, 0) + 1);
+			ret += dfs(root.left, prefix, curr, targetSum);
+			ret += dfs(root.right, prefix, curr, targetSum);
+			// 回溯
+			prefix.put(curr, prefix.getOrDefault(curr, 0) - 1);
+			return ret;
+		}
+
+		public static void main(String[] args) {
+			TreeNode node = new TreeNode(1000000000);
+			TreeNode node1 = new TreeNode(1000000000);
+			TreeNode node2 = new TreeNode(294967296);
+			TreeNode node3 = new TreeNode(1000000000);
+			TreeNode node4 = new TreeNode(1000000000);
+			node.left = node1;
+			node1.left = node2;
+			node2.left = node3;
+			node3.left = node4;
+			int i = pathSumI(node, 0);
+			System.out.println(i);
 		}
 	}
 }

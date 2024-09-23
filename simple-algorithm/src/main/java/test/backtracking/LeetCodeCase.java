@@ -2725,4 +2725,248 @@ public class LeetCodeCase {
 		}
 
 	}
+
+	/**
+	 * 994. 腐烂的橘子
+	 * 在给定的 m x n 网格 grid 中，每个单元格可以有以下三个值之一：
+	 * 值 0 代表空单元格；
+	 * 值 1 代表新鲜橘子；
+	 * 值 2 代表腐烂的橘子。
+	 * 每分钟，腐烂的橘子 周围 4 个方向上相邻 的新鲜橘子都会腐烂。
+	 * 返回 直到单元格中没有新鲜橘子为止所必须经过的最小分钟数。如果不可能，返回 -1 。
+	 * 示例 1：
+	 * 输入：grid = [[2,1,1],[1,1,0],[0,1,1]]
+	 * 输出：4
+	 * 示例 2：
+	 * 输入：grid = [[2,1,1],[0,1,1],[1,0,1]]
+	 * 输出：-1
+	 * 解释：左下角的橘子（第 2 行， 第 0 列）永远不会腐烂，因为腐烂只会发生在 4 个方向上。
+	 * 示例 3：
+	 * 输入：grid = [[0,2]]
+	 * 输出：0
+	 * 解释：因为 0 分钟时已经没有新鲜橘子了，所以答案就是 0 。
+	 * 提示：
+	 * m == grid.length
+	 * n == grid[i].length
+	 * 1 <= m, n <= 10
+	 * grid[i][j] 仅为 0、1 或 2
+	 */
+	public static class OrangesRotting {
+
+		private static int max = 0;
+
+		/**
+		 * dfs思路
+		 * 1.需要的最小分钟,即从所有的2到1的遍历过程中所进行的步数的最大值
+		 * 2.存在永远不会腐烂的橘子,说明存在1这样的节点,周围都是0的岛屿
+		 * <p>
+		 * 这个思路不对,不同位置的2可以同时进行遍历,到达最深的遍历点时,要取最小的那个
+		 * 所以本题好像没法用dfs来求解,多个2可以同时进行扩散
+		 * 那bfs该如何解题呢???
+		 * 1.分步骤进行遍历,每次记录需要遍历的节点个数,模拟扩散的实际场景
+		 * 2.同样,在遍历完所有的节点之后,如何还存在为1的节点,返回-1
+		 *
+		 * @param grid
+		 * @return
+		 */
+		public static int orangesRotting(int[][] grid) {
+			int n = grid.length, m = grid[0].length;
+			int[][] visited = new int[n][m];
+			for (int i = 0; i < n; i++) {
+				for (int j = 0; j < m; j++) {
+					if (visited[i][j] == 0 && grid[i][j] == 2) {
+						dfs(grid, 0, 0, 0, visited);
+					}
+				}
+			}
+			for (int[] ints : grid) {
+				for (int i : ints)
+					if (i == 1) {  // dfs遍历完之后还存在1,则说明存在永远不会腐烂的橘子
+						return -1;
+					}
+			}
+			return max;
+		}
+
+
+		/**
+		 * @param grid    矩阵
+		 * @param i       x坐标
+		 * @param j       y坐标
+		 * @param depth   遍历深度
+		 * @param visited 已访问的坐标
+		 */
+		private static void dfs(int[][] grid, int i, int j, int depth, int[][] visited) {
+			int n = grid.length, m = grid[0].length;
+			if (i < 0 || i >= n || j < 0 || j >= m || grid[i][j] == 0) {
+				max = Math.max(max, depth);
+				return;
+			}
+			if (visited[i][j] == 1) return;
+			visited[i][j] = 1;
+			if (grid[i][j] == 1) {
+				grid[i][j] = 2;
+				depth++;
+			} else {  // 碰到一个本身就是烂橘子时,depth初始化为0,深度重新计算
+				max = Math.max(max, depth);
+				depth = 0;
+			}
+			dfs(grid, i + 1, j, depth, visited);
+			dfs(grid, i - 1, j, depth, visited);
+			dfs(grid, i, j + 1, depth, visited);
+			dfs(grid, i, j - 1, depth, visited);
+		}
+
+		/**
+		 * 广度与优先遍历
+		 * 1.找到所有的2,入队列;然后向周围扩散
+		 * 2.每一步的扩散,记录入队列的总节点数
+		 *
+		 * @param grid
+		 * @return
+		 */
+		public static int orangesRottingBfs(int[][] grid) {
+			int n = grid.length, m = grid[0].length;
+			Deque<int[]> deque = new LinkedList<>();
+			int[][] visited = new int[n][m];
+			boolean have = false;
+			for (int i = 0; i < n; i++) {
+				for (int j = 0; j < m; j++) {
+					if (grid[i][j] == 2) {
+						deque.add(new int[]{i, j});
+						visited[i][j] = 1;
+					} else if (grid[i][j] == 1) {
+						have = true;
+					}
+				}
+			}
+			if (deque.isEmpty()) return have ? -1 : 0;
+			int[] dx = new int[]{1, 0, -1, 0};
+			int[] dy = new int[]{0, 1, 0, -1};
+			int count = -1;
+			while (!deque.isEmpty()) {
+				int size = deque.size();
+				for (; size > 0; size--) {
+					int[] curr = deque.pollFirst(); // 找到2,进行周边的扩散
+					for (int i = 0; i < dy.length; i++) {
+						int x = curr[0] + dx[i], y = curr[1] + dy[i];
+						if (x >= 0 && x < n && y >= 0 && y < m && visited[x][y] == 0) {
+							visited[x][y] = 1;
+							if (grid[x][y] == 1) {
+								grid[x][y] = 2;
+								deque.add(new int[]{x, y});
+							}
+						}
+					}
+				}
+				count++;
+			}
+			for (int[] ints : grid) {
+				for (int i : ints)
+					if (i == 1) {  // dfs遍历完之后还存在1,则说明存在永远不会腐烂的橘子
+						return -1;
+					}
+			}
+			return count;
+		}
+
+		/**
+		 * 新鲜的橘子树可以计数,这样可以最后判断是否存在新鲜的橘子树来判断是否返回-1
+		 *
+		 * @param grid
+		 * @return
+		 */
+		public static int orangesRottingBfsI(int[][] grid) {
+			int n = grid.length, m = grid[0].length;
+			Deque<int[]> deque = new LinkedList<>();
+			int[][] visited = new int[n][m];
+			int count = 0, round = 0; // 新鲜的橘子数量;遍历的轮数
+			for (int i = 0; i < n; i++) {
+				for (int j = 0; j < m; j++) {
+					if (grid[i][j] == 2) {
+						deque.add(new int[]{i, j});
+						visited[i][j] = 1;
+					} else if (grid[i][j] == 1) {
+						count++;
+					}
+				}
+			}
+			int[] dx = new int[]{1, 0, -1, 0};
+			int[] dy = new int[]{0, 1, 0, -1};
+			while (count > 0 && !deque.isEmpty()) {  // 当新鲜的橘子数不为0且烂橘子树也不为0时,进行广度优先遍历
+				round++;
+				int size = deque.size();
+				for (; size > 0; size--) {
+					int[] curr = deque.pollFirst(); // 找到2,进行周边的扩散
+					for (int i = 0; i < dy.length; i++) {
+						int x = curr[0] + dx[i], y = curr[1] + dy[i];
+						if (x >= 0 && x < n && y >= 0 && y < m && visited[x][y] == 0) {
+							visited[x][y] = 1;
+							if (grid[x][y] == 1) {
+								grid[x][y] = 2;
+								count--;
+								deque.add(new int[]{x, y});
+							}
+						}
+					}
+				}
+			}
+			return count > 0 ? -1 : round; // 为什么round不用-1呢,因为新鲜橘子树没有了,提前就结束遍历的轮数了
+		}
+
+		/**
+		 * 不需要visited数组来记录是否已经遍历
+		 *
+		 * @param grid
+		 * @return
+		 */
+		public static int orangesRottingBfsII(int[][] grid) {
+			int n = grid.length, m = grid[0].length;
+			Deque<int[]> deque = new LinkedList<>();
+			int count = 0, round = 0;
+			for (int i = 0; i < n; i++) {
+				for (int j = 0; j < m; j++) {
+					if (grid[i][j] == 2) {
+						deque.add(new int[]{i, j});
+					} else if (grid[i][j] == 1) {
+						count++;
+					}
+				}
+			}
+			int[] dx = new int[]{1, 0, -1, 0};
+			int[] dy = new int[]{0, 1, 0, -1};
+			while (count > 0 && !deque.isEmpty()) {
+				round++;
+				int size = deque.size();
+				for (; size > 0; size--) {
+					int[] curr = deque.pollFirst(); // 找到2,进行周边的扩散
+					for (int i = 0; i < dy.length; i++) {
+						int x = curr[0] + dx[i], y = curr[1] + dy[i];
+						if (x >= 0 && x < n && y >= 0 && y < m) {
+							if (grid[x][y] == 1) {
+								grid[x][y] = 2;
+								count--;
+								deque.add(new int[]{x, y});
+							}
+						}
+					}
+				}
+			}
+			return count > 0 ? -1 : round;
+		}
+
+		public static void main(String[] args) {
+			/*int[][] grid = new int[][]{
+					{2, 1, 1},
+					{1, 1, 1},
+					{0, 1, 2}
+			};*/
+			int[][] grid = new int[][]{
+					{1},
+					{2}
+			};
+			int i = orangesRottingBfsI(grid);
+			System.out.println(i);
+		}
+	}
 }
