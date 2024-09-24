@@ -1,5 +1,6 @@
 package test.backtracking;
 
+import java.lang.reflect.Array;
 import java.util.*;
 
 /**
@@ -2967,6 +2968,172 @@ public class LeetCodeCase {
 			};
 			int i = orangesRottingBfsI(grid);
 			System.out.println(i);
+		}
+	}
+
+	/**
+	 * 131. 分割回文串
+	 * 给你一个字符串 s，请你将 s 分割成一些子串，使每个子串都是
+	 * 回文串
+	 * 。返回 s 所有可能的分割方案。
+	 * 示例 1：
+	 * 输入：s = "aab"
+	 * 输出：[["a","a","b"],["aa","b"]]
+	 * 示例 2：
+	 * 输入：s = "a"
+	 * 输出：[["a"]]
+	 * 提示：
+	 * 1 <= s.length <= 16
+	 * s 仅由小写英文字母组成
+	 */
+	public static class Partition {
+
+		private static List<List<String>> res = new ArrayList<>();
+
+		/**
+		 * 分割字符串,可以还出递归树,从顶点开始,每次切割1,2,3...n个字符
+		 * 每次切割完字符后,即没有剩余的字符时,查看该次切割的每个节点是否都是回文串
+		 * 那么如何知道该次切割的所有节点呢,引入path来记录切割的路径,让path中有一个节点不会回文串,则终止本条线上的遍历
+		 *
+		 * @param s
+		 */
+		public static List<List<String>> partition(String s) {
+			dfs(s, 0, new ArrayList<>());
+			return res;
+		}
+
+		/**
+		 * 设置遍历的起始位置为i,进行下次遍历时其实位置为 i+1,i+2...n ,当然起始位置为n时,代表遍历结束
+		 * 所以只有记录遍历的起始位置,然后每次往后推进到j的位置
+		 * 因为j(分割结束位置)在每一次的递推中被不能被确定,它是在for循环中被定义的,每次往右推一位
+		 * 所以j不能定义在dfs方法中,这样反而不好写递推的业务
+		 *
+		 * @param s
+		 * @param i
+		 * @param path
+		 */
+		private static void dfs(String s, int i, List<String> path) {
+			int n = s.length();
+			if (i == n) {  // 字符已遍历完
+				res.add(new ArrayList<>(path));
+				return;
+			}
+			// 起始位置是i,然后每次往后推一个位置
+			for (int j = i; j < n; j++) {
+				String str = s.substring(i, j + 1);
+				if (isPalindrome(str)) {
+					path.add(s.substring(i, j + 1));
+					dfs(s, j + 1, path);
+					path.remove(path.size() - 1);
+				}
+			}
+		}
+
+		private static boolean isPalindrome(String str) {
+			if (str == null) return true;
+			if (str.length() == 1) return true;
+			int i = 0, j = str.length() - 1;
+			while (i < j) {
+				if (str.charAt(i) != str.charAt(j)) {
+					return false;
+				}
+				i++;
+				j--;
+			}
+			return true;
+		}
+
+
+		public static List<List<String>> partitionI(String s) {
+			dfs(s, 0, new LinkedList<>());
+			return res;
+		}
+
+		/**
+		 * dfs
+		 *
+		 * @param s    s字符串
+		 * @param i    从i开始分割下一个字符串
+		 * @param path 分割路径
+		 */
+		private static void dfs(String s, int i, LinkedList<String> path) {
+			int n = s.length();
+			if (i == n) {
+				res.add(new ArrayList<>(path));
+				return;
+			}
+			for (int j = i; j < n; j++) {
+				String str = s.substring(i, j + 1);
+				if (isPalindrome(str)) {
+					path.addLast(str);
+					dfs(s, j + 1, path); // 从i到j+1位置的分割
+					path.removeLast();
+				}
+			}
+		}
+
+		/**
+		 * 回文串使用动态规划获取
+		 *
+		 * @param s
+		 * @return
+		 */
+		public static List<List<String>> partitionII(String s) {
+			f = isPalindromeDp(s);
+			dfsI(s, 0, new LinkedList<>());
+			return res;
+		}
+
+		private static boolean[][] f;
+
+		private static void dfsI(String s, int i, LinkedList<String> path) {
+			int n = s.length();
+			if (i == n) {
+				res.add(new ArrayList<>(path));
+				return;
+			}
+
+			for (int j = i; j < n; j++) {
+				String str = s.substring(i, j + 1);
+				if (f[i][j]) {
+					path.addLast(str);
+					dfsI(s, j + 1, path); // 从i到j+1位置的分割
+					path.removeLast();
+				}
+			}
+		}
+
+		/**
+		 * f[i][j]表示s字符串从s[i...j]所形成的字符串是否为回文串
+		 * 想要f[i][j]==true,那必须满足f[i+1][j-1]==true && s[i+1]==s[j-1]
+		 * 在遍历的过程中,需要线得到f[i+1][j-1]的值,然后往后递推
+		 * 所以dp数组的两层循环中,j从左往右进行遍历;i从右往左进行遍历
+		 *
+		 * @param s
+		 * @return
+		 */
+		private static boolean[][] isPalindromeDp(String s) {
+			int n = s.length();
+			boolean[][] f = new boolean[n][n];
+			for (int j = 0; j < n; j++) {
+				for (int i = j; i >= 0; i--) {
+					if (i == j) {                // 分割字符串长度为1
+						f[i][j] = true;
+					} else if (j - i + 1 == 2) { // 分割字符串长度为2
+						f[i][j] = s.charAt(i) == s.charAt(j);
+					} else {
+						f[i][j] = f[i + 1][j - 1] && s.charAt(i) == s.charAt(j);
+					}
+				}
+			}
+			return f;
+		}
+
+		public static void main(String[] args) {
+			List<List<String>> aab = partition("abbab");
+			System.out.println(aab);
+			boolean[][] abbs = isPalindromeDp("abb");
+			System.out.println();
 		}
 	}
 }
