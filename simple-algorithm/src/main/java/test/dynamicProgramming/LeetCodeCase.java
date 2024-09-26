@@ -1,5 +1,7 @@
 package test.dynamicProgramming;
 
+import org.omg.CORBA.INTERNAL;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
@@ -1834,7 +1836,6 @@ public class LeetCodeCase {
 		}
 	}
 
-
 	/**
 	 * 72. 编辑距离
 	 * 给你两个单词 word1 和 word2， 请返回将 word1 转换成 word2 所使用的最少操作数  。
@@ -2211,7 +2212,6 @@ public class LeetCodeCase {
 		}
 	}
 
-
 	/**
 	 * 188. 买卖股票的最佳时机 IV
 	 * 给你一个整数数组 prices 和一个整数 k ，其中 prices[i] 是某支给定的股票在第 i 天的价格。
@@ -2284,5 +2284,96 @@ public class LeetCodeCase {
 		}
 	}
 
+	/**
+	 * 118. 杨辉三角
+	 * 给定一个非负整数 numRows，生成「杨辉三角」的前 numRows 行。
+	 * 在「杨辉三角」中，每个数是它左上方和右上方的数的和。
+	 * 示例 1:
+	 * 输入: numRows = 5
+	 * 输出: [[1],[1,1],[1,2,1],[1,3,3,1],[1,4,6,4,1]]
+	 * 示例 2:
+	 * 输入: numRows = 1
+	 * 输出: [[1]]
+	 * 提示:
+	 * 1 <= numRows <= 30
+	 */
+	public static class GenerateTriangle {
+
+		/**
+		 * 杨辉三角递推特性
+		 * 1.每行第一个和最后一个数为1
+		 * 2.其他数f[i]=f[i-1]+f[i]
+		 *
+		 * @param numRows
+		 * @return
+		 */
+		public static List<List<Integer>> generate(int numRows) {
+			List<List<Integer>> res = new ArrayList<>();
+			res.add(Collections.singletonList(1));
+			for (int i = 1; i < numRows; i++) {
+				List<Integer> list = new ArrayList<>();
+				list.add(1);
+				for (int j = 1; j <= i - 1; j++) {
+					List<Integer> prev = res.get(i - 1);
+					list.add(prev.get(j - 1) + prev.get(j));
+				}
+				list.add(1);
+				res.add(list);
+			}
+			return res;
+		}
+
+		public static void main(String[] args) {
+			List<List<Integer>> generate = generate(10);
+			System.out.println(generate);
+		}
+	}
+
+	/**
+	 * 279. 完全平方数
+	 * 给你一个整数 n ，返回 和为 n 的完全平方数的最少数量 。
+	 * 完全平方数 是一个整数，其值等于另一个整数的平方；换句话说，其值等于一个整数自乘的积。例如，1、4、9 和 16 都是完全平方数，而 3 和 11 不是。
+	 * 示例 1：
+	 * 输入：n = 12
+	 * 输出：3
+	 * 解释：12 = 4 + 4 + 4
+	 * 示例 2：
+	 * 输入：n = 13
+	 * 输出：2
+	 * 解释：13 = 4 + 9
+	 * 提示：
+	 * 1 <= n <= 104
+	 */
+	public static class NumSquares {
+
+		/**
+		 * 完全平方数之和构成n,那么肯定要从1,4,9,16,25...这些数开始遍历
+		 * f(i)表示数字i需要完全平方数的最少数量
+		 * 那么后续怎么递推呢? 如果先使用1,那么剩下的数和为 i-1^2 如果使用4,那么剩下的数和为i-2^2
+		 * 要找出最小的使用完全平方数,就要求得先使用任何数之后,剩下计算使用数的最小值,可直可以使用的数j的范围为[1,√i]
+		 * 那么 f(i)=1+min f(i-j^2);其中j∈[1,√i]  f(0)=0;
+		 * 为什么f(0)=0呢,比如f(4)= 1+min f(4-j^2) j∈[1,2] 当j=2时最小,f(4)=1+f(0) 实际上当第一个数选择2后,就已经满足条件了,
+		 * 所以定义f(0)=0
+		 *
+		 * @param n
+		 * @return
+		 */
+		public static int numSquares(int n) {
+			int[] f = new int[n + 1];
+			for (int i = 1; i < f.length; i++) {
+				int min = Integer.MAX_VALUE;
+				for (int j = 1; j * j <= i; j++) {
+					min = Math.min(f[i - j * j], min);
+				}
+				f[i] = min + 1;
+			}
+			return f[n];
+		}
+
+		public static void main(String[] args) {
+			int i1 = numSquares(3);
+			System.out.println(i1);
+		}
+	}
 }
 

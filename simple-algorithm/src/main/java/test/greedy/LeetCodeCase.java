@@ -443,5 +443,57 @@ public class LeetCodeCase {
 			System.out.println(s);
 		}
 	}
+
+	/**
+	 * 763. 划分字母区间
+	 * 给你一个字符串 s 。我们要把这个字符串划分为尽可能多的片段，同一字母最多出现在一个片段中。
+	 * 注意，划分结果需要满足：将所有划分结果按顺序连接，得到的字符串仍然是 s 。
+	 * 返回一个表示每个字符串片段的长度的列表。
+	 * 示例 1：
+	 * 输入：s = "ababcbacadefegdehijhklij"
+	 * 输出：[9,7,8]
+	 * 解释：
+	 * 划分结果为 "ababcbaca"、"defegde"、"hijhklij" 。
+	 * 每个字母最多出现在一个片段中。
+	 * 像 "ababcbacadefegde", "hijhklij" 这样的划分是错误的，因为划分的片段数较少。
+	 * 示例 2：
+	 * 输入：s = "eccbbbbdec"
+	 * 输出：[10]
+	 * 提示：
+	 * 1 <= s.length <= 500
+	 * s 仅由小写英文字母组成
+	 */
+	public static class PartitionLabels {
+
+		/**
+		 * 将字符串划分成尽可能多的片段,保证一个字母只能出现在同一个片段中
+		 * "ababcbacadefegdehijhklij"
+		 * 也就是会说当遍历字符'a'时,应找到最后一个'a'出现的位置,从而找第一个'a'到最后一个'a'中出现的字符'b','c'的最有一个位置
+		 * 使用贪心的思路,当这些字符都找到了最后的位置,那么以最右边的这个位置进行划分
+		 *
+		 * @param s
+		 * @return
+		 */
+		public static List<Integer> partitionLabels(String s) {
+			int[] arr = new int[26];
+			// 找到每个字符最右边的位置,也就是每个字符idx最大值
+			for (int i = 0; i < s.length(); i++) {
+				int c = s.charAt(i) - 'a';
+				arr[c] = i;
+			}
+			List<Integer> partition = new ArrayList<>();
+			// 这里的编程思路,感觉很难清晰化;每次遍历时拓展最右边的位置;直到遍历的指针到达最右边的位置
+			// 则形成一个闭环的划分区域,同时更新左边和右边的位置
+			int start = 0, end = 0;
+			for (int i = 0; i < s.length(); i++) {
+				end = Math.max(end, arr[s.charAt(i) - 'a']);  // 拓展end的值
+				if (i == end) { // 说明该次遍历已经到达最右边的end,可以进行划分
+					partition.add(end - start + 1);
+					start = i + 1;
+				}
+			}
+			return partition;
+		}
+	}
 }
 
