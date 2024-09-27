@@ -2375,5 +2375,59 @@ public class LeetCodeCase {
 			System.out.println(i1);
 		}
 	}
+
+	/**
+	 * 152. 乘积最大子数组
+	 * 给你一个整数数组 nums ，请你找出数组中乘积最大的非空连续
+	 * 子数组
+	 * （该子数组中至少包含一个数字），并返回该子数组所对应的乘积。
+	 * 测试用例的答案是一个 32-位 整数。
+	 * 示例 1:
+	 * 输入: nums = [2,3,-2,4]
+	 * 输出: 6
+	 * 解释: 子数组 [2,3] 有最大乘积 6。
+	 * 示例 2:
+	 * 输入: nums = [-2,0,-1]
+	 * 输出: 0
+	 * 解释: 结果不能为 2, 因为 [-2,-1] 不是子数组。
+	 * 提示:
+	 * 1 <= nums.length <= 2 * 104
+	 * -10 <= nums[i] <= 10
+	 * nums 的任何子数组的乘积都 保证 是一个 32-位 整数
+	 */
+	public static class MaxProduct {
+
+		/**
+		 * 状态转移的思路是:先求出以第i个元素结尾时,最大的子序列乘积,最后在遍历出最大的值,转移方程:
+		 * f(i)=max(f(i-1)*a[i],a[i]);
+		 * 但是本题中会出现负数,当a[i]为负数时,如果f(i-1)为正数,那么f(i)会成为负数;同理如果f(i-1)为负数,那么f(i)会成为正数
+		 * 也就是说,当a[i]为负数时,f(i)的值会取反;导致最大的值变最小,最小的值变最大.
+		 * 因此需要维护当前最小的值,是负数,乘以负数后就会变成最大
+		 * f'(i)=min(f'(i-1)*a[i],a[i]);  当出现负数时,就要用最小的值去求解,当为正数时,就要用最大的值去求解
+		 *
+		 * @param nums
+		 * @return
+		 */
+		public static int maxProduct(int[] nums) {
+			int max = Integer.MIN_VALUE, fmax = 1, fmin = 1;
+			for (int i = 0; i < nums.length; i++) {
+				if (nums[i] < 0) { // 负数,用最小的值去求解
+					int temp = fmax;
+					fmax = fmin;
+					fmin = temp;
+				}
+				fmax = Math.max(fmax * nums[i], nums[i]);
+				fmin = Math.min(fmin * nums[i], nums[i]);
+				max = Math.max(fmax, max);
+			}
+			return max;
+		}
+
+		public static void main(String[] args) {
+			int[] nums = new int[]{2, 3, -2, 4, -2};
+			int i1 = maxProduct(nums);
+			System.out.println(i1);
+		}
+	}
 }
 
