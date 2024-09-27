@@ -2429,5 +2429,173 @@ public class LeetCodeCase {
 			System.out.println(i1);
 		}
 	}
+
+	/**
+	 * 416. 分割等和子集
+	 * 给你一个 只包含正整数 的 非空 数组 nums 。请你判断是否可以将这个数组分割成两个子集，使得两个子集的元素和相等。
+	 * 示例 1：
+	 * 输入：nums = [1,5,11,5]
+	 * 输出：true
+	 * 解释：数组可以分割成 [1, 5, 5] 和 [11] 。
+	 * 示例 2：
+	 * 输入：nums = [1,2,3,5]
+	 * 输出：false
+	 * 解释：数组不能分割成两个元素和相等的子集。
+	 * 提示：
+	 * 1 <= nums.length <= 200
+	 * 1 <= nums[i] <= 100
+	 */
+	public static class CanPartition {
+
+		/**
+		 * 重新思考01背包问题，思路非常容忘记
+		 * 本地要求判断数组是否能分割成两个子集,是的两个子集的元素相等.
+		 * 那么其实是需要找数组中是否有子集和为元素总和的一半;又因为两个相同的数相加一定是偶数;所以和为奇数时一定不存在
+		 * <p>
+		 * 1.首先用穷举的思路来求解
+		 * 数组中的每个元素都有使用和不使用两种状态,但要满足最后子集的和为target=sum/2
+		 * 画出递归树,树中每个节点f(i,j) i表示第i个元素是否被使用,j表示选取到第i个元素时,其元素和为j
+		 * 2.dp思路 01背包问题
+		 * 还需要多加思考,深刻理解
+		 *
+		 * @param nums
+		 * @return
+		 */
+		public static boolean canPartitionDfs(int[] nums) {
+			n = nums.length;
+			int sum = 0;
+			for (int i = 0; i < n; i++) {
+				sum += nums[i];
+			}
+			if (sum % 2 != 0) return false;
+			target = sum / 2;
+			boolean[][] mem = new boolean[n + 1][target];
+			dfs(nums, 0, 0, mem);
+			return flag;
+		}
+
+		private static int target;
+		private static int n;
+		private static boolean flag = false;
+
+		/**
+		 * 深度优先遍历
+		 * i表示第几次选取元素
+		 *
+		 * @param nums
+		 * @param i
+		 * @param sum
+		 */
+		public static void dfs(int[] nums, int i, int sum, boolean[][] mem) {
+			if (sum >= target) {
+				if (sum == target) {
+					flag = true;
+				}
+				return;
+			}
+			if (i == n) return;
+			if (mem[i][sum]) return;
+			mem[i][sum] = true;
+			// nums为正整数,可以判断其和是否超出
+			dfs(nums, i + 1, sum, mem);
+			if (sum + nums[i] <= target) {
+				dfs(nums, i + 1, sum + nums[i], mem);
+			}
+		}
+
+		/**
+		 * 从递归树来推导动态规划
+		 * f(i,j')递归树每一层表示决策到第i个元素时,其出现的和j'的不同情况
+		 * 由于数组为正整数,第i层的j'只取决于第i-1层的j',那么递推公式
+		 * f(i,j') =f(i-1,j')||f(i-1,j'-a[i])
+		 *
+		 * @param nums
+		 * @return
+		 */
+		public static boolean canPartitionDp(int[] nums) {
+			int n = nums.length;
+			if (n < 2) return false;
+			int sum = 0, max = 0;
+			for (int i = 0; i < n; i++) {
+				sum += nums[i];
+				max = Math.max(nums[i], max);
+			}
+			if (sum % 2 != 0) return false;
+			int target = sum / 2;
+			if (max > target) return false;
+			boolean[][] dp = new boolean[n][target + 1];
+			// 初始化一个元素都不选取时
+			for (int i = 0; i < n; i++) {
+				dp[i][0] = true;
+			}
+			dp[0][nums[0]] = true;
+			/*for (int i = 1; i < n; i++) {
+				int v = nums[i];
+				for (int j = 1; j <= target; j++) {
+					if (j >= v) {
+						dp[i][j] = dp[i - 1][j] || dp[i - 1][j - v];
+					} else {
+						dp[i][j] = dp[i - 1][j];
+					}
+				}
+			}*/
+			// 更容易理解的方式
+			for (int i = 1; i < n; i++) {
+				int v = nums[i];
+				for (int j = 1; j <= target; j++) { // 不选取v时
+					if (dp[i - 1][j]) dp[i][j] = true;
+				}
+				for (int j = 0; j <= target - v; j++) { // 选取v时
+					if (dp[i - 1][j]) dp[i][j + v] = true;
+				}
+			}
+			return dp[n - 1][target];
+		}
+
+		/**
+		 * 一维数组dp
+		 *
+		 * @param nums
+		 * @return
+		 */
+		public static boolean canPartitionDpI(int[] nums) {
+			int n = nums.length;
+			if (n < 2) return false;
+			int sum = 0, max = 0;
+			for (int i = 0; i < n; i++) {
+				sum += nums[i];
+				max = Math.max(nums[i], max);
+			}
+			if (sum % 2 != 0) return false;
+			int target = sum / 2;
+			if (max > target) return false;
+			boolean[] dp = new boolean[target + 1];
+			// 初始化一个元素都不选取时
+			dp[0] = true;
+			// dp[nums[0]] = true;
+			/*for (int i = 1; i < n; i++) {
+				int v = nums[i];
+				for (int j = target; j > 0; j--) {
+					if (j >= v) {
+						dp[j] = dp[j] || dp[j - v];
+					}
+				}
+			}*/
+			for (int i = 0; i < n; i++) {
+				int v = nums[i];
+				for (int j = target; j > 0; j--) {
+					if (j >= v) {
+						dp[j] |= dp[j - v];
+					}
+				}
+			}
+			return dp[target];
+		}
+
+		public static void main(String[] args) {
+			int[] nums = new int[]{1, 5, 11, 5};
+			System.out.println(canPartitionDpI(nums));
+		}
+	}
 }
 
