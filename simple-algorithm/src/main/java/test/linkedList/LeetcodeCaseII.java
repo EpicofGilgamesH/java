@@ -1672,4 +1672,148 @@ public class LeetcodeCaseII {
 			System.out.println(node);
 		}
 	}
+
+	/**
+	 * 148. 排序链表
+	 * 给你链表的头结点 head ，请将其按 升序 排列并返回 排序后的链表 。
+	 * 示例 1：
+	 * 输入：head = [4,2,1,3]
+	 * 输出：[1,2,3,4]
+	 * 示例 2：
+	 * 输入：head = [-1,5,3,4,0]
+	 * 输出：[-1,0,3,4,5]
+	 * 示例 3：
+	 * 输入：head = []
+	 * 输出：[]
+	 * 提示：
+	 * 链表中节点的数目在范围 [0, 5 * 104] 内
+	 * -105 <= Node.val <= 105
+	 * 进阶：你可以在 O(n log n) 时间复杂度和常数级空间复杂度下，对链表进行排序吗？
+	 */
+	public static class SortList {
+
+		/**
+		 * 归并排序,首先要特别熟悉数组的归并排序思路
+		 * 1.先找到链表的中点,通过快慢指针来找
+		 * 2.先拆分,后合并
+		 *
+		 * @param head
+		 * @return
+		 */
+		public static ListNode sortList(ListNode head) {
+			return sortList(head, null);
+		}
+
+		private static ListNode sortList(ListNode head, ListNode tail) {
+			if (head == null) return head;
+			if (head.next == tail) {
+				head.next = null; // 如果头节点指向尾节点,则所有此时拆分后的链表只有两个节点,拆分后需要断开链表,此时不需要再拆分,递归结束
+				return head;
+			}
+			ListNode fast = head, slow = head;
+			while (fast != tail) {
+				slow = slow.next;
+				fast = fast.next;
+				if (fast != tail) {
+					fast = fast.next;
+				}
+			}
+			ListNode mid = slow;
+			ListNode node1 = sortList(head, mid);
+			ListNode node2 = sortList(mid, tail);
+			return merge(node1, node2);
+		}
+
+		private static ListNode merge(ListNode head1, ListNode head2) {
+			ListNode dummyHead = new ListNode(0);
+			ListNode temp = dummyHead, temp1 = head1, temp2 = head2;
+			while (temp1 != null && temp2 != null) {
+				if (temp1.val <= temp2.val) {
+					temp.next = temp1;
+					temp1 = temp1.next;
+				} else {
+					temp.next = temp2;
+					temp2 = temp2.next;
+				}
+				temp = temp.next;
+			}
+			if (temp1 != null) {
+				temp.next = temp1;
+			} else if (temp2 != null) {
+				temp.next = temp2;
+			}
+			return dummyHead.next;
+		}
+
+		/**
+		 * 回顾下归并排序
+		 * 先拆分,后合并
+		 *
+		 * @param arr
+		 */
+		private static void mergeSort(int[] arr) {
+			mergeSort(arr, 0, arr.length - 1);
+		}
+
+		private static void mergeSort(int[] arr, int p, int r) {
+			int q = (r + p) >> 1;
+			if (q >= r) return;
+			mergeSort(arr, p, q);
+			mergeSort(arr, q + 1, r);
+			mergeArr(arr, p, q, r);
+		}
+
+		/**
+		 * 将已经有序的 arr[p,q]和arr[q+1,r] 合并成有序的arr[p,r]
+		 * 需要申请临时数据来存放,然后通过比较把元素有序的放入临时数据
+		 *
+		 * @param arr
+		 * @param p
+		 * @param q
+		 * @param r
+		 */
+		private static void mergeArr(int[] arr, int p, int q, int r) {
+			int i = p, j = q + 1, k = 0;
+			int[] temp = new int[r - p + 1];
+			while (i <= q && j <= r) {
+				if (arr[i] <= arr[j]) {
+					temp[k++] = arr[i++];
+				} else {
+					temp[k++] = arr[j++];
+				}
+			}
+			while (i <= q) {
+				temp[k++] = arr[i++];
+			}
+			while (j <= r) {
+				temp[k++] = arr[j++];
+			}
+			for (int value : temp) {
+				arr[p++] = value;
+			}
+		}
+
+		public static void main(String[] args) {
+			/*int[] arr = new int[]{2, 3, 6, 1, 7, 9, 5, 4};
+			mergeSort(arr);
+			System.out.println(Arrays.toString(arr));*/
+			ListNode node2 = new ListNode(2);
+			ListNode node3 = new ListNode(3);
+			ListNode node6 = new ListNode(6);
+			ListNode node1 = new ListNode(1);
+			ListNode node7 = new ListNode(7);
+			ListNode node9 = new ListNode(9);
+			ListNode node5 = new ListNode(5);
+			ListNode node4 = new ListNode(4);
+			node2.next = node3;
+			node3.next = node6;
+			node6.next = node1;
+			node1.next = node7;
+			node7.next = node9;
+			node9.next = node5;
+			node5.next = node4;
+			ListNode node = sortList(node2);
+			System.out.println();
+		}
+	}
 }

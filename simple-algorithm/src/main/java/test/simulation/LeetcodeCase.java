@@ -726,4 +726,128 @@ public class LeetcodeCase {
 
 		}
 	}
+
+	/**
+	 * 31. 下一个排列
+	 * 整数数组的一个 排列  就是将其所有成员以序列或线性顺序排列。
+	 * 例如，arr = [1,2,3] ，以下这些都可以视作 arr 的排列：[1,2,3]、[1,3,2]、[3,1,2]、[2,3,1] 。
+	 * 整数数组的 下一个排列 是指其整数的下一个字典序更大的排列。更正式地，如果数组的所有排列根据其字典顺序从小到大排列在一个容器中，那么数组的 下一个排列 就是在这个有序容器中排在它后面的那个排列。如果不存在下一个更大的排列，那么这个数组必须重排为字典序最小的排列（即，其元素按升序排列）。
+	 * 例如，arr = [1,2,3] 的下一个排列是 [1,3,2] 。
+	 * 类似地，arr = [2,3,1] 的下一个排列是 [3,1,2] 。
+	 * 而 arr = [3,2,1] 的下一个排列是 [1,2,3] ，因为 [3,2,1] 不存在一个字典序更大的排列。
+	 * 给你一个整数数组 nums ，找出 nums 的下一个排列。
+	 * 必须 原地 修改，只允许使用额外常数空间。
+	 * 示例 1：
+	 * 输入：nums = [1,2,3]
+	 * 输出：[1,3,2]
+	 * 示例 2：
+	 * 输入：nums = [3,2,1]
+	 * 输出：[1,2,3]
+	 * 示例 3：
+	 * 输入：nums = [1,1,5]
+	 * 输出：[1,5,1]
+	 * 提示：
+	 * 1 <= nums.length <= 100
+	 * 0 <= nums[i] <= 100
+	 */
+	public static class NextPermutation {
+
+		/**
+		 * 4,5,2,6,3,1
+		 * 1.从后往前,找到第一个不遵守升序的数 a,如果整个数组都升序,说明其是最大
+		 * 2.然后在已遍历的数中,找到第一个符合的是数b 满足b>a
+		 * 3.将a和b进行交换,这样可以使得其不按升序位的数字完成最小幅度的增大,然后把a右边的数字变成升序
+		 * 如何变成升序呢?交换之前b>a,交换之后a放到了b的位置:4,5,3,6,2,1 由于b>a 那么a右边的数还是降序,
+		 * 我们只需要反转它成为升序即可
+		 *
+		 * @param nums
+		 */
+		public static void nextPermutation(int[] nums) {
+			int i = nums.length - 2;
+			while (i >= 0 && nums[i] >= nums[i + 1]) {
+				i--;
+			}
+			if (i >= 0) {
+				int j = nums.length - 1;
+				// 在i+1...n中找到比i位置数字大的最少的数,因为降序,那么第一个最小的即是要的数字
+				while (j >= 0 && nums[i] >= nums[j]) {
+					j--;
+				}
+				swap(nums, i, j);
+			}
+			reverse(nums, i + 1, nums.length - 1);
+		}
+
+		private static void swap(int[] nums, int i, int j) {
+			int temp = nums[i];
+			nums[i] = nums[j];
+			nums[j] = temp;
+		}
+
+		private static void reverse(int[] nums, int start, int end) {
+			while (start < end) {
+				swap(nums, start, end);
+				start++;
+				end--;
+			}
+		}
+
+		public static void main(String[] args) {
+			int[] ints = {4, 5, 2, 6, 3, 1};
+			nextPermutation(ints);
+			System.out.println(Arrays.toString(ints));
+		}
+	}
+
+	/**
+	 * 287. 寻找重复数
+	 * 给定一个包含 n + 1 个整数的数组 nums ，其数字都在 [1, n] 范围内（包括 1 和 n），可知至少存在一个重复的整数。
+	 * 假设 nums 只有 一个重复的整数 ，返回 这个重复的数 。
+	 * 你设计的解决方案必须 不修改 数组 nums 且只用常量级 O(1) 的额外空间。
+	 * 示例 1：
+	 * 输入：nums = [1,3,4,2,2]
+	 * 输出：2
+	 * 示例 2：
+	 * 输入：nums = [3,1,3,4,2]
+	 * 输出：3
+	 * 示例 3 :
+	 * 输入：nums = [3,3,3,3,3]
+	 * 输出：3
+	 * 提示
+	 * 1 <= n <= 105
+	 * nums.length == n + 1
+	 * 1 <= nums[i] <= n
+	 * nums 中 只有一个整数 出现 两次或多次 ，其余整数均只出现 一次
+	 * 进阶：
+	 * 如何证明 nums 中至少存在一个重复的数字?
+	 * 你可以设计一个线性级时间复杂度 O(n) 的解决方案吗？
+	 */
+	public static class FindDuplicate {
+
+		/**
+		 * 形成索引指向数字值的链表,那么存在重复数字时,链表就会存在环
+		 *
+		 * @param nums
+		 * @return
+		 */
+		public static int findDuplicate(int[] nums) {
+			int fast = 0, slow = 0;
+			do {
+				slow = nums[slow];
+				fast = nums[nums[fast]];
+			} while (fast != slow);
+			slow = 0;
+			while (slow != fast) {
+				slow = nums[slow];
+				fast = nums[fast];
+			}
+			return slow;
+		}
+
+		public static void main(String[] args) {
+			int[] nums = new int[]{1, 3, 4, 2, 2};
+			int duplicate = findDuplicate(nums);
+			System.out.println(duplicate);
+		}
+	}
 }
