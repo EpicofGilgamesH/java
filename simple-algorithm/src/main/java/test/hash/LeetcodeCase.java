@@ -1322,4 +1322,432 @@ public class LeetcodeCase {
 			System.out.println(longestConsecutiveI(new int[]{0, 3, 7, 2, 5, 8, 4, 6, 0, 1}));
 		}
 	}
+
+	/**
+	 * 2215. 找出两数组的不同
+	 * 给你两个下标从 0 开始的整数数组 nums1 和 nums2 ，请你返回一个长度为 2 的列表 answer ，其中：
+	 * answer[0] 是 nums1 中所有 不 存在于 nums2 中的 不同 整数组成的列表。
+	 * answer[1] 是 nums2 中所有 不 存在于 nums1 中的 不同 整数组成的列表。
+	 * 注意：列表中的整数可以按 任意 顺序返回。
+	 * 示例 1：
+	 * 输入：nums1 = [1,2,3], nums2 = [2,4,6]
+	 * 输出：[[1,3],[4,6]]
+	 * 解释：
+	 * 对于 nums1 ，nums1[1] = 2 出现在 nums2 中下标 0 处，然而 nums1[0] = 1 和 nums1[2] = 3 没有出现在 nums2 中。因此，answer[0] = [1,3]。
+	 * 对于 nums2 ，nums2[0] = 2 出现在 nums1 中下标 1 处，然而 nums2[1] = 4 和 nums2[2] = 6 没有出现在 nums2 中。因此，answer[1] = [4,6]。
+	 * 示例 2：
+	 * 输入：nums1 = [1,2,3,3], nums2 = [1,1,2,2]
+	 * 输出：[[3],[]]
+	 * 解释：
+	 * 对于 nums1 ，nums1[2] 和 nums1[3] 没有出现在 nums2 中。由于 nums1[2] == nums1[3] ，二者的值只需要在 answer[0] 中出现一次，故 answer[0] = [3]。
+	 * nums2 中的每个整数都在 nums1 中出现，因此，answer[1] = [] 。
+	 * 提示：
+	 * 1 <= nums1.length, nums2.length <= 1000
+	 * -1000 <= nums1[i], nums2[i] <= 1000
+	 */
+	static class FindDifference {
+
+		/**
+		 * 即求两个数组的差集,正向和反向
+		 *
+		 * @param nums1
+		 * @param nums2
+		 * @return
+		 */
+		public static List<List<Integer>> findDifference(int[] nums1, int[] nums2) {
+			HashSet<Integer> set1 = new HashSet<>();
+			HashSet<Integer> set2 = new HashSet<>();
+			for (int i = 0; i < nums1.length; ++i) {
+				set1.add(nums1[i]);
+			}
+			for (int i = 0; i < nums2.length; ++i) {
+				set2.add(nums2[i]);
+			}
+			List<List<Integer>> list = new ArrayList<>();
+			List<Integer> list1 = new ArrayList<>();
+			for (Integer value : set2) {
+				if (!set1.contains(value)) {
+					list1.add(value);
+				}
+			}
+			List<Integer> list2 = new ArrayList<>();
+			for (Integer value : set1) {
+				if (!set2.contains(value)) {
+					list2.add(value);
+				}
+			}
+			list.add(list2);
+			list.add(list1);
+			return list;
+		}
+
+		/**
+		 * 求一次差集即可,就是两个数组的公共元素
+		 *
+		 * @param nums1
+		 * @param nums2
+		 * @return
+		 */
+		public static List<List<Integer>> findDifferenceII(int[] nums1, int[] nums2) {
+			Map<Integer, Integer> map1 = new HashMap<>();
+			Map<Integer, Integer> map2 = new HashMap<>();
+			for (int i = 0; i < nums1.length; ++i) {
+				map1.put(nums1[i], 0);
+			}
+			for (int i = 0; i < nums2.length; ++i) {
+				map2.put(nums2[i], 0);
+			}
+			Iterator<Map.Entry<Integer, Integer>> iterator = map1.entrySet().iterator();
+			while (iterator.hasNext()) {
+				Map.Entry<Integer, Integer> next = iterator.next();
+				if (map2.containsKey(next.getKey())) {
+					iterator.remove();
+					map2.remove(next.getKey());
+				}
+			}
+			List<List<Integer>> list = new ArrayList<>();
+			list.add(new ArrayList<>(map1.keySet()));
+			list.add(new ArrayList<>(map2.keySet()));
+			return list;
+		}
+
+		public static void main(String[] args) {
+			System.out.println(findDifferenceII(new int[]{1, 2, 3, 3}, new int[]{1, 1, 2, 2}));
+		}
+	}
+
+	/**
+	 * 1207. 独一无二的出现次数
+	 * 给你一个整数数组 arr，如果每个数的出现次数都是独一无二的，就返回 true；否则返回 false。
+	 * 示例 1：
+	 * 输入：arr = [1,2,2,1,1,3]
+	 * 输出：true
+	 * 解释：在该数组中，1 出现了 3 次，2 出现了 2 次，3 只出现了 1 次。没有两个数的出现次数相同。
+	 * 示例 2：
+	 * 输入：arr = [1,2]
+	 * 输出：false
+	 * 示例 3：
+	 * 输入：arr = [-3,0,1,-3,1,1,1,-3,10,0]
+	 * 输出：true
+	 * 提示：
+	 * 1 <= arr.length <= 1000
+	 * -1000 <= arr[i] <= 1000
+	 */
+	static class UniqueOccurrences {
+
+		/**
+		 * 通过HashMap计数,然后判断数量是否有重复
+		 *
+		 * @param arr
+		 * @return
+		 */
+		public static boolean uniqueOccurrences(int[] arr) {
+			Map<Integer, Integer> map = new HashMap<>();
+			for (int i = 0; i < arr.length; ++i) {
+				if (map.containsKey(arr[i])) {
+					map.put(arr[i], map.get(arr[i]) + 1);
+				} else {
+					map.put(arr[i], 1);
+				}
+			}
+			TreeSet<Integer> set = new TreeSet<>(map.values());
+			return set.size() == map.size();
+		}
+
+		public static boolean uniqueOccurrencesII(int[] arr) {
+			Map<Integer, Integer> map = new HashMap<>();
+			for (int i = 0; i < arr.length; ++i) {
+				map.put(arr[i], map.getOrDefault(arr[i], 0) + 1);
+			}
+			Set<Integer> set = new HashSet<>(map.values());
+			return set.size() == map.size();
+		}
+
+		/**
+		 * 当然这里不用去对比HashMap中key的数量和HashSet中数量是否相等;
+		 * 可以往HashSet中加入count值,如果出现重复的count值,即set中已经存在该值,就可以直接返回
+		 *
+		 * @param arr
+		 * @return
+		 */
+		public static boolean uniqueOccurrencesIII(int[] arr) {
+			Map<Integer, Integer> map = new HashMap<>();
+			for (int i = 0; i < arr.length; ++i) {
+				map.put(arr[i], map.getOrDefault(arr[i], 0) + 1);
+			}
+			Set<Integer> set = new HashSet<>();
+			for (int i : map.values()) {
+				if (set.contains(i)) return false;
+				set.add(i);
+			}
+			return true;
+		}
+
+		public static boolean uniqueOccurrencesIV(int[] arr) {
+			int bitMapNum = 2001;
+			int[] map = new int[bitMapNum + 1001];
+			for (int iArr : arr) {
+				map[iArr + 1000]++;  // 将这2000个数的统计个数值,放入前2000个位置的数组中
+			}
+			int i = 0;
+			while (i < bitMapNum) {
+				if (map[i] != 0) {
+					if (map[map[i] + bitMapNum] != 0) { // 每个位置统计的个数,比如arr[0]=1,则arr[2001]=1
+						return false;                   // arr[1]=2,则arr[2002]=2;以此类推,每个位置统计的个数不能重复
+					} else {                            // 如果重复,则放入后面1000位 位置的值已经为1了,返回false
+						map[map[i] + bitMapNum] = 1;
+					}
+				}
+				i++;
+			}
+			return true;
+		}
+
+		public static void main(String[] args) {
+			System.out.println(uniqueOccurrencesIV(new int[]{-1000, -999, -999, -998, -998, -998}));
+		}
+	}
+
+	/**
+	 * 1657. 确定两个字符串是否接近
+	 * 如果可以使用以下操作从一个字符串得到另一个字符串，则认为两个字符串 接近 ：
+	 * 操作 1：交换任意两个 现有 字符。
+	 * 例如，abcde -> aecdb
+	 * 操作 2：将一个 现有 字符的每次出现转换为另一个 现有 字符，并对另一个字符执行相同的操作。
+	 * 例如，aacabb -> bbcbaa（所有 a 转化为 b ，而所有的 b 转换为 a ）
+	 * 你可以根据需要对任意一个字符串多次使用这两种操作。
+	 * 给你两个字符串，word1 和 word2 。如果 word1 和 word2 接近 ，就返回 true ；否则，返回 false 。
+	 * 示例 1：
+	 * 输入：word1 = "abc", word2 = "bca"
+	 * 输出：true
+	 * 解释：2 次操作从 word1 获得 word2 。
+	 * 执行操作 1："abc" -> "acb"
+	 * 执行操作 1："acb" -> "bca"
+	 * 示例 2：
+	 * 输入：word1 = "a", word2 = "aa"
+	 * 输出：false
+	 * 解释：不管执行多少次操作，都无法从 word1 得到 word2 ，反之亦然。
+	 * 示例 3：
+	 * 输入：word1 = "cabbba", word2 = "abbccc"
+	 * 输出：true
+	 * 解释：3 次操作从 word1 获得 word2 。
+	 * 执行操作 1："cabbba" -> "caabbb"
+	 * 执行操作 2："caabbb" -> "baaccc"
+	 * 执行操作 2："baaccc" -> "abbccc"
+	 * 提示：
+	 * 1 <= word1.length, word2.length <= 105
+	 * word1 和 word2 仅包含小写英文字母
+	 */
+	static class CloseStrings {
+
+		/**
+		 * 个人思路:
+		 * 根据题意分析,有两种情况符合条件
+		 * 1.字符长度一致
+		 * 2.所有字符的数量一致
+		 * 3.所有字符的数量个数,是一致,不考虑是哪个字符的数量,数量的顺序要相同
+		 * <p>
+		 * ***** 这个思路是错误的*****
+		 * 例如 uau和ssx  ;
+		 * 所以需要判断map1和map2中key完全一样,value的值也完全一样;不要求key对应该的value值一样;
+		 *
+		 * @param word1
+		 * @param word2
+		 * @return
+		 */
+		public static boolean closeStrings(String word1, String word2) {
+			int l1 = word1.length(), l2 = word2.length();
+			if (l1 != l2) return false;
+			Map<Character, Integer> map1 = new HashMap<>(), map2 = new HashMap<>();
+			for (int i = 0; i < l1; ++i) {
+				char c = word1.charAt(i);
+				map1.put(c, map1.getOrDefault(c, 0) + 1);
+			}
+			for (int i = 0; i < l2; ++i) {
+				char c = word2.charAt(i);
+				map2.put(c, map2.getOrDefault(c, 0) + 1);
+			}
+			if (map1.size() != map2.size()) return false;
+			for (Map.Entry<Character, Integer> entry : map1.entrySet()) {
+				Character key = entry.getKey();
+				if (!map2.containsKey(key)) return false;
+			}
+			// 如何判断两个collection里面的元素完全相同呢,且元素可以重复
+			// 通过HashMap再一次计数,进行判断
+			Map<Integer, Integer> count1 = new HashMap<>(), count2 = new HashMap<>();
+			for (Integer v : map1.values()) {
+				count1.put(v, count1.getOrDefault(v, 0) + 1);
+			}
+			for (Integer v : map2.values()) {
+				count2.put(v, count2.getOrDefault(v, 0) + 1);
+			}
+			if (count1.size() != count2.size()) return false;
+			for (Map.Entry<Integer, Integer> entry : count1.entrySet()) {
+				Integer key = entry.getKey();
+				if (!entry.getValue().equals(count2.get(key))) return false;
+			}
+			return true;
+		}
+
+		/**
+		 * 关键点还是两个
+		 * 1.出现的字符集完全相同
+		 * 2.字符集次数,经过排序后完全相同
+		 *
+		 * @param word1
+		 * @param word2
+		 * @return
+		 */
+		public static boolean closeStringsII(String word1, String word2) {
+			int l1 = word1.length(), l2 = word2.length();
+			int[] count1 = new int[26], count2 = new int[26];
+			for (int i = 0; i < l1; ++i) {
+				count1[word1.charAt(i) - 'a']++;
+			}
+			for (int i = 0; i < l2; ++i) {
+				count2[word2.charAt(i) - 'a']++;
+			}
+			// 1.判断字符集相同,同一个idx上如果一个等于0一个大于0,则说明字符集不同
+			for (int i = 0; i < count1.length; i++) {
+				if ((count1[i] == 0 && count2[i] > 0) || count1[i] > 0 && count2[i] == 0) return false;
+			}
+			// 2.判断字符集出现的次数,是否完全一样,排序后比较其是否相等即可
+			Arrays.sort(count1);
+			Arrays.sort(count2);
+			return Arrays.equals(count1, count2); // 比较两个集合是否一样,先比数量是否相同;然后逐项比较是否相同
+		}
+
+		public static void main(String[] args) {
+			System.out.println(closeStringsII("uau", "ssx"));
+		}
+	}
+
+	/**
+	 * 2352. 相等行列对
+	 * 给你一个下标从 0 开始、大小为 n x n 的整数矩阵 grid ，返回满足 Ri 行和 Cj 列相等的行列对 (Ri, Cj) 的数目。
+	 * 如果行和列以相同的顺序包含相同的元素（即相等的数组），则认为二者是相等的。
+	 * 示例 1：
+	 * 输入：grid = [[3,2,1],[1,7,6],[2,7,7]]
+	 * 输出：1
+	 * 解释：存在一对相等行列对：
+	 * - (第 2 行，第 1 列)：[2,7,7]
+	 * 示例 2：
+	 * 输入：grid = [[3,1,2,2],[1,4,4,5],[2,4,2,2],[2,4,2,2]]
+	 * 输出：3
+	 * 解释：存在三对相等行列对：
+	 * - (第 0 行，第 0 列)：[3,1,2,2]
+	 * - (第 2 行, 第 2 列)：[2,4,2,2]
+	 * - (第 3 行, 第 2 列)：[2,4,2,2]
+	 * 提示：
+	 * n = grid.length == grid[i].length
+	 * 1 <= n <= 200
+	 * 1 <= grid[i][j] <= 105
+	 */
+	static class qualPairs {
+
+		/**
+		 * 先遍历行记录每个数组出现的次数,key为字符串
+		 *
+		 * @param grid
+		 * @return
+		 */
+		public static int equalPairs(int[][] grid) {
+			Map<String, Integer> mapRow = new HashMap<>();
+			// 逐行遍历
+			for (int i = 0; i < grid.length; i++) {
+				StringBuilder sb = new StringBuilder();
+				for (int j = 0; j < grid[i].length; j++) {
+					sb.append(grid[i][j]).append("-");
+				}
+				String key = sb.substring(0, sb.length() - 1);
+				mapRow.put(key, mapRow.getOrDefault(key, 0) + 1);
+			}
+			// 逐列遍历
+			int count = 0;
+			for (int column = 0; column < grid[0].length; column++) {
+				StringBuilder sb = new StringBuilder();
+				for (int row = 0; row < grid.length; row++) {
+					sb.append(grid[row][column]).append("-");
+				}
+				String key1 = sb.substring(0, sb.length() - 1);
+				if (mapRow.containsKey(key1)) {
+					count += mapRow.get(key1);
+				}
+			}
+			return count;
+		}
+
+		/**
+		 * 拼接字符串较慢,用List作为map的key
+		 * int[] 的equals方法比较的是内存
+		 * HashMap<int[],Integer> 在以int[]作为key时,在计算hey的hash值时,int[]对象的hashcode是以对象地址为基准的
+		 * 并不是以int[]数组中的集合具体值来计算hashCode的
+		 * <p>
+		 * 而ArrayLsit是有重写hashcode和equals方法的
+		 * * public int hashCode() {
+		 * *        int hashCode = 1;
+		 * *        for (E e : this)
+		 * *            hashCode = 31*hashCode + (e==null ? 0 : e.hashCode());
+		 * *        return hashCode;
+		 * * }
+		 * ************************************************************************
+		 * * public boolean equals(Object o) {
+		 * *        if (o == this)
+		 * *            return true;
+		 * *        if (!(o instanceof List))
+		 * *            return false;
+		 * *
+		 * *        ListIterator<E> e1 = listIterator();
+		 * *        ListIterator<?> e2 = ((List<?>) o).listIterator();
+		 * *        while (e1.hasNext() && e2.hasNext()) {
+		 * *            E o1 = e1.next();
+		 * *            Object o2 = e2.next();
+		 * *            if (!(o1==null ? o2==null : o1.equals(o2)))
+		 * *                return false;
+		 * *        }
+		 * *        return !(e1.hasNext() || e2.hasNext());
+		 * *  }
+		 * *
+		 * *
+		 * 所以我们看到int[]与List<Integer>的区别,而使用时的注意点,HashMap中的key是通过hashcode进过高低位异或得到的
+		 * 而get方法中,是通过value的equals方法比较所得到的
+		 * ***********************************************************************************
+		 * 通过上中方法作为key,可以看出String的拼接是比较耗时的,比List的循环求hashcode和equals要慢
+		 * @param grid
+		 * @return
+		 */
+		public static int equalPairsII(int[][] grid) {
+			Map<List<Integer>, Integer> mapRow = new HashMap<>();
+			// 逐行遍历
+			for (int i = 0; i < grid.length; i++) {
+				List<Integer> list = new ArrayList<>();
+				for (int j = 0; j < grid[i].length; j++) {
+					list.add(grid[i][j]);
+				}
+				mapRow.put(list, mapRow.getOrDefault(list, 0) + 1);
+			}
+			// 逐列遍历
+			int count = 0;
+			for (int column = 0; column < grid[0].length; column++) {
+				List<Integer> list = new ArrayList<>();
+				for (int row = 0; row < grid.length; row++) {
+					list.add(grid[row][column]);
+				}
+				if (mapRow.containsKey(list)) {
+					count += mapRow.get(list);
+				}
+			}
+			return count;
+		}
+
+		public static void main(String[] args) {
+			System.out.println(equalPairsII(new int[][]{
+					{3, 1, 2, 2},
+					{1, 4, 4, 5},
+					{2, 4, 2, 2},
+					{2, 4, 2, 2},
+			}));
+		}
+	}
+
 }

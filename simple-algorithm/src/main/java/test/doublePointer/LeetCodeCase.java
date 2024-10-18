@@ -971,4 +971,67 @@ public class LeetCodeCase {
 			System.out.println(i);
 		}
 	}
+
+	/**
+	 * 1679. K 和数对的最大数目
+	 * 给你一个整数数组 nums 和一个整数 k 。
+	 * 每一步操作中，你需要从数组中选出和为 k 的两个整数，并将它们移出数组。
+	 * 返回你可以对数组执行的最大操作数。
+	 * 示例 1：
+	 * 输入：nums = [1,2,3,4], k = 5
+	 * 输出：2
+	 * 解释：开始时 nums = [1,2,3,4]：
+	 * - 移出 1 和 4 ，之后 nums = [2,3]
+	 * - 移出 2 和 3 ，之后 nums = []
+	 * 不再有和为 5 的数对，因此最多执行 2 次操作。
+	 * 示例 2：
+	 * 输入：nums = [3,1,3,4,3], k = 6
+	 * 输出：1
+	 * 解释：开始时 nums = [3,1,3,4,3]：
+	 * - 移出前两个 3 ，之后nums = [1,4,3]
+	 * 不再有和为 6 的数对，因此最多执行 1 次操作。
+	 * 提示：
+	 * 1 <= nums.length <= 105
+	 * 1 <= nums[i] <= 109
+	 * 1 <= k <= 109
+	 */
+	public static class MaxOperations {
+
+		/**
+		 * 思路:
+		 * nums中的值是无序的,那么我们根据双指针向中间逼近的方式没法遍历出所有的两个数字组合,除非两层循环遍历出所有的数字组合
+		 * 如何排序之后,再通过双指针向中间逼近呢? 排序时间复杂度 O(log n) ,双指向遍历O(n)
+		 *
+		 * @param nums
+		 * @param k
+		 * @return
+		 */
+		public static int maxOperations(int[] nums, int k) {
+			Arrays.sort(nums);
+			int p = 0, q = nums.length - 1, count = 0;
+			while (p < q) {
+				if (nums[q] >= k || nums[p] + nums[q] > k) {  // q指针往左移动
+					q--;
+				} else if (nums[p] + nums[q] < k) { // p往右移动
+					p++;
+				} else {
+					count++;
+					p++;
+					q--;
+				}
+			}
+			return count;
+		}
+
+		public static void main(String[] args) {
+			int i1 = maxOperations(new int[]{1, 3, 2, 4, 6, 3, 2}, 5);
+			System.out.println(i1);
+
+			String regex = "^.*.*$";
+			String str = "2.3.68521";
+			String str1 = "0..236";
+			System.out.println(str.matches(regex));
+			System.out.println(str1.matches(regex));
+		}
+	}
 }

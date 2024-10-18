@@ -56,6 +56,20 @@ public class RegexHelper {
 		Pattern pattern1 = Pattern.compile("(\\D*)(\\d+)(.*)");
 
 		{
+			String regex = "^(\\d)||(\\d+).(\\d+)$";
+			String str = "2.3.68521";
+			String str1 = "0..236";
+			String str2="a.12343";
+			String str3="1.234a";
+			String str4="1.234";
+			System.out.println(str.matches(regex));
+			System.out.println(str1.matches(regex));
+			System.out.println(str2.matches(regex));
+			System.out.println(str3.matches(regex));
+			System.out.println(str4.matches(regex));
+		}
+
+		{
 			String pattern = "zo*";
 			String str = "z";
 			boolean matches = str.matches(pattern);
