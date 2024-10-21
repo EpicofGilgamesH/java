@@ -1816,4 +1816,239 @@ public class LeetcodeCaseII {
 			System.out.println();
 		}
 	}
+
+	/**
+	 * 2095. 删除链表的中间节点
+	 * 给你一个链表的头节点 head 。删除 链表的 中间节点 ，并返回修改后的链表的头节点 head 。
+	 * 长度为 n 链表的中间节点是从头数起第 ⌊n / 2⌋ 个节点（下标从 0 开始），其中 ⌊x⌋ 表示小于或等于 x 的最大整数。
+	 * 对于 n = 1、2、3、4 和 5 的情况，中间节点的下标分别是 0、1、1、2 和 2 。
+	 * 示例 1：
+	 * 输入：head = [1,3,4,7,1,2,6]
+	 * 输出：[1,3,4,1,2,6]
+	 * 解释：
+	 * 上图表示给出的链表。节点的下标分别标注在每个节点的下方。
+	 * 由于 n = 7 ，值为 7 的节点 3 是中间节点，用红色标注。
+	 * 返回结果为移除节点后的新链表。
+	 * 示例 2：
+	 * 输入：head = [1,2,3,4]
+	 * 输出：[1,2,4]
+	 * 解释：
+	 * 上图表示给出的链表。
+	 * 对于 n = 4 ，值为 3 的节点 2 是中间节点，用红色标注。
+	 * 示例 3：
+	 * 输入：head = [2,1]
+	 * 输出：[2]
+	 * 解释：
+	 * 上图表示给出的链表。
+	 * 对于 n = 2 ，值为 1 的节点 1 是中间节点，用红色标注。
+	 * 值为 2 的节点 0 是移除节点 1 后剩下的唯一一个节点。
+	 * 提示：
+	 * 链表中节点的数目在范围 [1, 105] 内
+	 * 1 <= Node.val <= 105
+	 */
+	static class DeleteMiddle {
+
+		/**
+		 * 思路:
+		 * 通过快慢指针找到链表的中点,移除该节点
+		 *
+		 * @param head
+		 * @return
+		 */
+		public static ListNode deleteMiddle(ListNode head) {
+			if (head == null || head.next == null) return null;
+			ListNode slow = head, fast = head, slowPrev = null;
+			while (fast != null && fast.next != null) {
+				slowPrev = slow;
+				slow = slow.next;
+				fast = fast.next.next;
+			}
+			slowPrev.next = slow.next;
+			return head;
+		}
+
+		public static void main(String[] args) {
+			ListNode node1 = new ListNode(1);
+			ListNode node3 = new ListNode(3);
+			ListNode node4 = new ListNode(4);
+			ListNode node7 = new ListNode(7);
+			ListNode node1_1 = new ListNode(1);
+			ListNode node2 = new ListNode(2);
+			ListNode node6 = new ListNode(6);
+			node1.next = node3;
+			node3.next = node4;
+			node4.next = node7;
+			node7.next = node1_1;
+			node1_1.next = node2;
+			node2.next = node6;
+			ListNode node = deleteMiddle(node1);
+			System.out.println();
+		}
+	}
+
+	/**
+	 * 328. 奇偶链表
+	 * 给定单链表的头节点 head ，将所有索引为奇数的节点和索引为偶数的节点分别组合在一起，然后返回重新排序的列表。
+	 * 第一个节点的索引被认为是 奇数 ， 第二个节点的索引为 偶数 ，以此类推。
+	 * 请注意，偶数组和奇数组内部的相对顺序应该与输入时保持一致。
+	 * 你必须在 O(1) 的额外空间复杂度和 O(n) 的时间复杂度下解决这个问题。
+	 * 示例 1:
+	 * 输入: head = [1,2,3,4,5]
+	 * 输出: [1,3,5,2,4]
+	 * 示例 2:
+	 * 输入: head = [2,1,3,5,6,4,7]
+	 * 输出: [2,3,6,7,1,5,4]
+	 * 提示:
+	 * n ==  链表中的节点数
+	 * 0 <= n <= 104
+	 * -106 <= Node.val <= 106
+	 */
+	static class OddEvenList {
+
+		/**
+		 * 思路：
+		 * 奇偶链表的起始节点分别为:odd even
+		 * odd的下一个节点是 even.next;even的下一个节点是新的add节点的next
+		 * 所以在拼接奇偶两条链表时,需要一直更新add和even节点
+		 *
+		 * @param head
+		 * @return
+		 */
+		public static ListNode oddEvenList(ListNode head) {
+			if (head == null || head.next == null) return head;
+			ListNode odd = head, even = head.next, evenHead = even;
+			while (true) {
+				if (even != null) {
+					odd.next = even.next;
+					if (even.next != null) {
+						odd = odd.next;
+					} else {
+						break;
+					}
+				} else {
+					break;
+				}
+				even.next = odd.next;
+				even = even.next;
+			}
+			odd.next = evenHead;
+			return head;
+		}
+
+		/**
+		 * 官方的while条件是如何做的,因为先拼接奇数链后拼接偶数链
+		 * 那么可以对偶数链判断其是否为null和他的下一个是否null,它本身为null,则自身下一步没法拼接;它的next为null,则奇数链下一步没法拼接
+		 * 非常的清晰明了
+		 *
+		 * @param head
+		 * @return
+		 */
+		public static ListNode oddEvenListOfficial(ListNode head) {
+			if (head == null || head.next == null) return head;
+			ListNode odd = head, even = head.next, evenHead = even;
+			while (even != null && even.next != null) {
+				odd.next = even.next;
+				odd = odd.next;
+				even.next = odd.next;
+				even = even.next;
+			}
+			odd.next = evenHead;
+			return head;
+		}
+
+		public static void main(String[] args) {
+			ListNode node2 = new ListNode(2);
+			ListNode node1 = new ListNode(1);
+			ListNode node3 = new ListNode(3);
+			ListNode node5 = new ListNode(5);
+			ListNode node6 = new ListNode(6);
+			ListNode node4 = new ListNode(4);
+			ListNode node7 = new ListNode(7);
+			node2.next = node1;
+			node1.next = node3;
+			node3.next = node5;
+			node5.next = node6;
+			node6.next = node4;
+			node4.next = node7;
+			ListNode node = oddEvenList(node2);
+			System.out.println();
+		}
+	}
+
+	/**
+	 * 2130. 链表最大孪生和
+	 * 在一个大小为 n 且 n 为 偶数 的链表中，对于 0 <= i <= (n / 2) - 1 的 i ，第 i 个节点（下标从 0 开始）的孪生节点为第 (n-1-i) 个节点 。
+	 * 比方说，n = 4 那么节点 0 是节点 3 的孪生节点，节点 1 是节点 2 的孪生节点。这是长度为 n = 4 的链表中所有的孪生节点。
+	 * 孪生和 定义为一个节点和它孪生节点两者值之和。
+	 * 给你一个长度为偶数的链表的头节点 head ，请你返回链表的 最大孪生和 。
+	 * 示例 1：
+	 * 输入：head = [5,4,2,1]
+	 * 输出：6
+	 * 解释：
+	 * 节点 0 和节点 1 分别是节点 3 和 2 的孪生节点。孪生和都为 6 。
+	 * 链表中没有其他孪生节点。
+	 * 所以，链表的最大孪生和是 6 。
+	 * 示例 2：
+	 * 输入：head = [4,2,2,3]
+	 * 输出：7
+	 * 解释：
+	 * 链表中的孪生节点为：
+	 * - 节点 0 是节点 3 的孪生节点，孪生和为 4 + 3 = 7 。
+	 * - 节点 1 是节点 2 的孪生节点，孪生和为 2 + 2 = 4 。
+	 * 所以，最大孪生和为 max(7, 4) = 7 。
+	 * 示例 3：
+	 * 输入：head = [1,100000]
+	 * 输出：100001
+	 * 解释：
+	 * 链表中只有一对孪生节点，孪生和为 1 + 100000 = 100001 。
+	 * 提示：
+	 * 链表的节点数目是 [2, 105] 中的 偶数 。
+	 * 1 <= Node.val <= 105
+	 */
+	static class PairSum {
+
+		/**
+		 * 思路:
+		 * 1.先找到链表的中点,然后将前部分链表反转
+		 * 2.从中间开始往后逐步遍历节点,找出最大的孪生和
+		 *
+		 * @param head
+		 * @return
+		 */
+		public static int pairSum(ListNode head) {
+			ListNode slow = head, fast = head, prev = null, next = null;
+			while (fast != null && fast.next != null) {
+				fast = fast.next.next; // 先记录下一个fast指针,很关键 因为slow在翻转时会断开链表
+				next = slow.next; // 记录next
+				slow.next = prev;
+				prev = slow;
+				slow = next;
+			}
+			ListNode first = prev, second = slow;
+			int max = 0;
+			while (first != null) {
+				max = Math.max(first.val + second.val, max);
+				first = first.next;
+				second = second.next;
+			}
+			return max;
+		}
+
+		public static void main(String[] args) {
+			ListNode node2 = new ListNode(2);
+			ListNode node1 = new ListNode(1);
+			ListNode node3 = new ListNode(3);
+			ListNode node5 = new ListNode(5);
+			ListNode node6 = new ListNode(6);
+			ListNode node4 = new ListNode(4);
+			ListNode node7 = new ListNode(7);
+			node2.next = node1;
+			node1.next = node3;
+			node3.next = node5;
+			node5.next = node6;
+			node6.next = node4;
+			// node4.next = node7;
+			System.out.println(pairSum(node2));
+		}
+	}
 }
