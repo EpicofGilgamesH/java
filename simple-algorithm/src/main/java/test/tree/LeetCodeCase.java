@@ -4452,4 +4452,295 @@ public class LeetCodeCase {
 			System.out.println(i);
 		}
 	}
+
+	/**
+	 * 872. 叶子相似的树
+	 * 请考虑一棵二叉树上所有的叶子，这些叶子的值按从左到右的顺序排列形成一个 叶值序列 。
+	 * 举个例子，如上图所示，给定一棵叶值序列为 (6, 7, 4, 9, 8) 的树。
+	 * 如果有两棵二叉树的叶值序列是相同，那么我们就认为它们是 叶相似 的。
+	 * 如果给定的两个根结点分别为 root1 和 root2 的树是叶相似的，则返回 true；否则返回 false
+	 * 示例 1：
+	 * 输入：root1 = [3,5,1,6,2,9,8,null,null,7,4], root2 = [3,5,1,6,7,4,2,null,null,null,null,null,null,9,8]
+	 * 输出：true
+	 * 示例 2：
+	 * 输入：root1 = [1,2,3], root2 = [1,3,2]
+	 * 输出：false
+	 * 提示：
+	 * 给定的两棵树结点数在 [1, 200] 范围内
+	 * 给定的两棵树上的值在 [0, 200] 范围内
+	 */
+	static class LeafSimilar {
+
+		/**
+		 * 思路:
+		 * 深度优先遍历输出叶子节点,然后比较叶子节点是否完全相同
+		 * 能否在遍历的同时进行比较呢?
+		 *
+		 * @param root1
+		 * @param root2
+		 * @return
+		 */
+		public static boolean leafSimilar(TreeNode root1, TreeNode root2) {
+			List<Integer> list1 = new ArrayList<>(), list2 = new ArrayList<>();
+			dfs(root1, list1);
+			dfs(root2, list2);
+			if (list1.size() != list2.size()) return false;
+			for (int i = 0; i < list1.size(); i++) {
+				if (!Objects.equals(list1.get(i), list2.get(i))) return false;
+			}
+			return true;
+		}
+
+		private static void dfs(TreeNode root, List<Integer> list) {
+			if (root.left == null && root.right == null) { // 叶子节点
+				list.add(root.val);
+			}
+			if (root.left != null) dfs(root.left, list);
+			if (root.right != null) dfs(root.right, list);
+		}
+
+		/**
+		 * 广度优先搜索  bfs
+		 *
+		 * @param root1
+		 * @param root2
+		 * @return
+		 */
+		public static boolean leafSimilarII(TreeNode root1, TreeNode root2) {
+			List<Integer> list1 = bfs(root1);
+			List<Integer> list2 = bfs(root2);
+			if (list1.size() != list2.size()) return false;
+			for (int i = 0; i < list1.size(); i++) {
+				if (!Objects.equals(list1.get(i), list2.get(i))) return false;
+			}
+			return true;
+		}
+
+		private static List<Integer> bfs(TreeNode root) {
+			List<Integer> list = new ArrayList<>();
+			Deque<TreeNode> stack = new LinkedList<>();
+			stack.push(root);
+			while (!stack.isEmpty()) {
+				int size = stack.size();
+				for (; size > 0; size--) {
+					TreeNode curr = stack.pop();
+					if (curr.left != null) stack.push(curr.left);
+					if (curr.right != null) stack.push(curr.right);
+					if (curr.left == null && curr.right == null) list.add(curr.val);
+				}
+			}
+			return list;
+		}
+
+		public static void main(String[] args) {
+			TreeNode root1 = new TreeNode(3);
+			TreeNode node5 = new TreeNode(5);
+			TreeNode node1 = new TreeNode(1);
+			root1.left = node5;
+			root1.right = node1;
+			TreeNode node6 = new TreeNode(6);
+			TreeNode node2 = new TreeNode(2);
+			TreeNode node9 = new TreeNode(9);
+			TreeNode node8 = new TreeNode(8);
+			node5.left = node6;
+			node5.right = node2;
+			node1.left = node9;
+			node1.right = node8;
+			TreeNode node7 = new TreeNode(7);
+			TreeNode node4 = new TreeNode(4);
+			node2.left = node7;
+			node2.right = node4;
+
+			TreeNode root2 = new TreeNode(3);
+			TreeNode node5_1 = new TreeNode(5);
+			TreeNode node1_1 = new TreeNode(1);
+			root2.left = node5_1;
+			root2.right = node1_1;
+			TreeNode node6_1 = new TreeNode(6);
+			TreeNode node2_1 = new TreeNode(2);
+			TreeNode node9_1 = new TreeNode(9);
+			TreeNode node8_1 = new TreeNode(8);
+			TreeNode node7_1 = new TreeNode(7);
+			TreeNode node4_1 = new TreeNode(4);
+			node5_1.left = node6_1;
+			node5_1.right = node7_1;
+			node1_1.left = node4_1;
+			node1_1.right = node2_1;
+			node2_1.left = node9_1;
+			node2_1.right = node8_1;
+			System.out.println(leafSimilar(root1, root2));
+		}
+	}
+
+	/**
+	 * 1448. 统计二叉树中好节点的数目
+	 * 给你一棵根为 root 的二叉树，请你返回二叉树中好节点的数目。
+	 * 「好节点」X 定义为：从根到该节点 X 所经过的节点中，没有任何节点的值大于 X 的值。
+	 * 示例 1：
+	 * 输入：root = [3,1,4,3,null,1,5]
+	 * 输出：4
+	 * 解释：图中蓝色节点为好节点。
+	 * 根节点 (3) 永远是个好节点。
+	 * 节点 4 -> (3,4) 是路径中的最大值。
+	 * 节点 5 -> (3,4,5) 是路径中的最大值。
+	 * 节点 3 -> (3,1,3) 是路径中的最大值。
+	 * 示例 2：
+	 * 输入：root = [3,3,null,4,2]
+	 * 输出：3
+	 * 解释：节点 2 -> (3, 3, 2) 不是好节点，因为 "3" 比它大。
+	 * 示例 3：
+	 * 输入：root = [1]
+	 * 输出：1
+	 * 解释：根节点是好节点。
+	 * 提示：
+	 * 二叉树中节点数目范围是 [1, 10^5] 。
+	 * 每个节点权值的范围是 [-10^4, 10^4] 。
+	 */
+	static class GoodNodes {
+
+		/**
+		 * 思路：
+		 * 深度优先搜索树,同时保存到每个节点时,其路径上的最大值队列,以方便回溯
+		 *
+		 * @param root
+		 * @return
+		 */
+		public static int goodNodes(TreeNode root) {
+			Deque<Integer> deque = new LinkedList<>();
+			deque.push(Integer.MIN_VALUE);
+			return dfs(root, deque);
+		}
+
+		private static int dfs(TreeNode node, Deque<Integer> deque) {
+			if (node == null) return 0;
+			Integer currMax = deque.peek();
+			int count = 0;
+			if (node.val >= currMax) {
+				deque.push(node.val);
+				count++;
+			} else {
+				deque.push(currMax);
+			}
+			count += dfs(node.left, deque);
+			count += dfs(node.right, deque);
+			deque.pop();
+			return count;
+		}
+
+		/**
+		 * 官方思路:
+		 * 路径最大值,不需要保存全部,并且回溯;设置int类值最为路径上最大值
+		 * 那次每次搜索的int都是单独的,不需要回溯
+		 *
+		 * @param root
+		 * @return
+		 */
+		public static int goodNodesOfficial(TreeNode root) {
+			return dfs(root, Integer.MIN_VALUE);
+		}
+
+		private static int dfs(TreeNode node, int pathMax) {
+			if (node == null) return 0;
+			int count = 0;
+			if (node.val >= pathMax) {
+				pathMax = node.val;
+				count++;
+			}
+			count += dfs(node.left, pathMax);
+			count += dfs(node.right, pathMax);
+			return count;
+		}
+
+		public static void main(String[] args) {
+			TreeNode root = new TreeNode(3);
+			TreeNode root1 = new TreeNode(1);
+			TreeNode root4 = new TreeNode(4);
+			TreeNode root3 = new TreeNode(3);
+			TreeNode root1_1 = new TreeNode(1);
+			TreeNode root5 = new TreeNode(5);
+			TreeNode root2 = new TreeNode(2);
+			/*root.left = root1;
+			root.right = root4;
+			root1.left = root3;
+			root4.left = root1_1;
+			root4.right = root5;*/
+			root.left = root3;
+			root3.left = root4;
+			root3.right = root2;
+			System.out.println(goodNodesOfficial(root));
+		}
+	}
+
+	/**
+	 * 1372. 二叉树中的最长交错路径
+	 * 给你一棵以 root 为根的二叉树，二叉树中的交错路径定义如下：
+	 * 选择二叉树中 任意 节点和一个方向（左或者右）。
+	 * 如果前进方向为右，那么移动到当前节点的的右子节点，否则移动到它的左子节点。
+	 * 改变前进方向：左变右或者右变左。
+	 * 重复第二步和第三步，直到你在树中无法继续移动。
+	 * 交错路径的长度定义为：访问过的节点数目 - 1（单个节点的路径长度为 0 ）。
+	 * 请你返回给定树中最长 交错路径 的长度。
+	 * 示例 1：
+	 * 输入：root = [1,null,1,1,1,null,null,1,1,null,1,null,null,null,1,null,1]
+	 * 输出：3
+	 * 解释：蓝色节点为树中最长交错路径（右 -> 左 -> 右）。
+	 * 示例 2：
+	 * 输入：root = [1,1,1,null,1,null,null,1,1,null,1]
+	 * 输出：4
+	 * 解释：蓝色节点为树中最长交错路径（左 -> 右 -> 左 -> 右）。
+	 * 示例 3：
+	 * 输入：root = [1]
+	 * 输出：0
+	 * 提示：
+	 * 每棵树最多有 50000 个节点。
+	 * 每个节点的值在 [1, 100] 之间。
+	 */
+	static class LongestZigZag {
+
+		/**
+		 * 思路:
+		 * 深度优先遍历时,记录上一个节点遍历的方向是向右还是向左,如果下一个节点方向相同,则初始为0,否则+1
+		 *
+		 * @param root
+		 * @return
+		 */
+		private static int max;
+
+		public static int longestZigZag(TreeNode root) {
+			dfs(root.left, false, 1);
+			dfs(root.right, true, 1);
+			return max;
+		}
+
+		public static int longestZigZagII(TreeNode root) {
+			dfs(root,true,1);
+			return max;
+		}
+
+		private static void dfs(TreeNode node, boolean isRight, int len) {
+			if (node == null) return;
+			max = Math.max(len, max);
+			dfs(node.left, false, isRight ? len + 1 : 1);
+			dfs(node.right, true, isRight ? 1 : len + 1);
+		}
+
+		public static void main(String[] args) {
+			TreeNode root = new TreeNode(0);
+			TreeNode node1 = new TreeNode(1);
+			TreeNode node2 = new TreeNode(2);
+			TreeNode node3 = new TreeNode(3);
+			TreeNode node4 = new TreeNode(4);
+			TreeNode node5 = new TreeNode(5);
+			TreeNode node6 = new TreeNode(6);
+			TreeNode node7 = new TreeNode(7);
+			root.right = node1;
+			node1.left = node2;
+			node1.right = node3;
+			node3.left = node4;
+			node3.right = node5;
+			node4.right = node6;
+			node6.right = node7;
+			System.out.println(longestZigZag(root));
+		}
+	}
 }
