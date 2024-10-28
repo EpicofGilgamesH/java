@@ -54,7 +54,16 @@ public class RegexHelper {
 		// \D 非数字字符匹配.等效于 [^0-9]
 		// \\w匹配字母、数字、下划线。等价于 [A-Za-z0-9_]
 		Pattern pattern1 = Pattern.compile("(\\D*)(\\d+)(.*)");
-
+		{
+			String regex = "DI\\{(.*)\\}";
+			Pattern pattern = Pattern.compile(regex);
+			String content = "DI{2,buyer_business_relation}";
+			Matcher matcher = pattern.matcher(content);
+			while (matcher.find()) {
+				String group = matcher.group(1);
+				System.out.println(group);
+			}
+		}
 		{
 			String regex = "^(\\d)||(\\d+).(\\d+)$";
 			String str = "2.3.68521";

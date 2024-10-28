@@ -4519,13 +4519,13 @@ public class LeetCodeCase {
 		private static List<Integer> bfs(TreeNode root) {
 			List<Integer> list = new ArrayList<>();
 			Deque<TreeNode> stack = new LinkedList<>();
-			stack.push(root);
+			stack.offer(root);
 			while (!stack.isEmpty()) {
 				int size = stack.size();
 				for (; size > 0; size--) {
 					TreeNode curr = stack.pop();
-					if (curr.left != null) stack.push(curr.left);
-					if (curr.right != null) stack.push(curr.right);
+					if (curr.left != null) stack.offer(curr.left);
+					if (curr.right != null) stack.offer(curr.right);
 					if (curr.left == null && curr.right == null) list.add(curr.val);
 				}
 			}
@@ -4743,4 +4743,492 @@ public class LeetCodeCase {
 			System.out.println(longestZigZag(root));
 		}
 	}
+
+	/**
+	 * 1161. 最大层内元素和
+	 * 给你一个二叉树的根节点 root。设根节点位于二叉树的第 1 层，而根节点的子节点位于第 2 层，依此类推。
+	 * 请返回层内元素之和 最大 的那几层（可能只有一层）的层号，并返回其中 最小 的那个。
+	 * 示例 1：
+	 * 输入：root = [1,7,0,7,-8,null,null]
+	 * 输出：2
+	 * 解释：
+	 * 第 1 层各元素之和为 1，
+	 * 第 2 层各元素之和为 7 + 0 = 7，
+	 * 第 3 层各元素之和为 7 + -8 = -1，
+	 * 所以我们返回第 2 层的层号，它的层内元素之和最大。
+	 * 示例 2：
+	 * 输入：root = [989,null,10250,98693,-89388,null,null,null,-32127]
+	 * 输出：2
+	 * 提示：
+	 * 树中的节点数在 [1, 104]范围内
+	 * -105 <= Node.val <= 105
+	 */
+	static class maxLevelSum {
+
+		/**
+		 * 思路:
+		 * 层序遍历的同时,记录层的序号 同时计算这一层的和,记录最大的层内元素和,同时记录层号
+		 */
+		public static int maxLevelSum(TreeNode root) {
+			Deque<TreeNode> deque = new LinkedList<>();
+			deque.offer(root);
+			int level = 0, max = Integer.MIN_VALUE, maxLevel = 0;
+			while (!deque.isEmpty()) {
+				int size = deque.size();
+				level++;
+				int sum = 0;
+				for (; size > 0; --size) {
+					TreeNode curr = deque.pop();
+					sum += curr.val;
+					if (curr.left != null) deque.offer(curr.left);
+					if (curr.right != null) deque.offer(curr.right);
+				}
+				if (sum > max) {
+					maxLevel = level;
+					max = sum;
+				}
+			}
+			return maxLevel;
+		}
+
+		/**
+		 * 通过深度优先遍历要如何做呢?
+		 * 即在深度优先遍历的时候,计入层数,让后把同一层的节点值累计求和
+		 * 此处有一个技巧,用List来保存每一层的和,当list.size()==level 说明这一层的节点是第一次遍历到,所以创建这一次的sum=0;
+		 * 如果list.size()<level 说明这一层已经有节点遍历过了,直接累计sum即可
+		 *
+		 * @param root
+		 * @return
+		 */
+		public static int maxLevelSumDfs(TreeNode root) {
+			List<Integer> list = new ArrayList<>();
+			dfs(root, 0, list);
+			int max = Integer.MIN_VALUE, maxLevel = 0;
+			for (int i = 0; i < list.size(); i++) {
+				int v;
+				if ((v = list.get(i)) > max) {
+					max = v;
+					maxLevel = i;
+				}
+			}
+			return maxLevel + 1;
+		}
+
+		private static void dfs(TreeNode node, int level, List<Integer> list) {
+			if (node == null) return;
+			if (level == list.size()) {
+				list.add(node.val);
+			} else {
+				list.set(level, list.get(level) + node.val);
+			}
+			dfs(node.left, level + 1, list);
+			dfs(node.right, level + 1, list);
+		}
+
+		public static void main(String[] args) {
+			TreeNode root = new TreeNode(989);
+			TreeNode node1 = new TreeNode(10250);
+			TreeNode node2 = new TreeNode(98693);
+			TreeNode node3 = new TreeNode(-89388);
+			TreeNode node4 = new TreeNode(-32127);
+			root.right = node1;
+			node1.left = node2;
+			node1.right = node3;
+			node3.right = node4;
+			System.out.println(maxLevelSumDfs(root));
+		}
+	}
+
+	/**
+	 * 700. 二叉搜索树中的搜索
+	 * 给定二叉搜索树（BST）的根节点 root 和一个整数值 val。
+	 * 你需要在 BST 中找到节点值等于 val 的节点。 返回以该节点为根的子树。 如果节点不存在，则返回 null 。
+	 * 示例 1:
+	 * 输入：root = [4,2,7,1,3], val = 2
+	 * 输出：[2,1,3]
+	 * 示例 2:
+	 * 输入：root = [4,2,7,1,3], val = 5
+	 * 输出：[]
+	 * 提示：
+	 * 树中节点数在 [1, 5000] 范围内
+	 * 1 <= Node.val <= 107
+	 * root 是二叉搜索树
+	 * 1 <= val <= 107
+	 */
+	static class SearchBST {
+
+		/**
+		 * 思路:
+		 * 二叉搜索树: BST 即根节点左树的所有节点小于根节点;右树所有节点大于根节点
+		 * 按照以上条件进行深度优先搜索
+		 *
+		 * @param root
+		 * @param val
+		 * @return
+		 */
+		public static TreeNode searchBST(TreeNode root, int val) {
+			dfs(root, val);
+			return res;
+		}
+
+		private static TreeNode res = null;
+
+		private static void dfs(TreeNode node, int val) {
+			if (node == null) return;
+			if (node.val > val) {  // 在左子树中搜索
+				dfs(node.left, val);
+			} else if (node.val < val) {
+				dfs(node.right, val);
+			} else {
+				res = node;
+			}
+		}
+
+		/**
+		 * 可以确定遍历一个节点的左子节点还是右子节点,那么直接迭代是最清晰的
+		 *
+		 * @param root
+		 * @param val
+		 * @return
+		 */
+		public static TreeNode searchBSTII(TreeNode root, int val) {
+			while (root != null) {
+				if (root.val > val) {
+					root = root.left;
+				} else if (root.val < val) {
+					root = root.right;
+				} else {
+					return root;
+				}
+			}
+			return null;
+		}
+
+		public static void main(String[] args) {
+			TreeNode root = new TreeNode(4);
+			TreeNode node2 = new TreeNode(2);
+			TreeNode node7 = new TreeNode(7);
+			TreeNode node1 = new TreeNode(1);
+			TreeNode node3 = new TreeNode(3);
+			root.left = node2;
+			root.right = node7;
+			node2.left = node1;
+			node2.right = node3;
+			TreeNode treeNode = searchBSTII(root, 5);
+			System.out.println();
+		}
+
+		/**
+		 * 450. 删除二叉搜索树中的节点
+		 * 给定一个二叉搜索树的根节点 root 和一个值 key，删除二叉搜索树中的 key 对应的节点，并保证二叉搜索树的性质不变。返回二叉搜索树（有可能被更新）的根节点的引用。
+		 * 一般来说，删除节点可分为两个步骤：
+		 * 首先找到需要删除的节点；
+		 * 如果找到了，删除它。
+		 * 示例 1:
+		 * 输入：root = [5,3,6,2,4,null,7], key = 3
+		 * 输出：[5,4,6,2,null,null,7]
+		 * 解释：给定需要删除的节点值是 3，所以我们首先找到 3 这个节点，然后删除它。
+		 * 一个正确的答案是 [5,4,6,2,null,null,7], 如下图所示。
+		 * 另一个正确答案是 [5,2,6,null,4,null,7]。
+		 * 示例 2:
+		 * 输入: root = [5,3,6,2,4,null,7], key = 0
+		 * 输出: [5,3,6,2,4,null,7]
+		 * 解释: 二叉树不包含值为 0 的节点
+		 * 示例 3:
+		 * 输入: root = [], key = 0
+		 * 输出: []
+		 * 提示:
+		 * 节点数的范围 [0, 104].
+		 * -105 <= Node.val <= 105
+		 * 节点值唯一
+		 * root 是合法的二叉搜索树
+		 * -105 <= key <= 105
+		 * 进阶： 要求算法时间复杂度为 O(h)，h 为树的高度。
+		 */
+		static class DeleteNode {
+
+			/**
+			 * 思路：
+			 * 1.通过迭代的方式找到被删除的节点
+			 * 2.替换该节点为其右节点;没有右节点,直接指向左节点
+			 * 3.迭代的查找该节点的最左节点-即子树中最左边的节点
+			 *
+			 * @param root
+			 * @param key
+			 * @return
+			 */
+			public static TreeNode deleteNode(TreeNode root, int key) {
+				// 找到要被删除的节点,根节点也有可用被删除
+				TreeNode hair = new TreeNode(-100001);
+				hair.left = root;
+				TreeNode node = root, prev = hair;
+				boolean flag = true;
+				while (node != null) {
+					if (node.val > key) {
+						prev = node;
+						node = node.left;
+						flag = true;
+					} else if (node.val < key) {
+						prev = node;
+						node = node.right;
+						flag = false;
+					} else {
+						break;
+					}
+				}
+				if (node == null) return hair.left;
+				if (node.right == null) { // 删除的节点没有右节点
+					if (flag) prev.left = node.left;
+					else prev.right = node.left;
+				} else {  // 删除的节点有右节点,那么查看该右子树有没有最左叶子结点
+					// 有:则prev -> left ; curr.left -> curr1.left ;  prev1.left -> null; prev1.curr1 -> curr.curr1
+					TreeNode curr1 = node.right, prev1 = curr1.right;
+					while (curr1.left != null) {
+						prev1 = curr1;
+						curr1 = curr1.left;
+					}
+					if (flag) prev.left = curr1;
+					else prev.right = curr1;
+					if (curr1 != node.right) {  // 有最左叶子节点
+						prev1.left = null;
+						curr1.left = node.left;
+						curr1.right = node.right;
+					} else {
+						curr1.left = node.left;
+					}
+				}
+				return hair.left;
+			}
+
+			public static void main(String[] args) {
+				TreeNode root = new TreeNode(5);
+				TreeNode node3 = new TreeNode(3);
+				TreeNode node2 = new TreeNode(2);
+				TreeNode node4 = new TreeNode(4);
+				TreeNode node6 = new TreeNode(6);
+				TreeNode node7 = new TreeNode(7);
+				root.left = node3;
+				node3.left = node2;
+				node3.right = node4;
+				root.right = node6;
+				node6.right = node7;
+				TreeNode treeNode = deleteNode(root, 3);
+				System.out.println();
+			}
+		}
+	}
+
+	/**
+	 * 841. 钥匙和房间
+	 * 有 n 个房间，房间按从 0 到 n - 1 编号。最初，除 0 号房间外的其余所有房间都被锁住。你的目标是进入所有的房间。然而，你不能在没有获得钥匙的时候进入锁住的房间。
+	 * 当你进入一个房间，你可能会在里面找到一套 不同的钥匙，每把钥匙上都有对应的房间号，即表示钥匙可以打开的房间。你可以拿上所有钥匙去解锁其他房间。
+	 * 给你一个数组 rooms 其中 rooms[i] 是你进入 i 号房间可以获得的钥匙集合。如果能进入 所有 房间返回 true，否则返回 false。
+	 * 示例 1：
+	 * 输入：rooms = [[1],[2],[3],[]]
+	 * 输出：true
+	 * 解释：
+	 * 我们从 0 号房间开始，拿到钥匙 1。
+	 * 之后我们去 1 号房间，拿到钥匙 2。
+	 * 然后我们去 2 号房间，拿到钥匙 3。
+	 * 最后我们去了 3 号房间。
+	 * 由于我们能够进入每个房间，我们返回 true。
+	 * 示例 2：
+	 * 输入：rooms = [[1,3],[3,0,1],[2],[0]]
+	 * 输出：false
+	 * 解释：我们不能进入 2 号房间。
+	 * 提示：
+	 * n == rooms.length
+	 * 2 <= n <= 1000
+	 * 0 <= rooms[i].length <= 1000
+	 * 1 <= sum(rooms[i].length) <= 3000
+	 * 0 <= rooms[i][j] < n
+	 * 所有 rooms[i] 的值 互不相同
+	 */
+	static class CanVisitAllRooms {
+
+		/**
+		 * 思路:
+		 * 1.初始时可以进入0号房间
+		 * 2.每次进入房间,会得到一个钥匙集合,钥匙通向所指定的房间
+		 * 3.当所有钥匙都遍历完成,统计是否所有的房间都有遍历到
+		 *
+		 * @param rooms
+		 * @return
+		 */
+		public static boolean canVisitAllRooms(List<List<Integer>> rooms) {
+			boolean[] visited = new boolean[rooms.size()];
+			dfs(rooms, 0, rooms.size(), visited);
+			for (int i = 0; i < visited.length; ++i) {
+				if (!visited[i]) return false;
+			}
+			return true;
+		}
+
+		/**
+		 * dfs遍历
+		 */
+		private static void dfs(List<List<Integer>> rooms, int i, int l, boolean[] visited) {
+			if (i >= l) {
+				return;
+			}
+			if (visited[i]) {
+				return;
+			}
+			visited[i] = true;
+			List<Integer> keys = rooms.get(i);
+			for (int key : keys) {
+				dfs(rooms, key, l, visited);
+			}
+		}
+
+		/**
+		 * bfs
+		 *
+		 * @param rooms
+		 * @return
+		 */
+		public static boolean canVisitAllRoomsBfs(List<List<Integer>> rooms) {
+			boolean[] visited = new boolean[rooms.size()];
+			Deque<Integer> deque = new LinkedList<>();
+			deque.offer(0);
+			while (!deque.isEmpty()) {
+				Integer pop = deque.pop();
+				if (pop >= rooms.size()) continue;
+				visited[pop] = true;
+				List<Integer> list = rooms.get(pop);
+				for (int i : list) {
+					if (!visited[i]) deque.offer(i);
+				}
+			}
+			for (int i = 0; i < visited.length; ++i) {
+				if (!visited[i]) return false;
+			}
+			return true;
+		}
+
+		public static void main(String[] args) {
+			List<List<Integer>> rooms = new ArrayList<>();
+			rooms.add(Arrays.asList(1));
+			rooms.add(Arrays.asList(2));
+			rooms.add(Arrays.asList(3));
+			rooms.add(Arrays.asList());
+			boolean b = canVisitAllRoomsBfs(rooms);
+			System.out.println(b);
+		}
+	}
+
+	/**
+	 * 547. 省份数量
+	 * 有 n 个城市，其中一些彼此相连，另一些没有相连。如果城市 a 与城市 b 直接相连，且城市 b 与城市 c 直接相连，那么城市 a 与城市 c 间接相连。
+	 * 省份 是一组直接或间接相连的城市，组内不含其他没有相连的城市。
+	 * 给你一个 n x n 的矩阵 isConnected ，其中 isConnected[i][j] = 1 表示第 i 个城市和第 j 个城市直接相连，而 isConnected[i][j] = 0 表示二者不直接相连。
+	 * 返回矩阵中 省份 的数量。
+	 * 示例 1：
+	 * 输入：isConnected = [[1,1,0],[1,1,0],[0,0,1]]
+	 * 输出：2
+	 * 示例 2：
+	 * 输入：isConnected = [[1,0,0],[0,1,0],[0,0,1]]
+	 * 输出：3
+	 * 提示：
+	 * 1 <= n <= 200
+	 * n == isConnected.length
+	 * n == isConnected[i].length
+	 * isConnected[i][j] 为 1 或 0
+	 * isConnected[i][i] == 1
+	 * isConnected[i][j] == isConnected[j][i]
+	 */
+	static class FindCircleNum {
+
+		/**
+		 * 思路:
+		 * 1.遍历矩阵,当找到相连的(i,j)时,继续找j相连的坐标,直到找不到相连的坐标或者已经遍历过的坐标
+		 * 2.当找到相连坐标(i,j)时,去第j行找到所有与j相连的城市,dfs遍历
+		 * 3.最后通过visited坐标,来计算有多少个城市相连 -------题意理解错误,本题是要求解总共有多少个省份
+		 *
+		 * @param isConnected
+		 * @return
+		 */
+		public static int findCircleNum(int[][] isConnected) {
+			boolean[][] visited = new boolean[isConnected.length][isConnected[0].length];
+			HashSet<Integer> set = new HashSet<>();
+			for (int i = 0; i < isConnected.length; i++) {
+				for (int j = 0; j < isConnected[0].length; j++) {
+					if (i != j) {
+						dfs(isConnected, i, j, visited, set);
+					}
+				}
+			}
+			return set.size();
+		}
+
+		private static void dfs(int[][] isConnected, int i, int j, boolean[][] visited, HashSet<Integer> set) {
+			if (i >= isConnected.length || j >= isConnected[0].length) return;
+			if (i == j) return;
+			if (visited[i][j]) return;
+			visited[i][j] = true;
+			if (isConnected[i][j] == 1) {  // i和j相连,继续寻找和j相连的城市坐标
+				set.add(i);
+				set.add(j);
+				for (int k = 0; k < isConnected[0].length; k++) {
+					dfs(isConnected, j, k, visited, set);
+				}
+			}
+		}
+
+		/**
+		 * 如何找到所有省份呢?即所有联通的城市,不能连接其他城市了为一个连通分量,也就是一个省份
+		 * 所以拿到一个坐标,一直往下遍历,直到不能遍历为止,就产生一个连通分量
+		 * <p>
+		 * 关键点在于一个连通分量代表一个相关的所有城市集合,也就是一个省份
+		 *
+		 * @param isConnected
+		 * @return
+		 */
+		public static int findCircleNumDfs(int[][] isConnected) {
+			int cities = isConnected.length;
+			boolean[] visited = new boolean[cities];
+			int provinces = 0;
+			for (int i = 0; i < cities; i++) {
+				if (!visited[i]) {
+					dfs(isConnected, i, cities, visited);
+					provinces++;
+				}
+			}
+			return provinces;
+		}
+
+		private static void dfs(int[][] isConnected, int i, int cities, boolean[] visited) {
+			for (int j = 0; j < cities; j++) {
+				if (isConnected[i][j] == 1 && !visited[j]) {
+					visited[j] = true;
+					dfs(isConnected, j, cities, visited);
+				}
+			}
+		}
+
+		public static void main(String[] args) {
+			int circleNum = findCircleNum(new int[][]{
+					{1, 0, 0},
+					{0, 1, 0},
+					{0, 0, 1}
+			});
+			System.out.println(circleNum);
+		}
+	}
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
