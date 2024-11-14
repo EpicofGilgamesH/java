@@ -2770,5 +2770,78 @@ public class LeetCodeCase {
 			System.out.println(i1);
 		}
 	}
+
+	/**
+	 * 1137. 第 N 个泰波那契数
+	 * 泰波那契序列 Tn 定义如下：
+	 * T0 = 0, T1 = 1, T2 = 1, 且在 n >= 0 的条件下 Tn+3 = Tn + Tn+1 + Tn+2
+	 * 给你整数 n，请返回第 n 个泰波那契数 Tn 的值。
+	 * 示例 1：
+	 * 输入：n = 4
+	 * 输出：4
+	 * 解释：
+	 * T_3 = 0 + 1 + 1 = 2
+	 * T_4 = 1 + 1 + 2 = 4
+	 * 示例 2：
+	 * 输入：n = 25
+	 * 输出：1389537
+	 * 提示：
+	 * 0 <= n <= 37
+	 * 答案保证是一个 32 位整数，即 answer <= 2^31 - 1。
+	 */
+	static class Tribonacci {
+
+		public static int tribonacci(int n) {
+			if (n == 0) return 0;
+			if (n == 1 || n == 2) return 1;
+			int first = 0, second = 1, third = 1;
+			for (int i = 3; i <= n; i++) {
+				int v = first + second + third;  // 元素值交换
+				first = second;
+				second = third;
+				third = v;
+			}
+			return third;
+		}
+
+		public static void main(String[] args) {
+			System.out.println(tribonacci(25));
+			System.out.println(UUID.randomUUID().toString().replace("-", ""));
+
+		}
+	}
+
+	/**
+	 * 790. 多米诺和托米诺平铺
+	 * 题意理解需要看图,仅文字没法理解清楚
+	 */
+	static class NumTilings {
+
+		/**
+		 * 分析第i列铺上的4铺的情况,然后从第i-1列递推过来
+		 *
+		 * @param n
+		 * @return
+		 */
+		public static int numTilings(int n) {
+			int[][] dp = new int[n+1][4];
+			int mod = 1000000007;
+			dp[0][0] = 0;
+			dp[0][1] = 0;
+			dp[0][2] = 0;
+			dp[0][3] = 1;
+			for (int i = 1; i <= n; i++) {
+				dp[i][0] = dp[i - 1][3];
+				dp[i][1] = (dp[i - 1][0] + dp[i - 1][2]) % mod;
+				dp[i][2] = (dp[i - 1][0] + dp[i - 1][1]) % mod;
+				dp[i][3] = (((dp[i - 1][0] + dp[i - 1][1]) % mod + dp[i - 1][2]) % mod + dp[i - 1][3]) % mod;
+			}
+			return dp[n][3];
+		}
+
+		public static void main(String[] args) {
+			System.out.println(numTilings(3));
+		}
+	}
 }
 

@@ -738,4 +738,301 @@ public class LeetcodeCase {
 			System.out.println(maximizedCapital);
 		}
 	}
+
+	/**
+	 * 2336. 无限集中的最小数字
+	 * 现有一个包含所有正整数的集合 [1, 2, 3, 4, 5, ...] 。
+	 * 实现 SmallestInfiniteSet 类：
+	 * SmallestInfiniteSet() 初始化 SmallestInfiniteSet 对象以包含 所有 正整数。
+	 * int popSmallest() 移除 并返回该无限集中的最小整数。
+	 * void addBack(int num) 如果正整数 num 不 存在于无限集中，则将一个 num 添加 到该无限集中。
+	 * 示例：
+	 * 输入
+	 * ["SmallestInfiniteSet", "addBack", "popSmallest", "popSmallest", "popSmallest", "addBack", "popSmallest", "popSmallest", "popSmallest"]
+	 * [[], [2], [], [], [], [1], [], [], []]
+	 * 输出
+	 * [null, null, 1, 2, 3, null, 1, 4, 5]
+	 * 解释
+	 * SmallestInfiniteSet smallestInfiniteSet = new SmallestInfiniteSet();
+	 * smallestInfiniteSet.addBack(2);    // 2 已经在集合中，所以不做任何变更。
+	 * smallestInfiniteSet.popSmallest(); // 返回 1 ，因为 1 是最小的整数，并将其从集合中移除。
+	 * smallestInfiniteSet.popSmallest(); // 返回 2 ，并将其从集合中移除。
+	 * smallestInfiniteSet.popSmallest(); // 返回 3 ，并将其从集合中移除。
+	 * smallestInfiniteSet.addBack(1);    // 将 1 添加到该集合中。
+	 * smallestInfiniteSet.popSmallest(); // 返回 1 ，因为 1 在上一步中被添加到集合中，
+	 * // 且 1 是最小的整数，并将其从集合中移除。
+	 * smallestInfiniteSet.popSmallest(); // 返回 4 ，并将其从集合中移除。
+	 * smallestInfiniteSet.popSmallest(); // 返回 5 ，并将其从集合中移除。
+	 * 提示：
+	 * 1 <= num <= 1000
+	 * 最多调用 popSmallest 和 addBack 方法 共计 1000 次
+	 */
+	static class SmallestInfiniteSet {
+
+		/**
+		 * 直接使用PriorityQueue也可以实现,优先级队列在初始化时需要定长;本题限定了调用次数<=1000;
+		 * 但是使用有序数组TreeSet更好,每次返回最小的元素并删除,添加时先判断元素是否存在
+		 * 1.初始化时,先将1005个元素加入进去,然后进行删除和新增
+		 * 2.当然后面连续的正整数,最好是使用一个标记,该标记表示从该元素开始,后面全是连续正整数
+		 */
+		private TreeSet<Integer> treeSet;
+
+		/*public SmallestInfiniteSet() {
+			treeSet = new TreeSet<>();
+			for (int i = 1; i < 1005; i++) {
+				treeSet.add(i);
+			}
+		}
+
+		public int popSmallest() {
+			if (treeSet.isEmpty()) return 0;
+			return treeSet.pollFirst();
+		}
+
+		public void addBack(int num) {
+			if (!treeSet.contains(num)) {
+				treeSet.add(num);
+			}
+		}*/
+
+		private int flag = 1;
+
+		public SmallestInfiniteSet() {
+			treeSet = new TreeSet<>();
+		}
+
+		public int popSmallest() {
+			int res;
+			if (treeSet.isEmpty()) {  // set中没有元素则返回标识的最小正整数
+				res = flag;
+				flag++;
+			} else {
+				res = treeSet.pollFirst();
+			}
+			return res;
+		}
+
+		public void addBack(int num) {
+			if (num < flag) {
+				treeSet.add(num);
+			}
+		}
+	}
+
+	/**
+	 * 2542. 最大子序列的分数
+	 * 给你两个下标从 0 开始的整数数组 nums1 和 nums2 ，两者长度都是 n ，再给你一个正整数 k 。你必须从 nums1 中选一个长度为 k 的 子序列 对应的下标。
+	 * 对于选择的下标 i0 ，i1 ，...， ik - 1 ，你的 分数 定义如下：
+	 * nums1 中下标对应元素求和，乘以 nums2 中下标对应元素的 最小值 。
+	 * 用公式表示： (nums1[i0] + nums1[i1] +...+ nums1[ik - 1]) * min(nums2[i0] , nums2[i1], ... ,nums2[ik - 1]) 。
+	 * 请你返回 最大 可能的分数。
+	 * 一个数组的 子序列 下标是集合 {0, 1, ..., n-1} 中删除若干元素得到的剩余集合，也可以不删除任何元素。
+	 * 示例 1：
+	 * 输入：nums1 = [1,3,3,2], nums2 = [2,1,3,4], k = 3
+	 * 输出：12
+	 * 解释：
+	 * 四个可能的子序列分数为：
+	 * - 选择下标 0 ，1 和 2 ，得到分数 (1+3+3) * min(2,1,3) = 7 。
+	 * - 选择下标 0 ，1 和 3 ，得到分数 (1+3+2) * min(2,1,4) = 6 。
+	 * - 选择下标 0 ，2 和 3 ，得到分数 (1+3+2) * min(2,3,4) = 12 。
+	 * - 选择下标 1 ，2 和 3 ，得到分数 (3+3+2) * min(1,3,4) = 8 。
+	 * 所以最大分数为 12 。
+	 * 示例 2：
+	 * 输入：nums1 = [4,2,3,1,1], nums2 = [7,5,10,9,6], k = 1
+	 * 输出：30
+	 * 解释：
+	 * 选择下标 2 最优：nums1[2] * nums2[2] = 3 * 10 = 30 是最大可能分数。
+	 * 提示：
+	 * n == nums1.length == nums2.length
+	 * 1 <= n <= 105
+	 * 0 <= nums1[i], nums2[j] <= 105
+	 * 1 <= k <= n
+	 */
+	static class MaxScore {
+
+		/**
+		 * 思路:
+		 * 模拟场景,暴力计算
+		 * 数组长度为n,1<=k<=n,即在n个数中选k个数,放入优先级队列中,选入完成后,计算其分数值
+		 * <p>
+		 * 关键点在于从n个数中取k个数的组合,如何实现.使用回溯,暴力解法超时
+		 *
+		 * @param nums1
+		 * @param nums2
+		 * @param k
+		 * @return
+		 */
+		public static long maxScore(int[] nums1, int[] nums2, int k) {
+			int n = nums1.length, max = 0;
+			PriorityQueue<Integer> priorityQueue = new PriorityQueue<>(k);
+			// 在nums1,nums2中选取k个数,这个如何实现呢
+			List<List<Integer>> list = combine(n, k);
+			for (List<Integer> li : list) {
+				int sum = 0;
+				for (Integer i : li) {
+					sum += nums1[i];
+					priorityQueue.add(nums2[i]);
+				}
+				max = Math.max(max, sum * priorityQueue.poll());
+				priorityQueue.clear();
+			}
+			return max;
+		}
+
+		/**
+		 * 回顾下组合
+		 *
+		 * @param n
+		 * @param k
+		 * @return
+		 */
+		private static List<List<Integer>> combine(int n, int k) {
+			List<List<Integer>> list = new ArrayList<>();
+			Deque<Integer> path = new ArrayDeque<>();
+			dfs(-1, n, k, list, path);
+			return list;
+		}
+
+		private static void dfs(int i, int n, int k, List<List<Integer>> list, Deque<Integer> path) {
+			if (i >= n) return;
+			if (i >= 0) path.addLast(i);
+			if (path.size() == k) {
+				list.add(new ArrayList<>(path));
+				return;
+			}
+			for (int j = i + 1; j < n; ++j) {
+				dfs(j, n, k, list, path);
+				path.removeLast();
+			}
+		}
+
+		/**
+		 * 反悔贪心 A*B
+		 * 1.让B保持和题目最佳渐远的方式变化,本地要最大值,就让B降序,那么从nums2中先拿的数肯定最大
+		 * 2.同时A中如果已经拿到K个元素,那么此时继续往后拿更大的元素,同时B也会减小,因为是按照nums2降序拿的
+		 * 3.所以此时一定会拿到最优解
+		 *
+		 * @param nums1
+		 * @param nums2
+		 * @param k
+		 * @return
+		 */
+		public static long maxScoreII(int[] nums1, int[] nums2, int k) {
+			int n = nums1.length;
+			Integer[] idx = new Integer[n];
+			for (int i = 0; i < n; i++) {
+				idx[i] = i;
+			}
+			Arrays.sort(idx, (i, j) -> nums2[j] - nums2[i]);
+			PriorityQueue<Integer> pq = new PriorityQueue<>();
+			long sum = 0;
+			for (int i = 0; i < k; i++) { // A中先拿k个元素,其实B最大
+				sum += nums1[idx[i]];
+				pq.offer(nums1[idx[i]]);
+			}
+			long ans = sum * nums2[idx[k - 1]];
+			for (int i = k; i < n; i++) { // A中nums1中拿取其他元素,此时B往后移,会变小
+				int x = nums1[idx[i]]; // 如果放进去的元素,使得A变大,则有理由放进去
+				if (x > pq.peek()) {
+					sum += x - pq.poll();
+					pq.offer(x);
+					ans = Math.max(ans, sum * nums2[idx[i]]);
+				}
+			}
+			return ans;
+		}
+
+		public static void main(String[] args) {
+			long l = maxScoreII(new int[]{4, 2, 3, 1, 1}, new int[]{7, 5, 10, 9, 6}, 1);
+			System.out.println(l);
+			List<List<Integer>> combine = combine(5, 1);
+			System.out.println(combine);
+		}
+	}
+
+	/**
+	 * 2462. 雇佣 K 位工人的总代价
+	 * 给你一个下标从 0 开始的整数数组 costs ，其中 costs[i] 是雇佣第 i 位工人的代价。
+	 * 同时给你两个整数 k 和 candidates 。我们想根据以下规则恰好雇佣 k 位工人：
+	 * 总共进行 k 轮雇佣，且每一轮恰好雇佣一位工人。
+	 * 在每一轮雇佣中，从最前面 candidates 和最后面 candidates 人中选出代价最小的一位工人，如果有多位代价相同且最小的工人，选择下标更小的一位工人。
+	 * 比方说，costs = [3,2,7,7,1,2] 且 candidates = 2 ，第一轮雇佣中，我们选择第 4 位工人，因为他的代价最小 [3,2,7,7,1,2] 。
+	 * 第二轮雇佣，我们选择第 1 位工人，因为他们的代价与第 4 位工人一样都是最小代价，而且下标更小，[3,2,7,7,2] 。注意每一轮雇佣后，剩余工人的下标可能会发生变化。
+	 * 如果剩余员工数目不足 candidates 人，那么下一轮雇佣他们中代价最小的一人，如果有多位代价相同且最小的工人，选择下标更小的一位工人。
+	 * 一位工人只能被选择一次。
+	 * 返回雇佣恰好 k 位工人的总代价。
+	 * 示例 1：
+	 * 输入：costs = [17,12,10,2,7,2,11,20,8], k = 3, candidates = 4
+	 * 输出：11
+	 * 解释：我们总共雇佣 3 位工人。总代价一开始为 0 。
+	 * - 第一轮雇佣，我们从 [17,12,10,2,7,2,11,20,8] 中选择。最小代价是 2 ，有两位工人，我们选择下标更小的一位工人，即第 3 位工人。总代价是 0 + 2 = 2 。
+	 * - 第二轮雇佣，我们从 [17,12,10,7,2,11,20,8] 中选择。最小代价是 2 ，下标为 4 ，总代价是 2 + 2 = 4 。
+	 * - 第三轮雇佣，我们从 [17,12,10,7,11,20,8] 中选择，最小代价是 7 ，下标为 3 ，总代价是 4 + 7 = 11 。注意下标为 3 的工人同时在最前面和最后面 4 位工人中。
+	 * 总雇佣代价是 11 。
+	 * 示例 2：
+	 * 输入：costs = [1,2,4,1], k = 3, candidates = 3
+	 * 输出：4
+	 * 解释：我们总共雇佣 3 位工人。总代价一开始为 0 。
+	 * - 第一轮雇佣，我们从 [1,2,4,1] 中选择。最小代价为 1 ，有两位工人，我们选择下标更小的一位工人，即第 0 位工人，总代价是 0 + 1 = 1 。注意，下标为 1 和 2 的工人同时在最前面和最后面 3 位工人中。
+	 * - 第二轮雇佣，我们从 [2,4,1] 中选择。最小代价为 1 ，下标为 2 ，总代价是 1 + 1 = 2 。
+	 * - 第三轮雇佣，少于 3 位工人，我们从剩余工人 [2,4] 中选择。最小代价是 2 ，下标为 0 。总代价为 2 + 2 = 4 。
+	 * 总雇佣代价是 4 。
+	 * 提示：
+	 * 1 <= costs.length <= 105
+	 * 1 <= costs[i] <= 105
+	 * 1 <= k, candidates <= costs.length
+	 */
+	static class TotalCost {
+
+		/**
+		 * 思路：
+		 * 使用两个优先级队列和两个指针,分别记录左右选取元素的位置
+		 *
+		 * @param costs
+		 * @param k
+		 * @param candidates
+		 * @return
+		 */
+		public static long totalCost(int[] costs, int k, int candidates) {
+			int n = costs.length, l = 0, r = n - 1;
+			long sum = 0;
+			if (candidates * 2 + k > n) {  // 说明k轮雇佣之后,所有的元素都被选取了,那肯定是选择最小的k个数
+				Arrays.sort(costs);
+				for (int i = 0; i < k; i++) {
+					sum += costs[i];
+				}
+				return sum;
+			}
+			PriorityQueue<Integer> leftPq = new PriorityQueue<>();
+			PriorityQueue<Integer> rightPq = new PriorityQueue<>();
+			while (k > 0) {
+				while (leftPq.size() < candidates && l <= r) {
+					leftPq.offer(costs[l++]);
+				}
+				while (rightPq.size() < candidates && l <= r) {
+					rightPq.offer(costs[r--]);
+				}
+				k--;
+				int v;
+				if (leftPq.isEmpty()) {
+					v = rightPq.poll();
+				} else if (rightPq.isEmpty()) {
+					v = leftPq.poll();
+				} else {
+					if (leftPq.peek() <= rightPq.peek()) {
+						v = leftPq.poll();
+					} else {
+						v = rightPq.poll();
+					}
+				}
+				sum += v;
+			}
+			return sum;
+		}
+
+		public static void main(String[] args) {
+			long l = totalCost(new int[]{1, 2, 4, 1}, 3, 3);
+			System.out.println(l);
+		}
+	}
 }

@@ -1,6 +1,7 @@
 package test.bit;
 
 import javax.print.attribute.standard.PrinterURI;
+import java.util.Arrays;
 
 /**
  * 位运算
@@ -490,6 +491,142 @@ public class LeetCodeCase {
 			System.out.println(rangeBitwiseAndI(5, 7));
 		}
 	}
+
+	/**
+	 * 338. 比特位计数
+	 * 给你一个整数 n ，对于 0 <= i <= n 中的每个 i ，计算其二进制表示中 1 的个数 ，返回一个长度为 n + 1 的数组 ans 作为答案。
+	 * 示例 1：
+	 * 输入：n = 2
+	 * 输出：[0,1,1]
+	 * 解释：
+	 * 0 --> 0
+	 * 1 --> 1
+	 * 2 --> 10
+	 * 示例 2：
+	 * 输入：n = 5
+	 * 输出：[0,1,1,2,1,2]
+	 * 解释：
+	 * 0 --> 0
+	 * 1 --> 1
+	 * 2 --> 10
+	 * 3 --> 11
+	 * 4 --> 100
+	 * 5 --> 101
+	 * 提示：
+	 * 0 <= n <= 105
+	 * 进阶：
+	 * 很容易就能实现时间复杂度为 O(n log n) 的解决方案，你可以在线性时间复杂度 O(n) 内用一趟扫描解决此问题吗？
+	 * 你能不使用任何内置函数解决此问题吗？（如，C++ 中的 __builtin_popcount ）
+	 */
+	static class CountBits {
+
+		/**
+		 * 每位与1进行与运算,如果等于1计数+1
+		 *
+		 * @param n
+		 * @return
+		 */
+		public static int[] countBits(int n) {
+			int[] res = new int[n + 1];
+			res[0] = 0;
+			for (int i = 1; i <= n; i++) {
+				int count = 0, v = i;
+				do {
+					if ((v & 1) == 1) {
+						count++;
+					}
+					v = v >> 1;
+				} while (v > 0);
+				res[i] = count;
+			}
+			return res;
+		}
+
+		/**
+		 * 二进制的最低设置位,即最低的1所在的位,比如10的最低设置位 =2
+		 * y=x&(x-1) 表示将x的最低为1的位变为0;那么y的二进制位中1的个数比x少一个;即 bits[x]=bits[x&(x-1)]+1
+		 * 由于0 <= y < x ,本题就n的二进制位中1的个数,这一定会统计出所有的y,然后来计算x
+		 *
+		 * @param n
+		 * @return
+		 */
+		public static int[] countBitsII(int n) {
+			int[] bits = new int[n + 1];
+			for (int i = 1; i <= n; i++) {
+				bits[i] = bits[i & (i - 1)] + 1;
+			}
+			return bits;
+		}
+
+		public static void main(String[] args) {
+			int[] ints = countBits(5);
+			System.out.println(Arrays.toString(ints));
+		}
+
+		/**
+		 * 1318. 或运算的最小翻转次数
+		 * 给你三个正整数 a、b 和 c。
+		 * 你可以对 a 和 b 的二进制表示进行位翻转操作，返回能够使按位或运算   a OR b == c  成立的最小翻转次数。
+		 * 「位翻转操作」是指将一个数的二进制表示任何单个位上的 1 变成 0 或者 0 变成 1 。
+		 * 示例 1：
+		 * 输入：a = 2, b = 6, c = 5
+		 * 输出：3
+		 * 解释：翻转后 a = 1 , b = 4 , c = 5 使得 a OR b == c
+		 * 示例 2：
+		 * 输入：a = 4, b = 2, c = 7
+		 * 输出：1
+		 * 示例 3：
+		 * 输入：a = 1, b = 2, c = 3
+		 * 输出：0
+		 * 提示：
+		 * 1 <= a <= 10^9
+		 * 1 <= b <= 10^9
+		 * 1 <= c <= 10^9
+		 */
+		static class MinFlips {
+
+			/**
+			 * 首先拿到c的二进制位上的每一位是0还是1
+			 * 0:那么a,b在该位都是0,出现几个1就需要翻转几次
+			 * 1:那么a,b在该位至少有一个是1,如果都是0,则需要翻转一次
+			 *
+			 * @param a
+			 * @param b
+			 * @param c
+			 * @return
+			 */
+			public static int minFlips(int a, int b, int c) {
+				int count = 0;
+				// 拿到每一位上的值
+				while (a > 0 || b > 0 || c > 0) {
+					if ((c & 1) == 0) {  // c的该位是0
+						if ((a & 1) == 1) count++;
+						if ((b & 1) == 1) count++;
+					} else {  // c的该位是1
+						if ((a & 1) == 0 && (b & 1) == 0) count++;
+					}
+					a = a >> 1;
+					b = b >> 1;
+					c = c >> 1;
+				}
+				return count;
+			}
+
+			public static void main(String[] args) {
+				System.out.println(minFlips(1, 2, 3));
+			}
+		}
+	}
+
+// 位运算总结
+// 1. x&(x-1) 表示将x二进制位中的最后一个1变成0;可以用来判断x二进制位中为1的个数
+// 2. while (x>>1)&1 表示x二进制位每一位的值是1还是0
+
+
+
+
+
+
 }
 
 

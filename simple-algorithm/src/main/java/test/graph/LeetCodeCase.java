@@ -426,4 +426,196 @@ public class LeetCodeCase {
 			System.out.println(Arrays.toString(order));
 		}
 	}
+
+	/**
+	 * 1466. 重新规划路线
+	 * n 座城市，从 0 到 n-1 编号，其间共有 n-1 条路线。因此，要想在两座不同城市之间旅行只有唯一一条路线可供选择（路线网形成一颗树）。去年，交通运输部决定重新规划路线，以改变交通拥堵的状况。
+	 * 路线用 connections 表示，其中 connections[i] = [a, b] 表示从城市 a 到 b 的一条有向路线。
+	 * 今年，城市 0 将会举办一场大型比赛，很多游客都想前往城市 0 。
+	 * 请你帮助重新规划路线方向，使每个城市都可以访问城市 0 。返回需要变更方向的最小路线数。
+	 * 题目数据 保证 每个城市在重新规划路线方向后都能到达城市 0 。
+	 * 示例 1：
+	 * 输入：n = 6, connections = [[0,1],[1,3],[2,3],[4,0],[4,5]]
+	 * 输出：3
+	 * 解释：更改以红色显示的路线的方向，使每个城市都可以到达城市 0 。
+	 * 示例 2：
+	 * 输入：n = 5, connections = [[1,0],[1,2],[3,2],[3,4]]
+	 * 输出：2
+	 * 解释：更改以红色显示的路线的方向，使每个城市都可以到达城市 0 。
+	 * 示例 3：
+	 * 输入：n = 3, connections = [[1,0],[2,0]]
+	 * 输出：0
+	 * 提示：
+	 * 2 <= n <= 5 * 10^4
+	 * connections.length == n-1
+	 * connections[i].length == 2
+	 * 0 <= connections[i][0], connections[i][1] <= n-1
+	 * connections[i][0] != connections[i][1]
+	 */
+	static class MinReorder {
+
+		/**
+		 * 思路:
+		 * 依据题目要求,两座城市之间只有唯一一条路线可供选择,所以不是网状图,而是一颗树
+		 * 那么本题即求,树的根节点到叶子节点的过程中,存在多少个正向的边(从根节点到子节点的连接边)
+		 * 1.初始化无向边图,其中记录正向边为1,反向边为0;如何即记录节点,又记录正反向呢?可以用数组,也可以定义对象
+		 * 2.从根节点深度优先遍历整颗树,然后记录其中正向边的数量,即为所求
+		 * <p>
+		 * 想直接构建一个树形的向量图,好像很难实现.....所以构建无向图时,两个方向的节点都要加进去
+		 * 关键点在于,以遍历过的节点,其子节点不要再遍历回来,那样会死循环
+		 *
+		 * @param n
+		 * @param connections
+		 * @return
+		 */
+		public static int minReorder(int n, int[][] connections) {
+			List<List<Integer>> list = new ArrayList<>();
+			for (int i = 0; i < n; i++) {
+				list.add(new ArrayList<>());
+			}
+			for (int i = 0; i < connections.length; ++i) {
+				int a = connections[i][0], b = connections[i][1];
+				list.get(a).add(b);
+				list.get(b).add(-a);
+			}
+			return dfs(list, 0, -1);
+		}
+
+		private static int dfs(List<List<Integer>> list, int i, int parent) {
+			int res = 0;
+			List<Integer> li = list.get(i);
+			for (int o : li) {
+				int edge = Math.abs(o);
+				if (edge == parent) continue;
+				res += (o > 0 ? 1 : 0) + dfs(list, edge, i);
+			}
+			return res;
+		}
+
+		public static int minReorderII(int n, int[][] connections) {
+			List<int[]>[] list = new List[n];
+			for (int i = 0; i < n; i++) {
+				list[i] = new ArrayList<>();
+			}
+			for (int i = 0; i < connections.length; i++) {
+				list[connections[i][0]].add(new int[]{connections[i][1], 1});
+				list[connections[i][1]].add(new int[]{connections[i][0], 0});
+			}
+			return dfs(0, -1, list);
+		}
+
+		private static int dfs(int x, int parent, List<int[]>[] e) {
+			int res = 0;
+			for (int[] edge : e[x]) {
+				if (edge[0] == parent) {
+					continue;
+				}
+				res += dfs(edge[0], x, e) + edge[1];
+			}
+			return res;
+		}
+
+		public static void main(String[] args) {
+			int[][] connections = new int[][]{
+					{0, 1},
+					{1, 3},
+					{2, 3},
+					{4, 0},
+					{4, 5},
+			};
+			int i1 = minReorder(6, connections);
+			System.out.println(i1);
+		}
+	}
+
+	/**
+	 * 1926. 迷宫中离入口最近的出口
+	 * 给你一个 m x n 的迷宫矩阵 maze （下标从 0 开始），矩阵中有空格子（用 '.' 表示）和墙（用 '+' 表示）。同时给你迷宫的入口 entrance ，用 entrance = [entrancerow, entrancecol] 表示你一开始所在格子的行和列。
+	 * 每一步操作，你可以往 上，下，左 或者 右 移动一个格子。你不能进入墙所在的格子，你也不能离开迷宫。你的目标是找到离 entrance 最近 的出口。出口 的含义是 maze 边界 上的 空格子。entrance 格子 不算 出口。
+	 * 请你返回从 entrance 到最近出口的最短路径的 步数 ，如果不存在这样的路径，请你返回 -1 。
+	 * 示例 1：
+	 * 输入：maze = [["+","+",".","+"],[".",".",".","+"],["+","+","+","."]], entrance = [1,2]
+	 * 输出：1
+	 * 解释：总共有 3 个出口，分别位于 (1,0)，(0,2) 和 (2,3) 。
+	 * 一开始，你在入口格子 (1,2) 处。
+	 * - 你可以往左移动 2 步到达 (1,0) 。
+	 * - 你可以往上移动 1 步到达 (0,2) 。
+	 * 从入口处没法到达 (2,3) 。
+	 * 所以，最近的出口是 (0,2) ，距离为 1 步。
+	 * 示例 2：
+	 * 输入：maze = [["+","+","+"],[".",".","."],["+","+","+"]], entrance = [1,0]
+	 * 输出：2
+	 * 解释：迷宫中只有 1 个出口，在 (1,2) 处。
+	 * (1,0) 不算出口，因为它是入口格子。
+	 * 初始时，你在入口与格子 (1,0) 处。
+	 * - 你可以往右移动 2 步到达 (1,2) 处。
+	 * 所以，最近的出口为 (1,2) ，距离为 2 步。
+	 * 示例 3：
+	 * 输入：maze = [[".","+"]], entrance = [0,0]
+	 * 输出：-1
+	 * 解释：这个迷宫中没有出口。
+	 * 提示：
+	 * maze.length == m
+	 * maze[i].length == n
+	 * 1 <= m, n <= 100
+	 * maze[i][j] 要么是 '.' ，要么是 '+' 。
+	 * entrance.length == 2
+	 * 0 <= entrancerow < m
+	 * 0 <= entrancecol < n
+	 * entrance 一定是空格子。
+	 */
+	static class NearestExit {
+
+		/**
+		 * 思路：
+		 * 本题是找从入口entrance开始,找到其走到边界上的空格子,最近所需要的步数
+		 * 如果用dfs,务必是会走完所有的与入口想通的格子,然后找到能走到的最近的边界空格子
+		 * 如果采用bfs,那么当找到第一个能走到的边界空格子时即找到了答案
+		 *
+		 * @param maze
+		 * @param entrance
+		 * @return
+		 */
+		static final char BLANK = '.';
+		static final char WALL = '+';
+
+		public static int nearestExit(char[][] maze, int[] entrance) {
+			int m = maze.length, n = maze[0].length;
+			maze[entrance[0]][entrance[1]] = WALL;
+			Queue<int[]> queue = new ArrayDeque<>();
+			queue.offer(entrance);
+			int steps = 0;
+			int[] x = new int[]{1, -1, 0, 0};
+			int[] y = new int[]{0, 0, 1, -1};
+			while (!queue.isEmpty()) {
+				steps++;
+				int size = queue.size();
+				for (int i = 0; i < size; i++) {
+					int[] cell = queue.poll();
+					int row = cell[0], col = cell[1];
+					for (int j = 0; j < 4; j++) {
+						int newRow = row + x[j], newCol = col + y[j];
+						if (newRow >= 0 && newRow < m && newCol >= 0 && newCol < n && maze[newRow][newCol] == BLANK) {
+							if (newRow == 0 || newRow == m - 1 || newCol == 0 || newCol == n - 1) {
+								return steps;
+							}
+							maze[newRow][newCol] = WALL;
+							queue.offer(new int[]{newRow, newCol});
+						}
+					}
+				}
+			}
+			return -1;
+		}
+
+		public static void main(String[] args) {
+			char[][] maze = new char[][]{
+					{'+', '+', '+'},
+					{'.', '+', '+'},
+					{'+', '+', '+'}
+			};
+			int i1 = nearestExit(maze, new int[]{1, 2});
+			System.out.println(i1);
+		}
+	}
 }

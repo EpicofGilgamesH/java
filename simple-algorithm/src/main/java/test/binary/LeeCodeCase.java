@@ -2,6 +2,7 @@ package test.binary;
 
 import com.alibaba.fastjson.JSON;
 
+import java.util.Arrays;
 import java.util.Random;
 
 /**
@@ -687,6 +688,251 @@ public class LeeCodeCase {
 		public static void main(String[] args) {
 			int min = findMinI(new int[]{2,1});
 			System.out.println(min);
+		}
+	}
+
+	/**
+	 * 374. 猜数字大小
+	 * 我们正在玩猜数字游戏。猜数字游戏的规则如下：
+	 * 我会从 1 到 n 随机选择一个数字。 请你猜选出的是哪个数字。
+	 * 如果你猜错了，我会告诉你，我选出的数字比你猜测的数字大了还是小了。
+	 * 你可以通过调用一个预先定义好的接口 int guess(int num) 来获取猜测结果，返回值一共有三种可能的情况：
+	 * -1：你猜的数字比我选出的数字大 （即 num > pick）。
+	 * 1：你猜的数字比我选出的数字小 （即 num < pick）。
+	 * 0：你猜的数字与我选出的数字相等。（即 num == pick）。
+	 * 返回我选出的数字。
+	 * 示例 1：
+	 * 输入：n = 10, pick = 6
+	 * 输出：6
+	 * 示例 2：
+	 * 输入：n = 1, pick = 1
+	 * 输出：1
+	 * 示例 3：
+	 * 输入：n = 2, pick = 1
+	 * 输出：1
+	 * 提示：
+	 * 1 <= n <= 231 - 1
+	 * 1 <= pick <= n
+	 */
+	static class GuessGame {
+
+		/**
+		 * 思路:
+		 * 经典二分的思路
+		 *
+		 * @param n
+		 * @return
+		 */
+		public static int guessNumber(int n) {
+			int s = 1, e = n; // 范围
+			while (s <= e) {
+				int pos = s + ((e - s) >> 1);
+				int g = guess(pos);
+				if (g == -1) { // 缩小范围
+					e = pos - 1;
+				} else if (g == 1) {
+					s = pos + 1;
+				} else return pos;
+			}
+			return 0;
+		}
+
+		public static int guessNumberII(int n) {
+			int s = 1, e = n; // 范围
+			while (s < e) {
+				int pos = s + ((e - s) >> 1);
+				int g = guess(pos);
+				if (g <= 0) { // 那么答案在 [s,pos]之间
+					e = pos;
+				} else {
+					s = pos + 1; // 答案在[pos+1,s]之间
+				}
+			}
+			// 当s==e时,区间缩为一个点,即是答案
+			return s;
+		}
+
+		private static final int v = 6;
+
+		private static int guess(int num) {
+			if (num > v) {
+				return -1;
+			} else if (num < v) {
+				return 1;
+			} else {
+				return 0;
+			}
+		}
+
+		public static void main(String[] args) {
+			int i1 = guessNumberII(10);
+			System.out.println(i1);
+		}
+	}
+
+	/**
+	 * 2300. 咒语和药水的成功对数
+	 * 给你两个正整数数组 spells 和 potions ，长度分别为 n 和 m ，其中 spells[i] 表示第 i 个咒语的能量强度，potions[j] 表示第 j 瓶药水的能量强度。
+	 * 同时给你一个整数 success 。一个咒语和药水的能量强度 相乘 如果 大于等于 success ，那么它们视为一对 成功 的组合。
+	 * 请你返回一个长度为 n 的整数数组 pairs，其中 pairs[i] 是能跟第 i 个咒语成功组合的 药水 数目。
+	 * 示例 1：
+	 * 输入：spells = [5,1,3], potions = [1,2,3,4,5], success = 7
+	 * 输出：[4,0,3]
+	 * 解释：
+	 * - 第 0 个咒语：5 * [1,2,3,4,5] = [5,10,15,20,25] 。总共 4 个成功组合。
+	 * - 第 1 个咒语：1 * [1,2,3,4,5] = [1,2,3,4,5] 。总共 0 个成功组合。
+	 * - 第 2 个咒语：3 * [1,2,3,4,5] = [3,6,9,12,15] 。总共 3 个成功组合。
+	 * 所以返回 [4,0,3] 。
+	 * 示例 2：
+	 * 输入：spells = [3,1,2], potions = [8,5,8], success = 16
+	 * 输出：[2,0,2]
+	 * 解释：
+	 * - 第 0 个咒语：3 * [8,5,8] = [24,15,24] 。总共 2 个成功组合。
+	 * - 第 1 个咒语：1 * [8,5,8] = [8,5,8] 。总共 0 个成功组合。
+	 * - 第 2 个咒语：2 * [8,5,8] = [16,10,16] 。总共 2 个成功组合。
+	 * 所以返回 [2,0,2] 。
+	 * 提示：
+	 * n == spells.length
+	 * m == potions.length
+	 * 1 <= n, m <= 105
+	 * 1 <= spells[i], potions[i] <= 105
+	 * 1 <= success <= 1010
+	 */
+	static class SuccessfulPairs {
+
+		/**
+		 * 思路：
+		 * 本题的题意是,从spells数组中,每次拿出1个数,然后与potions中的每个数计算其乘积,然后统计满足条件的个数
+		 * 实际上可以先对potions数组进行排序,然后找到第一个满足条件的元素的序列,后面剩下的数即为需要统计的个数
+		 * 那么怎么找到第一个满足条件的序列呢?通过二分的范围缩小,来找到分界点
+		 *
+		 * @param spells
+		 * @param potions
+		 * @param success
+		 * @return
+		 */
+		public static int[] successfulPairs(int[] spells, int[] potions, long success) {
+			int n = spells.length, m = potions.length;
+			int[] res = new int[n];
+			Arrays.sort(potions);
+			for (int i = 0; i < n; i++) {
+				// 判断是否所有都满足,或者一个都不满足
+				int s = 0, e = m - 1, v = spells[i];
+				if ((long) v * potions[0] >= success) { // 所有都满足
+					res[i] = m;
+				} else if ((long) v * potions[m - 1] < success) { // 所有都不满足
+					res[i] = 0;
+				} else {
+					while (s < e) {
+						int p = s + ((e - s) >> 1);
+						if ((long) potions[p] * v >= success) {  // 范围在[s,p]
+							e = p;
+						} else {  // 范围在[p+1,e]
+							s = p + 1;
+						}
+					}
+					res[i] = m - s;
+				}
+			}
+			return res;
+		}
+
+		public static void main(String[] args) {
+			int[] ints = successfulPairs(new int[]{3, 1, 2}, new int[]{8, 5, 8}, 16);
+			System.out.println(Arrays.toString(ints));
+		}
+	}
+
+	/**
+	 * 875. 爱吃香蕉的珂珂
+	 * 珂珂喜欢吃香蕉。这里有 n 堆香蕉，第 i 堆中有 piles[i] 根香蕉。警卫已经离开了，将在 h 小时后回来。
+	 * 珂珂可以决定她吃香蕉的速度 k （单位：根/小时）。每个小时，她将会选择一堆香蕉，从中吃掉 k 根。如果这堆香蕉少于 k 根，她将吃掉这堆的所有香蕉，然后这一小时内不会再吃更多的香蕉
+	 * 珂珂喜欢慢慢吃，但仍然想在警卫回来前吃掉所有的香蕉。
+	 * 返回她可以在 h 小时内吃掉所有香蕉的最小速度 k（k 为整数）。
+	 * 示例 1：
+	 * 输入：piles = [3,6,7,11], h = 8
+	 * 输出：4
+	 * 示例 2：
+	 * 输入：piles = [30,11,23,4,20], h = 5
+	 * 输出：30
+	 * 示例 3：
+	 * 输入：piles = [30,11,23,4,20], h = 6
+	 * 输出：23
+	 * 提示：
+	 * 1 <= piles.length <= 104
+	 * piles.length <= h <= 109
+	 * 1 <= piles[i] <= 109
+	 */
+	static class MinEatingSpeed {
+
+		/**
+		 * 思路:
+		 * 根据题意,需要找到合理的速度K(k/h),使得能够在规定时间内吃掉所有的香蕉
+		 * 重点是,香蕉是按堆放的,1小时内吃掉一堆后将不在吃下一堆
+		 * 可以先判断这个速度最大值,例如香蕉堆为[3,6,7,11] 已排序,那么最大的那一堆分成2次吃,做多吃8h,符合条件
+		 * MAX(K)= max(piles)/(h/n) +1; MIN(K)=min(piles)/h/n)+1;
+		 *
+		 * @param piles
+		 * @param h
+		 * @return
+		 */
+		public static int minEatingSpeed(int[] piles, int h) {
+			Arrays.sort(piles);
+			int n = piles.length, left = piles[0] / (h / n), right = piles[n - 1] / (h / n) + 1;
+			left = left == 0 ? 1 : left;
+			while (left < right) {
+				int mid = left + ((right - left) >> 1);
+				// if (canFinish(piles, mid, n, h)) {  // 能完成,则范围为[left,mid]
+				if (getTime(piles, mid) <= h) {
+					right = mid;
+				} else {                            // 不能完成,则范围为[mid+1,right]
+					left = mid + 1;
+				}
+			}
+			return left;
+		}
+
+		private static boolean canFinish(int[] piles, int k, int n, int h) {
+			int total = 0;
+			for (int i = 0; i < n; i++) {
+				// 如果本堆香蕉数量小于速度k,那么耗时为1,如果数量大于k,则分段计算
+				if (piles[i] < k) total += 1;
+				else total += piles[i] / k + (piles[i] % k == 0 ? 0 : 1);
+			}
+			return total <= h;
+		}
+
+		public static int minEatingSpeedII(int[] piles, int h) {
+			int low = 1, high = 0;
+			for (int pile : piles) {
+				high = Math.max(high, pile);
+				low = Math.min(low, pile);
+			}
+			int n = piles.length;
+			low = low / (h / n);
+			high = high / (h / n) + 1;
+			low = low == 0 ? 1 : low;
+			while (low < high) {
+				int mid = low + ((high - low) >> 1);
+				if (getTime(piles, mid) <= h) {
+					high = mid;
+				} else {                            // 不能完成,则范围为[mid+1,right]
+					low = mid + 1;
+				}
+			}
+			return low;
+		}
+
+		private static long getTime(int[] piles, int k) {
+			long time = 0;
+			for (int pile : piles) {
+				time += (pile + k - 1) / k;
+			}
+			return time;
+		}
+
+		public static void main(String[] args) {
+			System.out.println(minEatingSpeedII(new int[]{3,6,7,11}, 8));
 		}
 	}
 }

@@ -18,6 +18,8 @@
         <module>springcloud-test</module>
         <module>java-agent</module>
         <module>java-agent-example</module>
+        <module>springboot</module>
+        <module>spring</module>
     </modules>
     <properties>
         <java.version>1.8</java.version>
