@@ -1878,6 +1878,87 @@ public class LeetCodeCase {
 			System.out.println(Arrays.toString(ints));
 		}
 	}
+
+	/**
+	 * 901. 股票价格跨度
+	 * 设计一个算法收集某些股票的每日报价，并返回该股票当日价格的 跨度 。
+	 * 当日股票价格的 跨度 被定义为股票价格小于或等于今天价格的最大连续日数（从今天开始往回数，包括今天）。
+	 * 例如，如果未来 7 天股票的价格是 [100,80,60,70,60,75,85]，那么股票跨度将是 [1,1,1,2,1,4,6] 。
+	 * 实现 StockSpanner 类：
+	 * StockSpanner() 初始化类对象。
+	 * int next(int price) 给出今天的股价 price ，返回该股票当日价格的 跨度 。
+	 * 示例：
+	 * 输入：
+	 * ["StockSpanner", "next", "next", "next", "next", "next", "next", "next"]
+	 * [[], [100], [80], [60], [70], [60], [75], [85]]
+	 * 输出：
+	 * [null, 1, 1, 1, 2, 1, 4, 6]
+	 * 解释：
+	 * StockSpanner stockSpanner = new StockSpanner();
+	 * stockSpanner.next(100); // 返回 1
+	 * stockSpanner.next(80);  // 返回 1
+	 * stockSpanner.next(60);  // 返回 1
+	 * stockSpanner.next(70);  // 返回 2
+	 * stockSpanner.next(60);  // 返回 1
+	 * stockSpanner.next(75);  // 返回 4 ，因为截至今天的最后 4 个股价 (包括今天的股价 75) 都小于或等于今天的股价。
+	 * stockSpanner.next(85);  // 返回 6
+	 * 提示：
+	 * 1 <= price <= 105
+	 * 最多调用 next 方法 104 次
+	 */
+	static class StockSpanner {
+
+		/**
+		 * 首先要使用单调栈,单调栈的作用是保证栈中的元素按一定的顺序,这样给出一个数v,找出比他小的所有元素,就很容易
+		 * 但是栈中的元素没有按顺序的保存所有元素了,那如何能求出一个数其相邻的前面的数比其小的个数呢?
+		 * 此时需要在栈元素中保存每个数的序列,这样就能通过序列号计算出结果.
+		 * ---------------------------------------------------------------------------------------------
+		 * 单调栈操作步骤
+		 * |60 |   70
+		 * |80 |
+		 * |100|
+		 * --------------------
+		 * 此时需要计算元素70的前面相邻连续比它小的数的个数,由于栈顶元素60<70,60出栈,用元素70的idx减去此时栈顶元素80的idx即为所求
+		 * 然后元素70入栈,以上一直保证栈中元素单调递减.
+		 * 那么如何证明元素60出栈,不会引起其后面元素的结果计算呢?
+		 * 此时单调栈情况:
+		 * |70 |   x
+		 * |80 |
+		 * |100|
+		 * 如果现在有元素x需要计算结果,如果x < 70,那么所求结果等于1,栈无操作;
+		 * 如果x >= 70 ,那么x > 60必然成立,所有结果用不到元素60的idx,此时元素70出栈,会用比元素70更大的元素的idx进行结果求解
+		 */
+		public StockSpanner() {
+			stack = new ArrayDeque<>();
+			stack.push(new int[]{-1, Integer.MAX_VALUE});
+			idx = -1;
+		}
+
+		private Deque<int[]> stack;
+		private int idx;
+
+		public int next(int price) {
+			idx++;
+			while (price >= stack.peek()[1]) {
+				stack.pop();
+			}
+			int res = idx - stack.peek()[0];
+			stack.push(new int[]{idx, price});
+			return res;
+		}
+
+		public static void main(String[] args) {
+			StockSpanner stockSpanner = new StockSpanner();
+			System.out.println(stockSpanner.next(100));
+			System.out.println(stockSpanner.next(80));
+			System.out.println(stockSpanner.next(60));
+			System.out.println(stockSpanner.next(70));
+			System.out.println(stockSpanner.next(60));
+			System.out.println(stockSpanner.next(75));
+			System.out.println(stockSpanner.next(85));
+
+		}
+	}
 }
 
 

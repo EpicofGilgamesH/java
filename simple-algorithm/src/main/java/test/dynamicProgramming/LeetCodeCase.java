@@ -2843,5 +2843,82 @@ public class LeetCodeCase {
 			System.out.println(numTilings(3));
 		}
 	}
+
+	/**
+	 * 714. 买卖股票的最佳时机含手续费
+	 * 给定一个整数数组 prices，其中 prices[i]表示第 i 天的股票价格 ；整数 fee 代表了交易股票的手续费用。
+	 * 你可以无限次地完成交易，但是你每笔交易都需要付手续费。如果你已经购买了一个股票，在卖出它之前你就不能再继续购买股票了。
+	 * 返回获得利润的最大值。
+	 * 注意：这里的一笔交易指买入持有并卖出股票的整个过程，每笔交易你只需要为支付一次手续费。
+	 * 示例 1：
+	 * 输入：prices = [1, 3, 2, 8, 4, 9], fee = 2
+	 * 输出：8
+	 * 解释：能够达到的最大利润:
+	 * 在此处买入 prices[0] = 1
+	 * 在此处卖出 prices[3] = 8
+	 * 在此处买入 prices[4] = 4
+	 * 在此处卖出 prices[5] = 9
+	 * 总利润: ((8 - 1) - 2) + ((9 - 4) - 2) = 8
+	 * 示例 2：
+	 * 输入：prices = [1,3,7,5,10,3], fee = 3
+	 * 输出：6
+	 * 提示：
+	 * 1 <= prices.length <= 5 * 104
+	 * 1 <= prices[i] < 5 * 104
+	 * 0 <= fee < 5 * 104
+	 */
+	static class MaxProfitII {
+
+		/**
+		 * 思路:
+		 * 本地可以通过深度优先遍历的思路,每天有两种选择,买和不买;然后计算最大利润
+		 * 当然更好的思路是使用动态规划
+		 * 设f[i][0]表示第i天,手上没有股票的最大利润
+		 * 设f[i][1]表示第i天,手上有一张股票的最大利润
+		 * 那么第i天,手上没有股票的最大利润,可以从前一天上术没有股票则第i天也不买得到;也可以从前一天手上有一张股票,且第i天卖出了得到.
+		 * 有f[i][0]=max{f[i-1][0],f[i-1][1]+prices[i]-2},同理
+		 * 有f[i][1]=max{f[i-1][1],f[i-1][0]-price[i]}
+		 *
+		 * @param prices
+		 * @param fee
+		 * @return
+		 */
+		public static int maxProfit(int[] prices, int fee) {
+			int n = prices.length;
+			int[][] f = new int[n][2];
+			f[0][0] = 0;
+			f[0][1] = -prices[0];
+			for (int i = 1; i < n; ++i) {
+				f[i][0] = Math.max(f[i - 1][0], f[i - 1][1] + prices[i] - fee);
+				f[i][1] = Math.max(f[i - 1][1], f[i - 1][0] - prices[i]);
+			}
+			// 最大利润就是最后一天手上没有股票的利润
+			return f[n - 1][0];
+		}
+
+		/**
+		 * 空间优化
+		 *
+		 * @param prices
+		 * @param fee
+		 * @return
+		 */
+		public static int maxProfitII(int[] prices, int fee) {
+			int n = prices.length;
+			int[] f = new int[2];
+			f[1] = -prices[0];
+			for (int i = 1; i < n; ++i) {
+				int temp = f[0]; // 先保存f[0]
+				f[0] = Math.max(f[0], f[1] + prices[i] - fee);
+				f[1] = Math.max(f[1], temp - prices[i]);
+			}
+			return f[0];
+		}
+
+		public static void main(String[] args) {
+			int i1 = maxProfit(new int[]{1, 3, 2, 8, 4, 9}, 2);
+			System.out.println(i1);
+		}
+	}
 }
 
