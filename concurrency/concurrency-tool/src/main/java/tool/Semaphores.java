@@ -1,3 +1,5 @@
+package tool;
+
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -26,7 +28,7 @@ public class Semaphores {
 				end.await();
 				semaphore.acquire();
 				System.out.println(getName() + "acquire");
-				//处理事件 要求同时只能有5个线程处理该事件，控制信号量
+				//处理事件 要求同时只能有2个线程处理该事件，控制信号量
 				TimeUnit.MILLISECONDS.sleep(1000);
 				System.out.println("----------------");
 				semaphore.release();
