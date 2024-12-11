@@ -3264,4 +3264,53 @@ public class LeetCodeCase {
 			System.out.println(lists);
 		}
 	}
+
+
+	/**
+	 * 组合字段的属性
+	 */
+	static class CombinationField {
+
+		/**
+		 * String[][]表示三个不同的字段结合,要组合出所有A,B,C的场景
+		 * {
+		 * {"A","B","C"},
+		 * {"D","E","F"},
+		 * {"G","H","I"},
+		 * }
+		 */
+		public static List<String> combination(String[][] arr) {
+			List<String> list = new LinkedList<>();
+			StringBuilder sb = new StringBuilder();
+			dfs(arr, 0, list, sb);
+			return list;
+		}
+
+		/**
+		 * @param idx  组合到第几个字符
+		 * @param list 结果集
+		 * @param sb   组合值
+		 */
+		private static void dfs(String[][] arr, int idx, List<String> list, StringBuilder sb) {
+			if (sb.length() == arr.length) {  // 已组合完成
+				list.add(sb.toString());
+				return;
+			}
+			String[] strs = arr[idx];
+			for (String s : strs) {
+				sb.append(s);
+				dfs(arr, idx + 1, list, sb);
+				sb.deleteCharAt(sb.length() - 1); // 回溯
+			}
+		}
+
+		public static void main(String[] args) {
+			List<String> combination = combination(new String[][]{
+					{"A", "B", "C"},
+					{"D", "E", "F"},
+					{"G", "H", "I"},
+			});
+			System.out.println(combination);
+		}
+	}
 }
