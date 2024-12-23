@@ -1,5 +1,9 @@
 package test;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class DailyQuestionCase {
 
 	/**
@@ -111,6 +115,177 @@ public class DailyQuestionCase {
 		 */
 		public boolean canFinish(int numCourses, int[][] prerequisites) {
 			return false;
+		}
+	}
+
+	/**
+	 * 3138. 同位字符串连接的最小长度
+	 * 给你一个字符串 s ，它由某个字符串 t 和若干 t  的 同位字符串 连接而成。
+	 * 请你返回字符串 t 的 最小 可能长度。
+	 * 同位字符串 指的是重新排列一个单词得到的另外一个字符串，原来字符串中的每个字符在新字符串中都恰好只使用一次。
+	 * 示例 1：
+	 * 输入：s = "abba"
+	 * 输出：2
+	 * 解释：
+	 * 一个可能的字符串 t 为 "ba" 。
+	 * 示例 2：
+	 * 输入：s = "cdef"
+	 * 输出：4
+	 * 解释：
+	 * 一个可能的字符串 t 为 "cdef" ，注意 t 可能等于 s 。
+	 * 提示：
+	 * 1 <= s.length <= 105
+	 * s 只包含小写英文字母。
+	 */
+	static class MinAnagramLength {
+
+		/**
+		 * 个人思路:
+		 * 首先这个字符串s如果可以有t和其同位字符串拼接而成,那么t字符串的长度一定是s字符串长度的因数;
+		 * 可以枚举因数,然后将s字符串按因数长度切割,匹配每一份字符串中字符的个数是否相同
+		 * 当然,因数在选择时是可以进行优化的,比如s只要存在重复的字符那么因素1就可以被排除
+		 * 由于我们要求最小可能长度的字符串t,那么我们可以排除不可能的最小因素,然后依次往后进行校验
+		 * 统计s字符中出现某个字符次数的最小值.
+		 * eg:abcabaacaacb
+		 * 对这个字符串进行统计:a=6 b=3 c=3 可以得出出现字符的次数最小为3,那么最小的因素长度为 12/3=4
+		 * 最多必须分为3组,此时t的长度最小
+		 *
+		 * @param s
+		 * @return
+		 */
+		public static int minAnagramLength(String s) {
+			int l = s.length();
+			int[] minArr = new int[26];
+			for (int i = 0; i < s.length(); i++) {
+				minArr[s.charAt(i) - 'a']++;
+			}
+			int min = l;
+			for (int i = 0; i < minArr.length; i++) {
+				if (minArr[i] != 0) {
+					min = Math.min(min, minArr[i]);
+				}
+			}
+			// 找到s字符串长度的因数
+			for (int i = l / min; i < l; i++) {
+				if (l % i == 0) {  // 因数
+					if (check(s, i)) {
+						return i;
+					}
+				}
+			}
+			return l;
+		}
+
+		/**
+		 * 检查字符串s是否由长度为i的同位字符串连接而成
+		 *
+		 * @param s
+		 * @param i
+		 * @return
+		 */
+		private static boolean check(String s, int i) {
+			int[] count0 = new int[26];
+			for (int j = 0; j < i; j++) {
+				count0[s.charAt(j) - 'a']++;
+			}
+			for (int n = 1; n < s.length() / i; n++) {
+				int[] count1 = new int[26];
+				for (int k = i * n; k < i * (n + 1); k++) {
+					count1[s.charAt(k) - 'a']++;
+				}
+				if (!Arrays.equals(count0, count1)) {
+					return false;
+				}
+			}
+			return true;
+		}
+
+		public static void main(String[] args) {
+			int i1 = minAnagramLength("aaa");
+			System.out.println(i1);
+		}
+	}
+
+	/**
+	 * 7. 整数反转
+	 * 给你一个 32 位的有符号整数 x ，返回将 x 中的数字部分反转后的结果。
+	 * 如果反转后整数超过 32 位的有符号整数的范围 [−231,  231 − 1] ，就返回 0。
+	 * 假设环境不允许存储 64 位整数（有符号或无符号）。
+	 * 示例 1：
+	 * 输入：x = 123
+	 * 输出：321
+	 * 示例 2：
+	 * 输入：x = -123
+	 * 输出：-321
+	 * 示例 3：
+	 * 输入：x = 120
+	 * 输出：21
+	 * 示例 4：
+	 * 输入：x = 0
+	 * 输出：0
+	 * 提示：
+	 * -231 <= x <= 231 - 1
+	 */
+	static class Reverse {
+
+		/**
+		 * 个人思路:
+		 * 对于数字反转的处理,可以转字符串之后进行反转,当然也可以去数字的每一位之后进行求和
+		 * 从个位开始取,一直到最高位
+		 * eg:785624
+		 * 785624 % 10 = 4 --> 785624/10  = 78562
+		 * 78562 % 10  = 2 --> 78562/10   = 7856
+		 * 7856 % 10   = 6 --> 7856/10    = 785
+		 * ...
+		 * 取到每一位的数字存储起来,最后进行求和
+		 *
+		 * @param x
+		 * @return
+		 */
+		public static int reverse(int x) {
+			List<Integer> list = new ArrayList<>(10);
+			while (x != 0) {
+				list.add(x % 10);
+				x = x / 10;
+			}
+			int n = list.size();
+			long v = 0;
+			for (int i = 0; i < n; i++) {
+				v += (long) (list.get(i) * Math.pow(10, (n - 1 - i)));
+				if (v > Integer.MAX_VALUE || v < Integer.MIN_VALUE) {
+					return 0;
+				}
+			}
+			return (int) v;
+		}
+
+		/**
+		 * MAX:2147483647
+		 * MIN:-2147483648
+		 *
+		 * @param x
+		 * @return
+		 */
+		public static int reverseII(int x) {
+			int res = 0;
+			while (x != 0) {
+				int temp = x % 10;
+				// 实际上是需要特殊判断最后一位数字,因为不到10位时,肯定不会溢出
+				if (res > Integer.MAX_VALUE / 10 || (res == Integer.MAX_VALUE / 10 && temp > 7)) {
+					return 0;
+				}
+				if (res < Integer.MIN_VALUE / 10 || (res == Integer.MIN_VALUE / 10 && temp < -8)) {
+					return 0;
+				}
+				res = res * 10 + temp;
+				x /= 10;
+			}
+			return res;
+		}
+
+		public static void main(String[] args) {
+			int reverse = reverseII(-1563847412);
+			System.out.println(reverse);
 		}
 	}
 }
