@@ -1637,26 +1637,134 @@ public class DailyQuestionCase {
 				return res;
 			}
 		}
+
+		public static void main(String[] args) {
+			ATM atm = new ATM();
+			atm.deposit(new int[]{0, 0, 1, 2, 1});
+			System.out.println(Arrays.toString(atm.withdrawI(600)));
+			atm.deposit(new int[]{0, 1, 0, 1, 1});
+			System.out.println(Arrays.toString(atm.withdrawI(600)));
+			System.out.println(Arrays.toString(atm.withdrawI(550)));
+
+			Dto dto = new Dto();
+			Map<String, String> map = new HashMap<>();
+			map.put("a", "123");
+			map.put("b", "456");
+			dto.setMap(map);
+			System.out.println(JSON.toJSONString(dto));
+		}
+
+		@Data
+		static class Dto {
+			private Map<String, String> map;
+		}
 	}
 
-	public static void main(String[] args) {
-		ATM atm = new ATM();
-		atm.deposit(new int[]{0, 0, 1, 2, 1});
-		System.out.println(Arrays.toString(atm.withdrawI(600)));
-		atm.deposit(new int[]{0, 1, 0, 1, 1});
-		System.out.println(Arrays.toString(atm.withdrawI(600)));
-		System.out.println(Arrays.toString(atm.withdrawI(550)));
+	/**
+	 * 3019. 按键变更的次数
+	 * 给你一个下标从 0 开始的字符串 s ，该字符串由用户输入。按键变更的定义是：使用与上次使用的按键不同的键。例如 s = "ab" 表示按键变更一次，而 s = "bBBb" 不存在按键变更。
+	 * 返回用户输入过程中按键变更的次数。
+	 * 注意：shift 或 caps lock 等修饰键不计入按键变更，也就是说，如果用户先输入字母 'a' 然后输入字母 'A' ，不算作按键变更。
+	 * 示例 1：
+	 * 输入：s = "aAbBcC"
+	 * 输出：2
+	 * 解释：
+	 * 从 s[0] = 'a' 到 s[1] = 'A'，不存在按键变更，因为不计入 caps lock 或 shift 。
+	 * 从 s[1] = 'A' 到 s[2] = 'b'，按键变更。
+	 * 从 s[2] = 'b' 到 s[3] = 'B'，不存在按键变更，因为不计入 caps lock 或 shift 。
+	 * 从 s[3] = 'B' 到 s[4] = 'c'，按键变更。
+	 * 从 s[4] = 'c' 到 s[5] = 'C'，不存在按键变更，因为不计入 caps lock 或 shift 。
+	 * 示例 2：
+	 * 输入：s = "AaAaAaaA"
+	 * 输出：0
+	 * 解释： 不存在按键变更，因为这个过程中只按下字母 'a' 和 'A' ，不需要进行按键变更。
+	 * 提示：
+	 * 1 <= s.length <= 100
+	 * s 仅由英文大写字母和小写字母组成。
+	 */
+	static class CountKeyChanges {
 
-		Dto dto = new Dto();
-		Map<String, String> map = new HashMap<>();
-		map.put("a", "123");
-		map.put("b", "456");
-		dto.setMap(map);
-		System.out.println(JSON.toJSONString(dto));
+		/**
+		 * 思路:
+		 * 逐个遍历字符,发生改变时计数+1,则标记字符更新
+		 *
+		 * @param s
+		 * @return
+		 */
+		public static int countKeyChanges(String s) {
+			char c = s.charAt(0);
+			int count = 0;
+			char[] arr = s.toCharArray();
+			for (int i = 1; i < arr.length; ++i) {
+				if (arr[i] != ' ') {
+					if (c != arr[i] && Math.abs(c - arr[i]) != 32) {
+						count++;
+						c = arr[i];
+					}
+				}
+			}
+			return count;
+		}
+
+		public static int countKeyChangesII(String s) {
+			char[] arr = s.toCharArray();
+			int res = 0;
+			for (int i = 1; i < arr.length; i++) {
+				if ((arr[i - 1] & 31) != (arr[i] & 31)) {
+					res++;
+				}
+			}
+			return res;
+		}
+
+		public static void main(String[] args) {
+			System.out.println(countKeyChanges("A aaAaAaaA"));
+		}
 	}
 
-	@Data
-	static class Dto {
-		private Map<String, String> map;
+	/**
+	 * 3285. 找到稳定山的下标
+	 * 有 n 座山排成一列，每座山都有一个高度。给你一个整数数组 height ，其中 height[i] 表示第 i 座山的高度，再给你一个整数 threshold 。
+	 * 对于下标不为 0 的一座山，如果它左侧相邻的山的高度 严格大于 threshold ，那么我们称它是 稳定 的。我们定义下标为 0 的山 不是 稳定的。
+	 * 请你返回一个数组，包含所有 稳定 山的下标，你可以以 任意 顺序返回下标数组。
+	 * 示例 1：
+	 * 输入：height = [1,2,3,4,5], threshold = 2
+	 * 输出：[3,4]
+	 * 解释：
+	 * 下标为 3 的山是稳定的，因为 height[2] == 3 大于 threshold == 2 。
+	 * 下标为 4 的山是稳定的，因为 height[3] == 4 大于 threshold == 2.
+	 * 示例 2：
+	 * 输入：height = [10,1,10,1,10], threshold = 3
+	 * 输出：[1,3]
+	 * 示例 3：
+	 * 输入：height = [10,1,10,1,10], threshold = 10
+	 * 输出：[]
+	 * 提示：
+	 * 2 <= n == height.length <= 100
+	 * 1 <= height[i] <= 100
+	 * 1 <= threshold <= 100
+	 */
+	static class StableMountains {
+
+		/**
+		 * 思路:
+		 * 逐个遍历,判断其左边的元素是否大于threshold
+		 *
+		 * @param height
+		 * @param threshold
+		 * @return
+		 */
+		public static List<Integer> stableMountains(int[] height, int threshold) {
+			List<Integer> res = new ArrayList<>();
+			for (int i = 1; i < height.length; i++) {
+				if (height[i - 1] > threshold) res.add(i);
+			}
+			return res;
+		}
+
+		public static void main(String[] args) {
+			System.out.println(stableMountains(new int[]{10, 1, 10, 1, 10}, 10));
+		}
 	}
+
 }
