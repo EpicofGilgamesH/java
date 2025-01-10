@@ -2,6 +2,7 @@ package test.slidingWindow;
 
 import org.apache.poi.xssf.usermodel.XSSFPivotTable;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -591,6 +592,413 @@ public class LeetCodeCase {
 		public static void main(String[] args) {
 			int i1 = longestSubarray(new int[]{0, 1, 1, 1, 0, 1, 1, 0, 1});
 			System.out.println(i1);
+		}
+	}
+
+	/**
+	 * 1343. 大小为 K 且平均值大于等于阈值的子数组数目
+	 * 给你一个整数数组 arr 和两个整数 k 和 threshold 。
+	 * 请你返回长度为 k 且平均值大于等于 threshold 的子数组数目。
+	 * 示例 1：
+	 * 输入：arr = [2,2,2,2,5,5,5,8], k = 3, threshold = 4
+	 * 输出：3
+	 * 解释：子数组 [2,5,5],[5,5,5] 和 [5,5,8] 的平均值分别为 4，5 和 6 。其他长度为 3 的子数组的平均值都小于 4 （threshold 的值)。
+	 * 示例 2：
+	 * 输入：arr = [11,13,17,23,29,31,7,5,2,3], k = 3, threshold = 5
+	 * 输出：6
+	 * 解释：前 6 个长度为 3 的子数组平均值都大于 5 。注意平均值不是整数。
+	 * 提示：
+	 * 1 <= arr.length <= 105
+	 * 1 <= arr[i] <= 104
+	 * 1 <= k <= arr.length
+	 * 0 <= threshold <= 104
+	 */
+	static class NumOfSubArrays {
+
+		/**
+		 * 思路:
+		 * 定长滑动窗口,每次进一个元素、出一个元素,然后判断是否符合
+		 * 1.直接滑动窗口,时间复杂度O(n)
+		 * 2.先倒序,再滑动窗口,时间复杂度再[ O(n*Log n) - O(n + n*Log n) ]
+		 *
+		 * @param arr
+		 * @param k
+		 * @param threshold
+		 * @return
+		 */
+		public static int numOfSubarrays(int[] arr, int k, int threshold) {
+			long svg, sum = 0;
+			int count = 0;
+			for (int i = 0; i < k; i++) {
+				sum += arr[i];
+			}
+			svg = sum / k;
+			if (svg >= threshold) count++;
+			for (int i = k; i < arr.length; i++) {
+				// svg+=(arr[i]-arr[i-k])/k; 为什么不对,因为svg得出来时余数被舍弃,后面除以k时,余数又被舍弃,会出现错误
+				sum += arr[i] - arr[i - k];
+				svg = sum / k;
+				if (svg >= threshold) count++;
+			}
+			return count;
+		}
+
+		public static int numOfSubarraysII(int[] arr, int k, int threshold) {
+			int sum = 0, v = threshold * k;
+			int count = 0;
+			for (int i = 0; i < k; i++) {
+				sum += arr[i];
+			}
+			if (sum >= v) count++;
+			for (int i = k; i < arr.length; i++) {
+				sum += arr[i] - arr[i - k];
+				if (sum >= v) count++;
+			}
+			return count;
+		}
+
+		public static void main(String[] args) {
+			System.out.println(numOfSubarrays(new int[]{11, 13, 17, 23, 29, 31, 7, 5, 2, 3}, 3, 5));
+		}
+	}
+
+	/**
+	 * 2264. 字符串中最大的 3 位相同数字
+	 * 给你一个字符串 num ，表示一个大整数。如果一个整数满足下述所有条件，则认为该整数是一个 优质整数 ：
+	 * 该整数是 num 的一个长度为 3 的 子字符串 。
+	 * 该整数由唯一一个数字重复 3 次组成。
+	 * 以字符串形式返回 最大的优质整数 。如果不存在满足要求的整数，则返回一个空字符串 "" 。
+	 * 注意：
+	 * 子字符串 是字符串中的一个连续字符序列。
+	 * num 或优质整数中可能存在 前导零 。
+	 * 示例 1：
+	 * 输入：num = "6777133339"
+	 * 输出："777"
+	 * 解释：num 中存在两个优质整数："777" 和 "333" 。
+	 * "777" 是最大的那个，所以返回 "777" 。
+	 * 示例 2：
+	 * 输入：num = "2300019"
+	 * 输出："000"
+	 * 解释："000" 是唯一一个优质整数。
+	 * 示例 3：
+	 * 输入：num = "42352338"
+	 * 输出：""
+	 * 解释：不存在长度为 3 且仅由一个唯一数字组成的整数。因此，不存在优质整数。
+	 * 提示：
+	 * 3 <= num.length <= 1000
+	 * num 仅由数字（0 - 9）组成
+	 */
+	static class LargestGoodInteger {
+
+		/**
+		 * 思路:
+		 * 定长滑动窗口,向右滑动时寻找3叠整数
+		 *
+		 * @param num
+		 * @return
+		 */
+		public static String largestGoodInteger(String num) {
+			char[] arr = num.toCharArray();
+			boolean flag = false;  // flag表示定长3的窗口中,后两个元素是否相同
+			int max = -1;
+			if (arr[1] == arr[2]) {
+				flag = true;
+				if (arr[0] == arr[1]) {
+					max = Math.max(max, arr[1] - 48);
+				}
+			}
+			for (int i = 3; i < arr.length; i++) {
+				if (flag) {  // 后两个字符不一样,直接往后滑动
+					if (arr[i] == arr[i - 1]) {
+						max = Math.max(max, arr[i] - 48);
+					}
+				}
+				flag = arr[i] == arr[i - 1];
+			}
+			if (max == -1) return "";
+			String s = String.valueOf(max);
+			StringBuilder sb = new StringBuilder();
+			return sb.append(s).append(s).append(s).toString();
+		}
+
+
+		public static String largestGoodIntegerII(String num) {
+			char[] arr = num.toCharArray();
+			boolean flag = arr[1] == arr[2];  // flag表示定长3的窗口中,后两个元素是否相同
+			int max = -1;
+			if (arr[0] == arr[1] && flag) {
+				max = Integer.parseInt(num.substring(0, 3));
+			}
+			for (int i = 3; i < arr.length; i++) {
+				boolean b = arr[i] == arr[i - 1];
+				if (b && flag) {
+					max = Math.max(Integer.parseInt(num.substring(i - 2, i + 1)), max);
+				}
+				flag = b;
+			}
+			if (max == -1) {
+				return "";
+			} else if (max == 0) {
+				return "000";
+			} else {
+				return String.valueOf(max);
+			}
+		}
+
+		public static void main(String[] args) {
+			System.out.println(largestGoodIntegerII("6777133339"));
+		}
+	}
+
+	/**
+	 * 2090. 半径为 k 的子数组平均值
+	 * 给你一个下标从 0 开始的数组 nums ，数组中有 n 个整数，另给你一个整数 k 。
+	 * 半径为 k 的子数组平均值 是指：nums 中一个以下标 i 为 中心 且 半径 为 k 的子数组中所有元素的平均值，即下标在 i - k 和 i + k 范围（含 i - k 和 i + k）内所有元素的平均值。如果在下标 i 前或后不足 k 个元素，那么 半径为 k 的子数组平均值 是 -1 。
+	 * 构建并返回一个长度为 n 的数组 avgs ，其中 avgs[i] 是以下标 i 为中心的子数组的 半径为 k 的子数组平均值 。
+	 * x 个元素的 平均值 是 x 个元素相加之和除以 x ，此时使用截断式 整数除法 ，即需要去掉结果的小数部分。
+	 * 例如，四个元素 2、3、1 和 5 的平均值是 (2 + 3 + 1 + 5) / 4 = 11 / 4 = 2.75，截断后得到 2 。
+	 * 示例 1：
+	 * 输入：nums = [7,4,3,9,1,8,5,2,6], k = 3
+	 * 输出：[-1,-1,-1,5,4,4,-1,-1,-1]
+	 * 解释：
+	 * - avg[0]、avg[1] 和 avg[2] 是 -1 ，因为在这几个下标前的元素数量都不足 k 个。
+	 * - 中心为下标 3 且半径为 3 的子数组的元素总和是：7 + 4 + 3 + 9 + 1 + 8 + 5 = 37 。
+	 * 使用截断式 整数除法，avg[3] = 37 / 7 = 5 。
+	 * - 中心为下标 4 的子数组，avg[4] = (4 + 3 + 9 + 1 + 8 + 5 + 2) / 7 = 4 。
+	 * - 中心为下标 5 的子数组，avg[5] = (3 + 9 + 1 + 8 + 5 + 2 + 6) / 7 = 4 。
+	 * - avg[6]、avg[7] 和 avg[8] 是 -1 ，因为在这几个下标后的元素数量都不足 k 个。
+	 * 示例 2：
+	 * 输入：nums = [100000], k = 0
+	 * 输出：[100000]
+	 * 解释：
+	 * - 中心为下标 0 且半径 0 的子数组的元素总和是：100000 。
+	 * avg[0] = 100000 / 1 = 100000 。
+	 * 示例 3：
+	 * 输入：nums = [8], k = 100000
+	 * 输出：[-1]
+	 * 解释：
+	 * - avg[0] 是 -1 ，因为在下标 0 前后的元素数量均不足 k 。
+	 * 提示：
+	 * n == nums.length
+	 * 1 <= n <= 105
+	 * 0 <= nums[i], k <= 105
+	 */
+	static class GetAverages {
+
+		/**
+		 * 先找到k的取值范围为[k,l-k-1]
+		 * 然后滑动定长窗口,计算窗口内元素的总和
+		 *
+		 * @param nums
+		 * @param k
+		 * @return
+		 */
+		public static int[] getAverages(int[] nums, int k) {
+			int n = nums.length;
+			long sum = 0;
+			int[] res = new int[n];
+			if (k * 2 >= n) {  // 说明所有的值都是负一
+				Arrays.fill(res, -1);
+				return res;
+			}
+			for (int i = 0; i < k; i++) {
+				res[i] = -1;
+				sum += nums[i];
+			}
+			for (int i = k; i <= 2 * k; i++) {
+				sum += nums[i];
+			}
+			res[k] = (int) (sum / (2 * k + 1));
+			for (int i = k + 1; i < n - k; i++) {
+				sum += nums[i + k] - nums[i - k - 1];
+				res[i] = (int) (sum / (2 * k + 1));
+			}
+			for (int i = n - k; i < n; i++) {
+				res[i] = -1;
+			}
+			return res;
+		}
+
+		public static void main(String[] args) {
+			int[] averages = getAverages(new int[]{2, 1}, 1);
+			System.out.println(Arrays.toString(averages));
+		}
+	}
+
+	/**
+	 * 2379. 得到 K 个黑块的最少涂色次数
+	 * 给你一个长度为 n 下标从 0 开始的字符串 blocks ，blocks[i] 要么是 'W' 要么是 'B' ，表示第 i 块的颜色。字符 'W' 和 'B' 分别表示白色和黑色。
+	 * 给你一个整数 k ，表示想要 连续 黑色块的数目。
+	 * 每一次操作中，你可以选择一个白色块将它 涂成 黑色块。
+	 * 请你返回至少出现 一次 连续 k 个黑色块的 最少 操作次数。
+	 * 示例 1：
+	 * 输入：blocks = "WBBWWBBWBW", k = 7
+	 * 输出：3
+	 * 解释：
+	 * 一种得到 7 个连续黑色块的方法是把第 0 ，3 和 4 个块涂成黑色。
+	 * 得到 blocks = "BBBBBBBWBW" 。
+	 * 可以证明无法用少于 3 次操作得到 7 个连续的黑块。
+	 * 所以我们返回 3 。
+	 * 示例 2：
+	 * 输入：blocks = "WBWBBBW", k = 2
+	 * 输出：0
+	 * 解释：
+	 * 不需要任何操作，因为已经有 2 个连续的黑块。
+	 * 所以我们返回 0 。
+	 * 提示：
+	 * n == blocks.length
+	 * 1 <= n <= 100
+	 * blocks[i] 要么是 'W' ，要么是 'B' 。
+	 * 1 <= k <= n
+	 */
+	static class MinimumRecolors {
+
+		/**
+		 * 思路:
+		 * 定长滑动窗口,长度为7
+		 * 初始化时,计算窗口中'W'字母的数量,即需要涂色的个数,然后滑动计算'W'的数量,找到最小值
+		 *
+		 * @param blocks
+		 * @param k
+		 * @return
+		 */
+		public static int minimumRecolors(String blocks, int k) {
+			int count = 0, min;
+			for (int i = 0; i < k; i++) {
+				if (blocks.charAt(i) == 'W') count++;
+			}
+			min = count;
+			for (int i = k; i < blocks.length(); i++) {
+				if (blocks.charAt(i) == 'W') {
+					count++;
+				}
+				if (blocks.charAt(i - k) == 'W') {
+					count--;
+				}
+				min = Math.min(count, min);
+			}
+			return min;
+		}
+
+		public static void main(String[] args) {
+			System.out.println(minimumRecolors("WBWBBBW", 2));
+		}
+	}
+
+	/**
+	 * 1052. 爱生气的书店老板
+	 * 有一个书店老板，他的书店开了 n 分钟。每分钟都有一些顾客进入这家商店。给定一个长度为 n 的整数数组 customers ，其中 customers[i] 是在第 i 分钟开始时进入商店的顾客数量，所有这些顾客在第 i 分钟结束后离开。
+	 * 在某些分钟内，书店老板会生气。 如果书店老板在第 i 分钟生气，那么 grumpy[i] = 1，否则 grumpy[i] = 0。
+	 * 当书店老板生气时，那一分钟的顾客就会不满意，若老板不生气则顾客是满意的。
+	 * 书店老板知道一个秘密技巧，能抑制自己的情绪，可以让自己连续 minutes 分钟不生气，但却只能使用一次。
+	 * 请你返回 这一天营业下来，最多有多少客户能够感到满意 。
+	 * 示例 1：
+	 * 输入：customers = [1,0,1,2,1,1,7,5], grumpy = [0,1,0,1,0,1,0,1], minutes = 3
+	 * 输出：16
+	 * 解释：书店老板在最后 3 分钟保持冷静。
+	 * 感到满意的最大客户数量 = 1 + 1 + 1 + 1 + 7 + 5 = 16.
+	 * 示例 2：
+	 * 输入：customers = [1], grumpy = [0], minutes = 1
+	 * 输出：1
+	 * 提示：
+	 * n == customers.length == grumpy.length
+	 * 1 <= minutes <= n <= 2 * 104
+	 * 0 <= customers[i] <= 1000
+	 * grumpy[i] == 0 or 1
+	 */
+	static class MaxSatisfied {
+
+		/**
+		 * 思路:
+		 * 定长滑动窗口
+		 * 1.先预算每分钟满意的客户数量,然后计算以i开始到结尾的客户满意数量
+		 * 2.滑动窗口长度为k,窗口内所客户都是满意的,所以直接计算其和;窗口后面的满意数量通过1中计算
+		 * 3.窗口每次向右滑动一位,窗口左边界p 若grumpy[p]=1 则和-customers[p];
+		 * 窗口右边界q 若grumpy[q+1]=0 则和+customer[q+1]
+		 *
+		 * @param customers
+		 * @param grumpy
+		 * @param minutes
+		 * @return
+		 */
+		public static int maxSatisfied(int[] customers, int[] grumpy, int minutes) {
+			int n = customers.length;
+			int[] sum = new int[n + 1];
+			if (grumpy[n - 1] == 0) sum[n - 1] = customers[n - 1];
+			for (int i = n - 2; i >= 0; --i) {
+				sum[i] = sum[i + 1];
+				if (grumpy[i] == 0) {   // 不生气客户满意
+					sum[i] += customers[i];
+				}
+			}
+			int count = 0, max;
+			for (int i = 0; i < minutes; i++) {
+				count += customers[i];
+			}
+			max = count + sum[minutes];
+			for (int i = minutes; i < n; i++) {
+				if (grumpy[i - minutes] == 1) {
+					count -= customers[i - minutes];
+				}
+				count += customers[i];
+				max = Math.max(count + sum[i + 1], max);
+			}
+			return max;
+		}
+
+		public static int maxSatisfiedII(int[] customers, int[] grumpy, int minutes) {
+			int n = customers.length;
+			int[] sum = new int[n + 1];
+			if (grumpy[n - 1] == 0) sum[n - 1] = customers[n - 1];
+			for (int i = n - 2; i >= 0; --i) {
+				sum[i] = sum[i + 1];
+				if (grumpy[i] == 0) {   // 不生气客户满意
+					sum[i] += customers[i];
+				}
+			}
+			int count = 0, max;
+			for (int i = 0; i < minutes; i++) {
+				count += customers[i];
+			}
+			max = count + sum[minutes];
+			for (int i = minutes; i < n; i++) {
+				count += customers[i] - customers[i - minutes] * grumpy[i - minutes];
+				max = Math.max(count + sum[i + 1], max);
+			}
+			return max;
+		}
+
+		/**
+		 * 官方思路,先根据老板是否生气计算总和
+		 * 然后滑动窗口时,计算窗口内增加了多少,跟之前的总和加起来就是满意的客户数量
+		 *
+		 * @param customers
+		 * @param grumpy
+		 * @param minutes
+		 * @return
+		 */
+		public static int maxSatisfiedOfficial(int[] customers, int[] grumpy, int minutes) {
+			int total = 0, n = customers.length;
+			for (int i = 0; i < n; i++) {
+				if (grumpy[i] == 0) {
+					total += customers[i];
+				}
+			}
+			int increase = 0;
+			for (int i = 0; i < minutes; i++) {
+				increase += customers[i] * grumpy[i];
+			}
+			int maxIncrease = increase;
+			for (int i = minutes; i < n; i++) {
+				increase = increase - customers[i - minutes] * grumpy[i - minutes] + customers[i] * grumpy[i];
+				maxIncrease = Math.max(increase, maxIncrease);
+			}
+			return maxIncrease + total;
+		}
+
+		public static void main(String[] args) {
+			System.out.println(maxSatisfiedOfficial(new int[]{1, 0, 1, 2, 1, 1, 7, 5}, new int[]{0, 1, 0, 1, 0, 1, 0, 1}, 3));
+			System.out.println(maxSatisfiedOfficial(new int[]{1}, new int[]{0}, 1));
 		}
 	}
 }

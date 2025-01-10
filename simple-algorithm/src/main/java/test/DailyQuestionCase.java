@@ -1767,4 +1767,145 @@ public class DailyQuestionCase {
 		}
 	}
 
+	/**
+	 * 3297. 统计重新排列后包含另一个字符串的子字符串数目 I
+	 * 给你两个字符串 word1 和 word2 。
+	 * 如果一个字符串 x 重新排列后，word2 是重排字符串的
+	 * 前缀
+	 * ，那么我们称字符串 x 是 合法的 。
+	 * 请你返回 word1 中 合法
+	 * 子字符串
+	 * 的数目。
+	 * 示例 1：
+	 * 输入：word1 = "bcca", word2 = "abc"
+	 * 输出：1
+	 * 解释：
+	 * 唯一合法的子字符串是 "bcca" ，可以重新排列得到 "abcc" ，"abc" 是它的前缀。
+	 * 示例 2：
+	 * 输入：word1 = "abcabc", word2 = "abc"
+	 * 输出：10
+	 * 解释：
+	 * 除了长度为 1 和 2 的所有子字符串都是合法的。
+	 * 示例 3：
+	 * 输入：word1 = "abcabc", word2 = "aaabc"
+	 * 输出：0
+	 * 解释：
+	 * 1 <= word1.length <= 105
+	 * 1 <= word2.length <= 104
+	 * word1 和 word2 都只包含小写英文字母。
+	 */
+	static class ValidSubstringCount {
+
+		/**
+		 * 思路:
+		 * 本题的题意为 查找word1的所有子数组,子数组包含word2,则计数+1,求所有包含word2的子数组数量
+		 * 按照常规思路一个字符的的子字符串,就是按照不通的长度,全部进行分割
+		 * eg: word1="abacabc"  word2="abc"
+		 * word1的子字符串,就是分割成长度为l=[3,7]的所有字符串
+		 * l=3 -> aba,bac,aca,cab,abc
+		 * l=4 -> abac,baca,acab,cabc
+		 * ...
+		 * l=7 - > abacabc
+		 * 然后判断每个字符串wordx是否包含word2中的所有字母,可以计数每个字母的数量,然后比较数量是否满足count(wordx)>=count(word2)
+		 * 不难发现,如果长度为3的子字符串 [l,l+3]满足条件,那么字符串[l,l+4]...[l,n-1]都满足条件,会出现大量的重复计算.
+		 * ----------------------------------------------------------------------------------------------------
+		 * 怎么避免重复的计算呢?
+		 * 换个思路,可以统计每个字母开始的,满足情况的字符串数量
+		 * s[0]代表idx=0位置字母开头字符串满足情况的场景
+		 * s[0] : abac是第一个满足的,那么[abac..n-1]的字符串都满足
+		 * ...
+		 * s[n-3] :abc
+		 * 这样的思路,就不需要重复的计算是否包含
+		 * -----------------------------------------------------------------------------------------------------
+		 * 那么如何将这种思路清晰化的模拟出来呢?
+		 * 滑动窗口
+		 * 变长的滑动窗口,记录窗口内每个字母与word2每个字母的差值
+		 * 1.当找到满足情况的窗口时,窗口右边界q,那么计数n-q
+		 * 2.上一步完成后,窗口左边界左移一位,继续重复1步骤(左边界p即计算以idx=p的字母开头的子字符串,是否满足条件)
+		 * 直到窗口的长度q-p < word2.length() 结束
+		 *
+		 * @param word1
+		 * @param word2
+		 * @return
+		 */
+		public static long validSubstringCount(String word1, String word2) {
+			int[] cnt = new int[26];
+			for (int i = 0; i < word2.length(); i++) {
+				cnt[word2.charAt(i) - 'a']--;
+			}
+			// p表示窗口左边界,q表示窗口右边界+1
+			int p = 0, q = 0, n = word1.length();
+			long count = 0;
+			// 为什么这里q<=n,因为q从里面的while循环出来后,是指向窗体右边界的下一位的
+			// 所以当q=n时,实际上q还未计算到cnt中,会漏掉这种情况
+			while (q <= n && p < n) {
+				while (q < n && !isContains(cnt)) {
+					cnt[word1.charAt(q) - 'a']++;
+					q++;
+				}
+				if (isContains(cnt)) {
+					count += n - q + 1;
+				}
+				cnt[word1.charAt(p) - 'a']--;
+				p++;
+			}
+			return count;
+		}
+
+		private static boolean isContains(int[] cnt) {
+			for (int i : cnt) {
+				if (i < 0) {
+					return false;
+				}
+			}
+			return true;
+		}
+
+		/**
+		 * cnt 记录有差异的字母的个数
+		 * diff[] 数组保存每个字母的差异数，当一个字母的差异数从-1变成0那么cnt则减少一个；
+		 * 当一个字母的差异数从0变成-1，那么cnt则增加一个
+		 * @param word1
+		 * @param word2
+		 * @return
+		 */
+		public static long validSubstringCountOfficial(String word1, String word2) {
+			int[] diff = new int[26];
+			for (int i = 0; i < word2.length(); i++) {
+				diff[word2.charAt(i) - 'a']--;
+			}
+			long res = 0;
+			int[] cnt = {(int) Arrays.stream(diff).filter(c -> c < 0).count()}; // 差异数小于0的个数
+			int l = 0, r = 0;
+			while (l < word1.length()) {
+				while (r < word1.length() && cnt[0] > 0) {
+					update(diff, word1.charAt(r) - 'a', 1, cnt);
+					r++;
+				}
+				if (cnt[0] == 0) {
+					res += word1.length() - r + 1;
+				}
+				update(diff, word1.charAt(l) - 'a', -1, cnt);
+				l++;
+			}
+			return res;
+		}
+
+		private static void update(int[] diff, int c, int add, int[] cnt) {
+			diff[c] += add;   // 表示c字母加/减1
+			if (add == 1 && diff[c] == 0) {
+				// 表示diff从-1变成0
+				cnt[0]--;
+			} else if (add == -1 && diff[c] == -1) {
+				// 表示diff从0变成-1
+				cnt[0]++;
+			}
+		}
+
+
+		public static void main(String[] args) {
+			System.out.println(validSubstringCount("ddccdddccdddccccdddccdcdcd", "ddc"));
+		}
+	}
+
 }
