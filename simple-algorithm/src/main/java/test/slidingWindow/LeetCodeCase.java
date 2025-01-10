@@ -1001,4 +1001,160 @@ public class LeetCodeCase {
 			System.out.println(maxSatisfiedOfficial(new int[]{1}, new int[]{0}, 1));
 		}
 	}
+
+	/**
+	 * 1461. 检查一个字符串是否包含所有长度为 K 的二进制子串
+	 * 给你一个二进制字符串 s 和一个整数 k 。如果所有长度为 k 的二进制字符串都是 s 的子串，请返回 true ，否则请返回 false 。
+	 * 示例 1：
+	 * 输入：s = "00110110", k = 2
+	 * 输出：true
+	 * 解释：长度为 2 的二进制串包括 "00"，"01"，"10" 和 "11"。它们分别是 s 中下标为 0，1，3，2 开始的长度为 2 的子串。
+	 * 示例 2：
+	 * 输入：s = "0110", k = 1
+	 * 输出：true
+	 * 解释：长度为 1 的二进制串包括 "0" 和 "1"，显然它们都是 s 的子串。
+	 * 示例 3：
+	 * 输入：s = "0110", k = 2
+	 * 输出：false
+	 * 解释：长度为 2 的二进制串 "00" 没有出现在 s 中。
+	 * 提示：
+	 * 1 <= s.length <= 5 * 105
+	 * s[i] 不是'0' 就是 '1'
+	 * 1 <= k <= 20
+	 */
+	static class HasAllCodes {
+
+		/**
+		 * 思路:
+		 * 定长滑动窗口
+		 * 1.关键在于,长度为k的二进制字符串需要全部遍历出来,可以通过回溯的方法遍历,然后转成字符串作为hashmap的key存放起来
+		 * 2.滑动窗口时,每次在hashmap中查找,如果存在则删除掉
+		 * 时间复杂度： 回溯 O(k*log k); hashmap的put和delete 都是O(1); 滑动窗口O(n)
+		 *
+		 * @param s
+		 * @param k
+		 * @return
+		 */
+		public static boolean hasAllCodes(String s, int k) {
+			if (s.length() < k) return false;
+			int[] arr = new int[]{0, 1};
+			List<int[]> list = new ArrayList<>(k);
+			for (int i = 0; i < k; i++) {
+				list.add(arr);
+			}
+			map = new HashMap<>();
+			n = k;
+			// 通过回溯遍历出k位的所有二进制字符串
+			dfs(list, 0, new StringBuilder());
+			// 如果回溯得到的组合数量大于s字符串能够遍历出的组合数量,返回false
+			if (map.size() > s.length() - k + 1) return false;
+			// 滑动窗口
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < k; i++) {
+				sb.append(s.charAt(i));
+			}
+			map.remove(sb.toString(), 1);
+			for (int i = k; i < s.length(); i++) {
+				sb.deleteCharAt(0);
+				sb.append(s.charAt(i));
+				map.remove(sb.toString(), 1);
+				if (map.isEmpty()) return true;
+			}
+			return map.isEmpty();
+		}
+
+		private static HashMap<String, Integer> map;
+		private static int n;
+
+		/**
+		 * dfs遍历出所有的二进制字符串并保存在HashMap中
+		 *
+		 * @param list 所有遍历的组合
+		 * @param i    遍历到第ige数字
+		 * @param path 路径
+		 */
+		private static void dfs(List<int[]> list, int i, StringBuilder path) {
+			if (path.length() == n) {
+				map.put(path.toString(), 1);
+				return;
+			}
+			int[] arr = list.get(i);  // 遍历到第几位数
+			for (int j = 0; j < 2; j++) {
+				path.append(arr[j]);
+				dfs(list, i + 1, path);
+				path.deleteCharAt(i);
+			}
+		}
+
+		/**
+		 * 看到官方解题思路之后,发现本题只需要判断s的子串是否包含k个二进制位的所有组合,而不需要判断包含多少个.
+		 * 然后有个关键点在于k位二进制位的所有组合的数量为2^k
+		 * 只需要判断所有不重复的子串数量是否等于2^k即可
+		 *
+		 * @param s
+		 * @param k
+		 * @return
+		 */
+		public static boolean hasAllCodesII(String s, int k) {
+			int count = (int) Math.pow(2, k);
+			if (s.length() <= k || s.length() - k + 1 < count) return false;
+			Map<String, Integer> map = new HashMap<>(count); // 避免hashmap扩容
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < k; i++) {
+				sb.append(s.charAt(i));
+			}
+			map.put(sb.toString(), 1);
+			for (int i = k; i < s.length(); i++) {
+				sb.deleteCharAt(0);
+				sb.append(s.charAt(i));
+				map.put(sb.toString(), 1);
+				if (map.size() == count) return true;
+			}
+			return false;
+		}
+
+		public static boolean hasAllCodesIII(String s, int k) {
+			int count = (int) Math.pow(2, k);
+			if (s.length() <= k || s.length() - k + 1 < count) return false;
+			HashSet<String> set = new HashSet<>(count);
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < k; i++) {
+				sb.append(s.charAt(i));
+			}
+			set.add(sb.toString());
+			for (int i = k; i < s.length(); i++) {
+				sb.deleteCharAt(0);
+				sb.append(s.charAt(i));
+				set.add(sb.toString());
+				if (set.size() == count) return true;
+			}
+			return false;
+		}
+
+		/**
+		 * 使用String.subString()切割字符串
+		 *
+		 * @param s
+		 * @param k
+		 * @return
+		 */
+		public static boolean hasAllCodesIV(String s, int k) {
+			if (s.length() <= k) return false;
+			int count = 1 << k;
+			if (s.length() - k + 1 < count) return false;
+			HashSet<String> set = new HashSet<>(count);
+			for (int i = 0; i < s.length() - k + 1; i++) {
+				set.add(s.substring(i, i + k));
+				if (set.size() == count) return true;
+			}
+			return false;
+		}
+
+		// todo 滑动窗口时,窗口内k个字符可以转换为二进制数字,每个数字的值都不相同;该如何做呢??
+
+
+		public static void main(String[] args) {
+			System.out.println(hasAllCodesIV("00110", 2));
+		}
+	}
 }
