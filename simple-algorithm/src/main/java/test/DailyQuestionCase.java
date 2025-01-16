@@ -1908,4 +1908,307 @@ public class DailyQuestionCase {
 		}
 	}
 
+	/**
+	 * 2270. 分割数组的方案数
+	 * 给你一个下标从 0 开始长度为 n 的整数数组 nums 。
+	 * 如果以下描述为真，那么 nums 在下标 i 处有一个 合法的分割 ：
+	 * 前 i + 1 个元素的和 大于等于 剩下的 n - i - 1 个元素的和。
+	 * 下标 i 的右边 至少有一个 元素，也就是说下标 i 满足 0 <= i < n - 1 。
+	 * 请你返回 nums 中的 合法分割 方案数。
+	 * 示例 1：
+	 * 输入：nums = [10,4,-8,7]
+	 * 输出：2
+	 * 解释：
+	 * 总共有 3 种不同的方案可以将 nums 分割成两个非空的部分：
+	 * - 在下标 0 处分割 nums 。那么第一部分为 [10] ，和为 10 。第二部分为 [4,-8,7] ，和为 3 。因为 10 >= 3 ，所以 i = 0 是一个合法的分割。
+	 * - 在下标 1 处分割 nums 。那么第一部分为 [10,4] ，和为 14 。第二部分为 [-8,7] ，和为 -1 。因为 14 >= -1 ，所以 i = 1 是一个合法的分割。
+	 * - 在下标 2 处分割 nums 。那么第一部分为 [10,4,-8] ，和为 6 。第二部分为 [7] ，和为 7 。因为 6 < 7 ，所以 i = 2 不是一个合法的分割。
+	 * 所以 nums 中总共合法分割方案受为 2 。
+	 * 示例 2：
+	 * 输入：nums = [2,3,1,0]
+	 * 输出：2
+	 * 解释：
+	 * 总共有 2 种 nums 的合法分割：
+	 * - 在下标 1 处分割 nums 。那么第一部分为 [2,3] ，和为 5 。第二部分为 [1,0] ，和为 1 。因为 5 >= 1 ，所以 i = 1 是一个合法的分割。
+	 * - 在下标 2 处分割 nums 。那么第一部分为 [2,3,1] ，和为 6 。第二部分为 [0] ，和为 0 。因为 6 >= 0 ，所以 i = 2 是一个合法的分割。
+	 * 提示：
+	 * 2 <= nums.length <= 105
+	 * -105 <= nums[i] <= 105
+	 */
+	static class WaysToSplitArray {
+
+		/**
+		 * 思路:
+		 * 数组元素,从i开始左部分和右部的和
+		 * 这类题一般要提前计算s[i]即idx=i,开始到数组结尾元素的和
+		 * 那么前半部分可以使用总和减去后半部分的和,注意int范围溢出
+		 *
+		 * @param nums
+		 * @return
+		 */
+		public static int waysToSplitArray(int[] nums) {
+			// 预计算idx=i,从i开始到数组结尾的元素和
+			int n = nums.length;
+			long[] sum = new long[n + 1];
+			for (int i = nums.length - 1; i >= 0; --i) {
+				sum[i] += sum[i + 1] + nums[i];
+			}
+			// 查找满足条件的i范围为:[0,n-2]
+			int count = 0;
+			for (int i = 0; i < n - 1; i++) {
+				if (sum[0] - sum[i + 1] >= sum[i + 1]) {
+					count++;
+				}
+			}
+			return count;
+		}
+
+		/**
+		 * 更好的方案,在计算idx=i的左边和时,可以累加计算
+		 *
+		 * @param nums
+		 * @return
+		 */
+		public static int waysToSplitArrayII(int[] nums) {
+			int n = nums.length;
+			long[] sum = new long[n + 1];
+			for (int i = nums.length - 1; i >= 0; --i) {
+				sum[i] += sum[i + 1] + nums[i];
+			}
+			// 查找满足条件的i范围为:[0,n-2]
+			int count = 0;
+			long left = 0;
+			for (int i = 0; i < n - 1; i++) {
+				left += nums[i];
+				if (left >= sum[i + 1]) {
+					count++;
+				}
+			}
+			return count;
+		}
+
+		/**
+		 * 空间复杂度O(1)
+		 * 计算和,左部分累加,右部分用和-左部分
+		 * 尽量去思考时间复杂度和空间复杂度的最优解
+		 *
+		 * @param nums
+		 * @return
+		 */
+		public static int waysToSplitArrayIII(int[] nums) {
+			int n = nums.length;
+			long sum = 0;
+			for (int i = 0; i < n; i++) {
+				sum += nums[i];
+			}
+			long left = 0;
+			int count = 0;
+			for (int i = 0; i < n - 1; i++) {
+				left += nums[i];
+				long right = sum - left;
+				if (left >= right) {
+					count++;
+				}
+			}
+			return count;
+		}
+
+		public static void main(String[] args) {
+			System.out.println(waysToSplitArrayII(new int[]{2, 3, 1, 0}));
+		}
+	}
+
+	/**
+	 * 3065. 超过阈值的最少操作数 I
+	 * 给你一个下标从 0 开始的整数数组 nums 和一个整数 k 。
+	 * 一次操作中，你可以删除 nums 中的最小元素。
+	 * 你需要使数组中的所有元素都大于或等于 k ，请你返回需要的 最少 操作次数。
+	 * 示例 1：
+	 * 输入：nums = [2,11,10,1,3], k = 10
+	 * 输出：3
+	 * 解释：第一次操作后，nums 变为 [2, 11, 10, 3] 。
+	 * 第二次操作后，nums 变为 [11, 10, 3] 。
+	 * 第三次操作后，nums 变为 [11, 10] 。
+	 * 此时，数组中的所有元素都大于等于 10 ，所以我们停止操作。
+	 * 使数组中所有元素都大于等于 10 需要的最少操作次数为 3 。
+	 * 示例 2：
+	 * 输入：nums = [1,1,2,4,9], k = 1
+	 * 输出：0
+	 * 解释：数组中的所有元素都大于等于 1 ，所以不需要对 nums 做任何操作。
+	 * 示例 3：
+	 * 输入：nums = [1,1,2,4,9], k = 9
+	 * 输出：4
+	 * 解释：nums 中只有一个元素大于等于 9 ，所以需要执行 4 次操作。
+	 * 提示：
+	 * 1 <= nums.length <= 50
+	 * 1 <= nums[i] <= 109
+	 * 1 <= k <= 109
+	 * 输入保证至少有一个满足 nums[i] >= k 的下标 i 存在
+	 */
+	static class MinOperations {
+
+		/**
+		 * 思路,排序之后计数满足要求的元素排在哪个序列
+		 * 可以用插入排序,冒泡排序找到一个大于等于k的数就停止
+		 *
+		 * @param nums
+		 * @param k
+		 * @return
+		 */
+		public static int minOperations(int[] nums, int k) {
+			Arrays.sort(nums);
+			for (int i = 0; i < nums.length; i++) {
+				if (nums[i] >= k) {
+					return i;
+				}
+			}
+			return 0;
+		}
+
+		/**
+		 * 完整的一次遍历,找到比k大的元素个数
+		 *
+		 * @param nums
+		 * @param k
+		 * @return
+		 */
+		public static int minOperationsII(int[] nums, int k) {
+			int res = 0;
+			for (int i = 0; i < nums.length; i++) {
+				if (nums[i] < k) res++;
+			}
+			return res;
+		}
+
+		public static void main(String[] args) {
+			System.out.println(minOperations(new int[]{1, 1, 2, 4, 9}, 9));
+		}
+	}
+
+	/**
+	 * 3066. 超过阈值的最少操作数 II
+	 * 给你一个下标从 0 开始的整数数组 nums 和一个整数 k 。
+	 * 一次操作中，你将执行：
+	 * 选择 nums 中最小的两个整数 x 和 y 。
+	 * 将 x 和 y 从 nums 中删除。
+	 * 将 min(x, y) * 2 + max(x, y) 添加到数组中的任意位置。
+	 * 注意，只有当 nums 至少包含两个元素时，你才可以执行以上操作。
+	 * 你需要使数组中的所有元素都大于或等于 k ，请你返回需要的 最少 操作次数。
+	 * 示例 1：
+	 * 输入：nums = [2,11,10,1,3], k = 10
+	 * 输出：2
+	 * 解释：第一次操作中，我们删除元素 1 和 2 ，然后添加 1 * 2 + 2 到 nums 中，nums 变为 [4, 11, 10, 3] 。
+	 * 第二次操作中，我们删除元素 3 和 4 ，然后添加 3 * 2 + 4 到 nums 中，nums 变为 [10, 11, 10] 。
+	 * 此时，数组中的所有元素都大于等于 10 ，所以我们停止操作。
+	 * 使数组中所有元素都大于等于 10 需要的最少操作次数为 2 。
+	 * 示例 2：
+	 * 输入：nums = [1,1,2,4,9], k = 20
+	 * 输出：4
+	 * 解释：第一次操作后，nums 变为 [2, 4, 9, 3] 。
+	 * 第二次操作后，nums 变为 [7, 4, 9] 。
+	 * 第三次操作后，nums 变为 [15, 9] 。
+	 * 第四次操作后，nums 变为 [33] 。
+	 * 此时，数组中的所有元素都大于等于 20 ，所以我们停止操作。
+	 * 使数组中所有元素都大于等于 20 需要的最少操作次数为 4 。
+	 * 提示：
+	 * 2 <= nums.length <= 2 * 105
+	 * 1 <= nums[i] <= 109
+	 * 1 <= k <= 109
+	 * 输入保证答案一定存在，也就是说一定存在一个操作序列使数组中所有元素都大于等于 k 。
+	 */
+	static class MinOperationsII {
+
+		/**
+		 * 思路:使用优先级队列,每次操作时进行出队和入队
+		 *
+		 * @param nums
+		 * @param k
+		 * @return
+		 */
+		public static int minOperations(int[] nums, int k) {
+			int n = nums.length;
+			PriorityQueue<Long> priorityQueue = new PriorityQueue<>(n);
+			for (int x : nums) {
+				priorityQueue.offer((long) x);
+			}
+			int res = 0;
+			while (priorityQueue.peek() < k) {
+				// 弹出两个元素,计算要放入的元素 first<=second
+				long first = priorityQueue.poll();
+				long second = priorityQueue.poll();
+				priorityQueue.offer(first * 2 + second);
+				res++;
+			}
+			return res;
+		}
+
+		public static void main(String[] args) {
+			System.out.println(minOperations(new int[]{1000000000, 999999999, 1000000000, 999999999, 1000000000, 999999999}, 1000000000));
+		}
+	}
+
+	/**
+	 * 3095. 或值至少 K 的最短子数组 I
+	 * 给你一个 非负 整数数组 nums 和一个整数 k 。
+	 * 如果一个数组中所有元素的按位或运算 OR 的值 至少 为 k ，那么我们称这个数组是 特别的 。
+	 * 请你返回 nums 中 最短特别非空
+	 * 子数组
+	 * 的长度，如果特别子数组不存在，那么返回 -1 。
+	 * 示例 1：
+	 * 输入：nums = [1,2,3], k = 2
+	 * 输出：1
+	 * 解释：
+	 * 子数组 [3] 的按位 OR 值为 3 ，所以我们返回 1 。
+	 * 注意，[2] 也是一个特别子数组。
+	 * 示例 2：
+	 * 输入：nums = [2,1,8], k = 10
+	 * 输出：3
+	 * 解释：
+	 * 子数组 [2,1,8] 的按位 OR 值为 11 ，所以我们返回 3 。
+	 * 示例 3：
+	 * 输入：nums = [1,2], k = 0
+	 * 输出：1
+	 * 解释：
+	 * 子数组 [1] 的按位 OR 值为 1 ，所以我们返回 1 。
+	 * 提示：
+	 * 1 <= nums.length <= 50
+	 * 0 <= nums[i] <= 50
+	 * 0 <= k < 64
+	 */
+	static class minimumDifference {
+
+		/**
+		 * 思路:`
+		 * 常见思路暴力匹配,遍历所有的子数组,然后字段or值,其中or值是可以往后传递的
+		 * 先确定子数组的右边界为i,i从0开始;左边界为j j从i-1开始
+		 * 当i=1时,nums[0]-nums[1]的OR记录存放在nums[0]中
+		 * 当i=2时,nums[1]-nums[2]的OR记录存放在nums[1]中,num[0]-nums[2]的OR记录存放在nums[0]中
+		 * 总结就是当确定右边界i时,子数据是从右到左反向遍历的,那么num[j]中存放的就是num[j]-nums[i]的OR值
+		 * 所以数据不会被覆盖,每次从右到左都是重新计算OR值
+		 *
+		 * @param nums
+		 * @param k
+		 * @return
+		 */
+		public static int minimumSubarrayLength(int[] nums, int k) {
+			int n = nums.length, res = Integer.MAX_VALUE;
+			for (int i = 0; i < n; i++) {
+				// 单个元素也算子数组
+				int x = nums[i];
+				if (x >= k) res = Math.min(res, 1);
+				for (int j = i - 1; j >= 0; --j) {
+					nums[j] |= x;
+					if (nums[j] >= k) {
+						res = Math.min(res, i - j + 1);
+					}
+				}
+			}
+			return res == Integer.MAX_VALUE ? -1 : res;
+		}
+
+		public static void main(String[] args) {
+			System.out.println(minimumSubarrayLength(new int[]{2,1,8}, 10));
+		}
+	}
+
 }

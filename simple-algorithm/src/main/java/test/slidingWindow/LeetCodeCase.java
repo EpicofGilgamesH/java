@@ -1,8 +1,5 @@
 package test.slidingWindow;
 
-import org.apache.poi.xssf.usermodel.XSSFPivotTable;
-
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -1157,4 +1154,287 @@ public class LeetCodeCase {
 			System.out.println(hasAllCodesIV("00110", 2));
 		}
 	}
+
+	/**
+	 * 2841. 几乎唯一子数组的最大和
+	 * 给你一个整数数组 nums 和两个正整数 m 和 k 。
+	 * 请你返回 nums 中长度为 k 的 几乎唯一 子数组的 最大和 ，如果不存在几乎唯一子数组，请你返回 0 。
+	 * 如果 nums 的一个子数组有至少 m 个互不相同的元素，我们称它是 几乎唯一 子数组。
+	 * 子数组指的是一个数组中一段连续 非空 的元素序列。
+	 * 示例 1：
+	 * 输入：nums = [2,6,7,3,1,7], m = 3, k = 4
+	 * 输出：18
+	 * 解释：总共有 3 个长度为 k = 4 的几乎唯一子数组。分别为 [2, 6, 7, 3] ，[6, 7, 3, 1] 和 [7, 3, 1, 7] 。这些子数组中，和最大的是 [2, 6, 7, 3] ，和为 18 。
+	 * 示例 2：
+	 * 输入：nums = [5,9,9,2,4,5,4], m = 1, k = 3
+	 * 输出：23
+	 * 解释：总共有 5 个长度为 k = 3 的几乎唯一子数组。分别为 [5, 9, 9] ，[9, 9, 2] ，[9, 2, 4] ，[2, 4, 5] 和 [4, 5, 4] 。这些子数组中，和最大的是 [5, 9, 9]
+	 * ，和为 23 。
+	 * 示例 3：
+	 * 输入：nums = [1,2,1,2,1,2,1], m = 3, k = 3
+	 * 输出：0
+	 * 解释：输入数组中不存在长度为 k = 3 的子数组含有至少  m = 3 个互不相同元素的子数组。所以不存在几乎唯一子数组，最大和为 0 。
+	 * 提示：
+	 * 1 <= nums.length <= 2 * 104
+	 * 1 <= m <= k <= nums.length
+	 * 1 <= nums[i] <= 109
+	 */
+	static class MaxSum {
+
+		/**
+		 * 思路:
+		 * 定长滑动窗口
+		 * 本题的关键点是,需要判断窗体内,长度为k的元素,计算不同的元素个数
+		 * 用hashset不行,需要记录元素的个数,在移除的时候,如果有多个相同的元素则不移除
+		 *
+		 * @param nums
+		 * @param m
+		 * @param k
+		 * @return
+		 */
+		public static long maxSum(List<Integer> nums, int m, int k) {
+			HashMap<Integer, Integer> map = new HashMap<>(m);
+			long sum = 0, max = 0;
+			for (int i = 0; i < k; i++) {
+				sum += nums.get(i);
+				map.put(nums.get(i), map.getOrDefault(nums.get(i), 0) + 1);
+			}
+			if (map.size() >= m) {
+				max = sum;
+			}
+			for (int i = k; i < nums.size(); i++) {
+				sum += nums.get(i) - nums.get(i - k);
+				map.put(nums.get(i), map.getOrDefault(nums.get(i), 0) + 1);  // 增加
+				Integer v = map.put(nums.get(i - k), map.get(nums.get(i - k)) - 1);
+				if (v <= 1) {
+					map.remove(nums.get(i - k));
+				}
+				if (map.size() >= m) {
+					max = Math.max(max, sum);
+				}
+			}
+			return max;
+		}
+
+		public static void main(String[] args) {
+			List<Integer> nums = new ArrayList<>();
+			nums.add(3);
+			nums.add(1);
+			nums.add(4);
+			nums.add(3);
+			System.out.println(maxSum(nums, 2, 2));
+		}
+	}
+
+	/**
+	 * 2461. 长度为 K 子数组中的最大和
+	 * 给你一个整数数组 nums 和一个整数 k 。请你从 nums 中满足下述条件的全部子数组中找出最大子数组和：
+	 * 子数组的长度是 k，且
+	 * 子数组中的所有元素 各不相同 。
+	 * 返回满足题面要求的最大子数组和。如果不存在子数组满足这些条件，返回 0 。
+	 * 子数组 是数组中一段连续非空的元素序列。
+	 * 示例 1：
+	 * 输入：nums = [1,5,4,2,9,9,9], k = 3
+	 * 输出：15
+	 * 解释：nums 中长度为 3 的子数组是：
+	 * - [1,5,4] 满足全部条件，和为 10 。
+	 * - [5,4,2] 满足全部条件，和为 11 。
+	 * - [4,2,9] 满足全部条件，和为 15 。
+	 * - [2,9,9] 不满足全部条件，因为元素 9 出现重复。
+	 * - [9,9,9] 不满足全部条件，因为元素 9 出现重复。
+	 * 因为 15 是满足全部条件的所有子数组中的最大子数组和，所以返回 15 。
+	 * 示例 2：
+	 * 输入：nums = [4,4,4], k = 3
+	 * 输出：0
+	 * 解释：nums 中长度为 3 的子数组是：
+	 * - [4,4,4] 不满足全部条件，因为元素 4 出现重复。
+	 * 因为不存在满足全部条件的子数组，所以返回 0 。
+	 * 提示：
+	 * 1 <= k <= nums.length <= 105
+	 * 1 <= nums[i] <= 105
+	 */
+	static class MaximumSubarraySum {
+
+		/**
+		 * 思路:
+		 * 在滑动窗口时,要记录窗口内每个元素的个数,记录是否重复
+		 *
+		 * @param nums
+		 * @param k
+		 * @return
+		 */
+		public static long maximumSubarraySum(int[] nums, int k) {
+			int n = nums.length, cnt = 0; // cnt表示重复元素的个数
+			long sum = 0, max = 0;
+			Map<Integer, Integer> map = new HashMap<>(k);
+			for (int i = 0; i < k; i++) {
+				sum += nums[i];
+				Integer v = map.put(nums[i], map.getOrDefault(nums[i], 0) + 1);
+				if (v != null && v == 1) {
+					cnt++;
+				}
+			}
+			if (cnt == 0) {
+				max = sum;
+			}
+			for (int i = k; i < n; i++) {
+				if (nums[i] != nums[i - k]) {  // 出窗口和入窗口元素不一样
+					sum += nums[i] - nums[i - k];
+					Integer v = map.put(nums[i], map.getOrDefault(nums[i], 0) + 1);
+					if (v != null && v == 1) {  // nums[k]从1个变成2个,重复元素多一个
+						cnt++;
+					}
+					Integer v1 = map.put(nums[i - k], map.get(nums[i - k]) - 1);
+					if (v1 != null && v1 == 2) { // nums[k-i]从2个变成1个,重复元素少一个
+						cnt--;
+					}
+				}
+				if (cnt == 0) max = Math.max(max, sum);
+			}
+			return max;
+		}
+
+		/**
+		 * 用数组替代hashmap
+		 *
+		 * @param nums
+		 * @param k
+		 * @return
+		 */
+		public static long maximumSubarraySumII(int[] nums, int k) {
+			int n = nums.length, cnt = 0; // cnt表示重复元素的个数
+			long sum = 0, max = 0;
+			int[] arr = new int[10_0001];
+			for (int i = 0; i < k; i++) {
+				sum += nums[i];
+				if (arr[nums[i]]++ == 1) { // 数量从1变成2
+					cnt++;
+				}
+			}
+			if (cnt == 0) {
+				max = sum;
+			}
+			for (int i = k; i < n; i++) {
+				if (nums[i] != nums[i - k]) {  // 出窗口和入窗口元素不一样
+					sum += nums[i] - nums[i - k];
+					if (arr[nums[i]]++ == 1) cnt++;
+					if (arr[nums[i - k]]-- == 2) cnt--;
+				}
+				if (cnt == 0) max = Math.max(max, sum);
+			}
+			return max;
+		}
+
+		public static void main(String[] args) {
+			System.out.println(maximumSubarraySumII(new int[]{1, 5, 4, 2, 9, 9, 9, 9}, 3));
+		}
+	}
+
+	/**
+	 * 1423. 可获得的最大点数
+	 * 几张卡牌 排成一行，每张卡牌都有一个对应的点数。点数由整数数组 cardPoints 给出。
+	 * 每次行动，你可以从行的开头或者末尾拿一张卡牌，最终你必须正好拿 k 张卡牌。
+	 * 你的点数就是你拿到手中的所有卡牌的点数之和。
+	 * 给你一个整数数组 cardPoints 和整数 k，请你返回可以获得的最大点数。
+	 * 示例 1：
+	 * 输入：cardPoints = [1,2,3,4,5,6,1], k = 3
+	 * 输出：12
+	 * 解释：第一次行动，不管拿哪张牌，你的点数总是 1 。但是，先拿最右边的卡牌将会最大化你的可获得点数。最优策略是拿右边的三张牌，最终点数为 1 + 6 + 5 = 12 。
+	 * 示例 2：
+	 * 输入：cardPoints = [2,2,2], k = 2
+	 * 输出：4
+	 * 解释：无论你拿起哪两张卡牌，可获得的点数总是 4 。
+	 * 示例 3：
+	 * 输入：cardPoints = [9,7,7,9,7,7,9], k = 7
+	 * 输出：55
+	 * 解释：你必须拿起所有卡牌，可以获得的点数为所有卡牌的点数之和。
+	 * 示例 4：
+	 * 输入：cardPoints = [1,1000,1], k = 1
+	 * 输出：1
+	 * 解释：你无法拿到中间那张卡牌，所以可以获得的最大点数为 1 。
+	 * 示例 5：
+	 * 输入：cardPoints = [1,79,80,1,1,1,200,1], k = 3
+	 * 输出：202
+	 * 提示：
+	 * 1 <= cardPoints.length <= 10^5
+	 * 1 <= cardPoints[i] <= 10^4
+	 * 1 <= k <= cardPoints.length
+	 */
+	static class MaxScore {
+
+		/**
+		 * 思路：
+		 * 本题如果用模拟的思路去做,需要用到递归,每次选择第一个或者最后一个元素,然后计算和最大
+		 * 但是如果想到滑动窗口呢? 窗口的大小固定为l-k;因为从头或尾拿出元素,肯定是连续的,所以滑动窗口满足条件
+		 *
+		 * @param cardPoints
+		 * @param k
+		 * @return
+		 */
+		public static int maxScore(int[] cardPoints, int k) {
+			int n = cardPoints.length, l = n - k, min = 0;
+			int sum = 0, v = 0;
+			for (int i = 0; i < n; i++) {
+				sum += cardPoints[i];
+			}
+			for (int i = 0; i < l; i++) {
+				v += cardPoints[i];
+			}
+			min = v;
+			for (int i = l; i < n; i++) {
+				v += cardPoints[i] - cardPoints[i - l];
+				min = Math.min(v, min);
+			}
+			return sum - min;
+		}
+
+		public static void main(String[] args) {
+			System.out.println(maxScore(new int[]{1, 2, 3, 4, 5, 6, 1}, 3));
+		}
+	}
+
+	/**
+	 * 1652. 拆炸弹
+	 * 你有一个炸弹需要拆除，时间紧迫！你的情报员会给你一个长度为 n 的 循环 数组 code 以及一个密钥 k 。
+	 * 为了获得正确的密码，你需要替换掉每一个数字。所有数字会 同时 被替换。
+	 * 如果 k > 0 ，将第 i 个数字用 接下来 k 个数字之和替换。
+	 * 如果 k < 0 ，将第 i 个数字用 之前 k 个数字之和替换。
+	 * 如果 k == 0 ，将第 i 个数字用 0 替换。
+	 * 由于 code 是循环的， code[n-1] 下一个元素是 code[0] ，且 code[0] 前一个元素是 code[n-1] 。
+	 * 给你 循环 数组 code 和整数密钥 k ，请你返回解密后的结果来拆除炸弹！
+	 * 示例 1：
+	 * 输入：code = [5,7,1,4], k = 3
+	 * 输出：[12,10,16,13]
+	 * 解释：每个数字都被接下来 3 个数字之和替换。解密后的密码为 [7+1+4, 1+4+5, 4+5+7, 5+7+1]。注意到数组是循环连接的。
+	 * 示例 2：
+	 * 输入：code = [1,2,3,4], k = 0
+	 * 输出：[0,0,0,0]
+	 * 解释：当 k 为 0 时，所有数字都被 0 替换。
+	 * 示例 3：
+	 * 输入：code = [2,4,9,3], k = -2
+	 * 输出：[12,5,6,13]
+	 * 解释：解密后的密码为 [3+9, 2+3, 4+2, 9+4] 。注意到数组是循环连接的。如果 k 是负数，那么和为 之前 的数字。
+	 * 提示：
+	 * n == code.length
+	 * 1 <= n <= 100
+	 * 1 <= code[i] <= 100
+	 * -(n - 1) <= k <= n - 1
+	 */
+	static class Decrypt {
+
+		/**
+		 * 循环数组的处理,窗体长度固定,超出数组长度时(idx=n-1 那么 idx=0)
+		 *
+		 * @param code
+		 * @param k
+		 * @return
+		 */
+		public static int[] decrypt(int[] code, int k) {
+			int n = code.length;
+			int[] res = new int[n];
+			if (k == 0) return res;
+			return null;
+		}
+	}
+
 }
