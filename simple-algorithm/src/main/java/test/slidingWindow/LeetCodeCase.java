@@ -1,5 +1,7 @@
 package test.slidingWindow;
 
+import org.omg.CORBA.INTERNAL;
+
 import java.util.*;
 
 /**
@@ -1423,8 +1425,10 @@ public class LeetCodeCase {
 	static class Decrypt {
 
 		/**
-		 * 循环数组的处理,窗体长度固定,超出数组长度时(idx=n-1 那么 idx=0)
-		 *
+		 * 循环数组的处理,将单个数组填充为两个数数组,然后根据k的正负情况,来判断滑动窗口的左右边界
+		 * 1.当k>0时,l=1,r=k
+		 * 2.当k<0时,l=n-k,r=n-1
+		 * 确定窗口的左右边界之后,向右滑动n次即可
 		 * @param code
 		 * @param k
 		 * @return
@@ -1433,7 +1437,495 @@ public class LeetCodeCase {
 			int n = code.length;
 			int[] res = new int[n];
 			if (k == 0) return res;
-			return null;
+			int[] arr = new int[2 * n];
+			System.arraycopy(code, 0, arr, 0, n);
+			System.arraycopy(code, 0, arr, n, n);
+			int l = k > 0 ? 1 : n + k;
+			int r = k > 0 ? k : n - 1;
+			int sum = 0;
+			for (int i = l; i <= r; i++) {
+				sum += arr[i];
+			}
+			res[0] = sum;
+			for (int i = 1; i < n; i++) {
+				sum += arr[++r] - arr[l++];
+				res[i] = sum;
+			}
+			return res;
+		}
+
+		public static void main(String[] args) {
+			System.out.println(Arrays.toString(decrypt(new int[]{2, 4, 9, 3}, -2)));
+		}
+	}
+
+	/**
+	 * 1297. 子串的最大出现次数
+	 * 给你一个字符串 s ，请你返回满足以下条件且出现次数最大的 任意 子串的出现次数：
+	 * 子串中不同字母的数目必须小于等于 maxLetters 。
+	 * 子串的长度必须大于等于 minSize 且小于等于 maxSize 。
+	 * 示例 1：
+	 * 输入：s = "aababcaab", maxLetters = 2, minSize = 3, maxSize = 4
+	 * 输出：2
+	 * 解释：子串 "aab" 在原字符串中出现了 2 次。
+	 * 它满足所有的要求：2 个不同的字母，长度为 3 （在 minSize 和 maxSize 范围内）。
+	 * 示例 2：
+	 * 输入：s = "aaaa", maxLetters = 1, minSize = 3, maxSize = 3
+	 * 输出：2
+	 * 解释：子串 "aaa" 在原字符串中出现了 2 次，且它们有重叠部分。
+	 * 示例 3：
+	 * 输入：s = "aabcabcab", maxLetters = 2, minSize = 2, maxSize = 3
+	 * 输出：3
+	 * 示例 4：
+	 * 输入：s = "abcde", maxLetters = 2, minSize = 3, maxSize = 3
+	 * 输出：0
+	 * 提示：
+	 * 1 <= s.length <= 10^5
+	 * 1 <= maxLetters <= 26
+	 * 1 <= minSize <= maxSize <= min(26, s.length)
+	 * s 只包含小写英文字母。
+	 */
+	static class MaxFreq {
+
+		/**
+		 * 思路:不定长滑动窗口 左右边界的移动如何控制呢?
+		 * 1.窗口内元素的数量 minSize < c < Maxsize 在范围内时,left++; c > maxSize时,left++;
+		 * 2.其他情况c< minSize c不可能大于maxSize,因为left随时在移动
+		 * 3.滑动的过程中记录不同字母的个数cnt
+		 *
+		 * @param s
+		 * @param maxLetters
+		 * @param minSize
+		 * @param maxSize
+		 * @return
+		 */
+		public static int maxFreq(String s, int maxLetters, int minSize, int maxSize) {
+			int n = s.length(), cnt = 0;
+			Map<String, Integer> map = new HashMap<>();
+			StringBuilder sb = new StringBuilder();
+			int[] count = new int[26];
+			for (int i = 0; i < minSize; i++) {
+				sb.append(s.charAt(i));
+				if (count[s.charAt(i) - 'a']++ == 0) {
+					cnt++;
+				}
+			}
+			if (cnt <= maxLetters) map.put(sb.toString(), map.getOrDefault(sb.toString(), 0) + 1);
+			int l = 0;
+			if (maxSize == minSize) {  // 定长滑动窗口,需要左右边界同时移动
+				for (int r = minSize; r < n; r++) {
+					sb.append(s.charAt(r));
+					if (count[s.charAt(r) - 'a']++ == 0) {
+						cnt++;
+					}
+					sb.deleteCharAt(0);
+					if (count[s.charAt(l) - 'a']-- == 1) {
+						cnt--;
+					}
+					l++;
+					if (cnt <= maxLetters) {
+						map.put(sb.toString(), map.getOrDefault(sb.toString(), 0) + 1);
+					}
+				}
+			} else {
+				for (int r = minSize; r < n; r++) {
+					// 进入for循环,窗体右侧右移一位
+					if (r - l + 1 <= maxSize) {
+						sb.append(s.charAt(r));
+						if (count[s.charAt(r) - 'a']++ == 0) {
+							cnt++;
+						}
+						if (cnt <= maxLetters) {
+							map.put(sb.toString(), map.getOrDefault(sb.toString(), 0) + 1);
+						}
+					}
+					while (r - l + 1 > minSize) {
+						sb.deleteCharAt(0);
+						if (count[s.charAt(l) - 'a']-- == 1) {
+							cnt--;
+						}
+						if (cnt <= maxLetters) {
+							map.put(sb.toString(), map.getOrDefault(sb.toString(), 0) + 1);
+						}
+						l++;
+					}
+				}
+			}
+			return map.values().stream().max(Comparator.comparingInt(x -> x)).orElse(0);
+		}
+
+		/**
+		 * 如果用一个逻辑,保证定长窗口和不定长窗口都能满足条件呢?
+		 * 1.首先只要r < n 则一定可以右移
+		 * 2.在循环中: 当窗口长度s > minSize 或者 不同字母数量c < maxLetters,则l左移
+		 * 3.当循环2退出时,就得到一个满足情况的场景,放入map中进行计数(子串长度为maxSize的肯定覆盖长度为minSize,所以最大的子串数量
+		 * 肯定在minSize中得到)
+		 * <p>
+		 * 这个是解决不定长窗口的模版方法
+		 *
+		 * @param s
+		 * @param maxLetters
+		 * @param minSize
+		 * @param maxSize
+		 * @return
+		 */
+		public static int maxFreqII(String s, int maxLetters, int minSize, int maxSize) {
+			int n = s.length();
+			Map<String, Integer> map = new HashMap<>();
+			StringBuilder sb = new StringBuilder();
+			int[] count = new int[26];
+			int l = 0, r = 0, cnt = 0;
+			while (r < n) {
+				sb.append(s.charAt(r));
+				if (count[s.charAt(r) - 'a']++ == 0) {
+					cnt++;
+				}
+				r++;
+				int len = r - l; // 窗口长度,处理r之后,r++ r已经右移了,但窗口还是r右移之前的长度
+				while (cnt > maxLetters || len > minSize) {
+					sb.deleteCharAt(0);
+					if (count[s.charAt(l) - 'a']-- == 1) {
+						cnt--;
+					}
+					l++;
+					len--;
+				}
+				if (cnt <= maxLetters && len == minSize) {
+					map.put(sb.toString(), map.getOrDefault(sb.toString(), 0) + 1);
+				}
+			}
+			int res = 0;
+			for (String key : map.keySet()) {
+				res = Math.max(res, map.get(key));
+			}
+			return res;
+		}
+
+		public static void main(String[] args) {
+			System.out.println(maxFreqII("babcbceccaaacddbdaedbadcddcbdbcbaaddbcabcccbacebda", 1, 1, 1));
+			System.out.println(Integer.toBinaryString((int) Math.pow(10, 9)));
+		}
+	}
+
+	/**
+	 * 2134. 最少交换次数来组合所有的 1 II
+	 * 交换 定义为选中一个数组中的两个 互不相同 的位置并交换二者的值。
+	 * 环形 数组是一个数组，可以认为 第一个 元素和 最后一个 元素 相邻 。
+	 * 给你一个 二进制环形 数组 nums ，返回在 任意位置 将数组中的所有 1 聚集在一起需要的最少交换次数。
+	 * 示例 1：
+	 * 输入：nums = [0,1,0,1,1,0,0]
+	 * 输出：1
+	 * 解释：这里列出一些能够将所有 1 聚集在一起的方案：
+	 * [0,0,1,1,1,0,0] 交换 1 次。
+	 * [0,1,1,1,0,0,0] 交换 1 次。
+	 * [1,1,0,0,0,0,1] 交换 2 次（利用数组的环形特性）。
+	 * 无法在交换 0 次的情况下将数组中的所有 1 聚集在一起。
+	 * 因此，需要的最少交换次数为 1 。
+	 * 示例 2：
+	 * 输入：nums = [0,1,1,1,0,0,1,1,0]
+	 * 输出：2
+	 * 解释：这里列出一些能够将所有 1 聚集在一起的方案：
+	 * [1,1,1,0,0,0,0,1,1] 交换 2 次（利用数组的环形特性）。
+	 * [1,1,1,1,1,0,0,0,0] 交换 2 次。
+	 * 无法在交换 0 次或 1 次的情况下将数组中的所有 1 聚集在一起。
+	 * 因此，需要的最少交换次数为 2 。
+	 * 示例 3：
+	 * 输入：nums = [1,1,0,0,1]
+	 * 输出：0
+	 * 解释：得益于数组的环形特性，所有的 1 已经聚集在一起。
+	 * 因此，需要的最少交换次数为 0 。
+	 * 提示：
+	 * 1 <= nums.length <= 105
+	 * nums[i] 为 0 或者 1
+	 */
+	static class MinSwaps {
+
+		/**
+		 * 思路：
+		 * 环形数组,一般将数组拼接一个完全相同的
+		 * 固定滑动窗口长度为数组中1的个数
+		 *
+		 * @param nums
+		 * @return
+		 */
+		public static int minSwaps(int[] nums) {
+			int n = nums.length, k = 0;
+			for (int i = 0; i < n; i++) {
+				if (nums[i] == 1) k++;
+			}
+			int[] arr = new int[2 * n];
+			System.arraycopy(nums, 0, arr, 0, n);
+			System.arraycopy(nums, 0, arr, n, n);
+			int res = 0, cnt = 0; // 记录0的数量
+			for (int i = 0; i < k; i++) {
+				if (arr[i] == 0) {
+					cnt++;
+				}
+			}
+			res = cnt;
+			for (int left = 1; left < n; left++) {
+				if (arr[left - 1] == 0) {
+					cnt--;
+				}
+				if (arr[left + k - 1] == 0) {
+					cnt++;
+
+				}
+				res = Math.min(res, cnt);
+			}
+			return res;
+		}
+
+		/**
+		 * 当然,也可以不用拓展数组的方式,当idx>=n时,idx=idx%n
+		 *
+		 * @param nums
+		 * @return
+		 */
+		public static int minSwapsII(int[] nums) {
+			int n = nums.length, k = 0;
+			for (int i = 0; i < n; i++) {
+				k += nums[i];
+			}
+			int res = 0, cnt = 0; // 记录1的数量
+			for (int i = 0; i < k; i++) {
+				cnt += nums[i];
+			}
+			res = cnt;
+			for (int left = 1; left < n; left++) {
+				cnt -= nums[left - 1];
+				cnt += nums[(left + k - 1) % n];
+				res = Math.max(res, cnt);
+			}
+			return k - res;
+		}
+
+		public static void main(String[] args) {
+			System.out.println(minSwapsII(new int[]{0, 1, 0, 1, 1, 0, 0}));
+		}
+	}
+
+	/**
+	 * 2653. 滑动子数组的美丽值
+	 * 给你一个长度为 n 的整数数组 nums ，请你求出每个长度为 k 的子数组的 美丽值 。
+	 * 一个子数组的 美丽值 定义为：如果子数组中第 x 小整数 是 负数 ，那么美丽值为第 x 小的数，否则美丽值为 0 。
+	 * 请你返回一个包含 n - k + 1 个整数的数组，依次 表示数组中从第一个下标开始，每个长度为 k 的子数组的 美丽值 。
+	 * 子数组指的是数组中一段连续 非空 的元素序列。
+	 * 示例 1：
+	 * 输入：nums = [1,-1,-3,-2,3], k = 3, x = 2
+	 * 输出：[-1,-2,-2]
+	 * 解释：总共有 3 个 k = 3 的子数组。
+	 * 第一个子数组是 [1, -1, -3] ，第二小的数是负数 -1 。
+	 * 第二个子数组是 [-1, -3, -2] ，第二小的数是负数 -2 。
+	 * 第三个子数组是 [-3, -2, 3] ，第二小的数是负数 -2 。
+	 * 示例 2：
+	 * 输入：nums = [-1,-2,-3,-4,-5], k = 2, x = 2
+	 * 输出：[-1,-2,-3,-4]
+	 * 解释：总共有 4 个 k = 2 的子数组。
+	 * [-1, -2] 中第二小的数是负数 -1 。
+	 * [-2, -3] 中第二小的数是负数 -2 。
+	 * [-3, -4] 中第二小的数是负数 -3 。
+	 * [-4, -5] 中第二小的数是负数 -4 。
+	 * 示例 3：
+	 * 输入：nums = [-3,1,2,-3,0,-3], k = 2, x = 1
+	 * 输出：[-3,0,-3,-3,-3]
+	 * 解释：总共有 5 个 k = 2 的子数组。
+	 * [-3, 1] 中最小的数是负数 -3 。
+	 * [1, 2] 中最小的数不是负数，所以美丽值为 0 。
+	 * [2, -3] 中最小的数是负数 -3 。
+	 * [-3, 0] 中最小的数是负数 -3 。
+	 * [0, -3] 中最小的数是负数 -3 。
+	 * 提示：
+	 * n == nums.length
+	 * 1 <= n <= 105
+	 * 1 <= k <= n
+	 * 1 <= x <= k
+	 * -50 <= nums[i] <= 50
+	 */
+	static class GetSubarrayBeauty {
+
+		/**
+		 * 思路: 固定长度子数组,滑动窗口
+		 * 主要是窗体内,每次都要求第x小的元素,如何快速求第x小呢?
+		 * 1.用快排思路的selectK是可以的,但是窗口滑动时,相当于要完全重排序.
+		 * 2.使用优先级队列(大顶堆),队列长度为x,那么堆顶就是第x小的元素.优先级队列怎么删除元素呢?
+		 * 这种方法时间复杂度太高,会超时
+		 *
+		 * @param nums
+		 * @param k
+		 * @param x
+		 * @return
+		 */
+		public static int[] getSubarrayBeauty(int[] nums, int k, int x) {
+			int n = nums.length;
+			PriorityQueue<Integer> priorityQueue = new PriorityQueue<>(k, (Comparator.comparingInt(o -> o)));
+			List<Integer> list = new ArrayList<>(k);
+			for (int i = 0; i < k; i++) {
+				list.add(nums[i]);
+			}
+			int[] res = new int[n - k + 1];
+			res[0] = Math.min(topK(list, priorityQueue, x), 0);
+			int idx = 1;
+			for (int i = k; i < n; i++) {
+				list.remove(0);
+				list.add(nums[i]);
+				res[idx++] = Math.min(topK(list, priorityQueue, x), 0);
+			}
+			return res;
+		}
+
+		private static int topK(List<Integer> list, PriorityQueue<Integer> priorityQueue, int x) {
+			priorityQueue.clear();
+			priorityQueue.addAll(list);
+			int res = 0;
+			for (int i = 0; i < x; i++) {
+				res = priorityQueue.poll();
+			}
+			return res;
+		}
+
+		/**
+		 * 由于数据范围在[-50,50]之间,数据的范围小,可以参考计数排序,然后暴力的统计第x大的数,即遍历计数排序数组
+		 * 这个思路非常不好想到
+		 *
+		 * @param nums
+		 * @param k
+		 * @param x
+		 * @return
+		 */
+		public static int[] getSubarrayBeautyII(int[] nums, int k, int x) {
+			int[] cnt = new int[50 * 2 + 1];
+			for (int i = 0; i < k; i++) { // 现在数组中放入k个数
+				cnt[nums[i] + 50]++;  // 全部变成正数,范围变成[0,100]
+			}
+			int n = nums.length;
+			int[] res = new int[n - k + 1];
+			res[0] = min(cnt, x);
+			for (int i = k; i < n; i++) {
+				cnt[nums[i] + 50]++;
+				cnt[nums[i - k] + 50]--;
+				res[i - k + 1] = min(cnt, x);
+			}
+			return res;
+		}
+
+		/**
+		 * 找到cnt中第x小的数
+		 *
+		 * @param cnt
+		 * @return
+		 */
+		private static int min(int[] cnt, int x) {
+			int count = 0;
+			for (int i = 0; i < cnt.length; i++) {
+				count += cnt[i];
+				if (count >= x) {
+					return Math.min(i - 50, 0);
+				}
+			}
+			return 0;
+		}
+
+		public static void main(String[] args) {
+			System.out.println(Arrays.toString(getSubarrayBeautyII(new int[]{-1, -2, -3, -4, -5}, 2, 2)));
+		}
+	}
+
+	/**
+	 * 1888. 使二进制字符串字符交替的最少反转次数
+	 * 给你一个二进制字符串 s 。你可以按任意顺序执行以下两种操作任意次：
+	 * 类型 1 ：删除 字符串 s 的第一个字符并将它 添加 到字符串结尾。
+	 * 类型 2 ：选择 字符串 s 中任意一个字符并将该字符 反转 ，也就是如果值为 '0' ，则反转得到 '1' ，反之亦然。
+	 * 请你返回使 s 变成 交替 字符串的前提下， 类型 2 的 最少 操作次数 。
+	 * 我们称一个字符串是 交替 的，需要满足任意相邻字符都不同。
+	 * 比方说，字符串 "010" 和 "1010" 都是交替的，但是字符串 "0100" 不是。
+	 * 示例 1：
+	 * 输入：s = "111000"
+	 * 输出：2
+	 * 解释：执行第一种操作两次，得到 s = "100011" 。
+	 * 然后对第三个和第六个字符执行第二种操作，得到 s = "101010" 。
+	 * 示例 2：
+	 * 输入：s = "010"
+	 * 输出：0
+	 * 解释：字符串已经是交替的。
+	 * 示例 3：
+	 * 输入：s = "1110"
+	 * 输出：1
+	 * 解释：对第二个字符执行第二种操作，得到 s = "1010" 。
+	 * 提示：
+	 * 1 <= s.length <= 105
+	 * s[i] 要么是 '0' ，要么是 '1' 。
+	 */
+	static class MinFlips {
+
+		/**
+		 * 思路:
+		 * 按照常规思路,先走步骤1,然后通过滑动窗口进行步骤2
+		 * 步骤2如何操作呢?
+		 * 滑动窗口的长度为2,每次判断窗口内元素是都相同,如果相同就滑动;不同则把后面的数反转,反转次数+1后滑动
+		 * ---------------------------------------------------------------------------------
+		 * 暴力匹配超时
+		 *
+		 * @param s
+		 * @return
+		 */
+		public static int minFlips(String s) {
+			String s1 = s + s;
+			int n = s.length(), min = Integer.MAX_VALUE;
+			for (int i = 0; i < s.length(); i++) {
+				String s2 = s1.substring(i, n + i);
+				char pre = s2.charAt(0);
+				int count = 0;
+				for (int j = 1; j < s2.length(); j++) {
+					if (pre == s2.charAt(j)) {
+						pre = pre == '0' ? '1' : '0';
+						count++;
+					} else {
+						pre = s2.charAt(j);
+					}
+				}
+				min = Math.min(count, min);
+			}
+			return min;
+		}
+
+		/**
+		 * 解题思路有点难以理解
+		 * 1.操作一是将首位的字符移动到尾部,类似于2倍长度的字符串,向右滑动一位形成的窗口
+		 * 2.操作二是反转字符,可以通过和 s1(01...) 或者 s2(10...) 这样的字符串比较差异的位数有多少
+		 * * 其中用cnt表是和s1比较后差异的字符数量,那么n-cnt就是和s2比较后差异的字符数量(因为字符除了0就是1,s1和s2每位上恰好相反)
+		 * 当然有种情况是可以通过操作一来弥补的,比如01...01|10101 他中间有两个1相邻,如果把前面所有的元素都移动到后面,则得到
+		 * 10101|01...01 这样也是符合情况的.对原s字符串进行滑动,滑动后,进入窗口和退出窗口的元素会影响cnt的值
+		 *
+		 * @param s
+		 * @return
+		 */
+		public static int minFlipsII(String s) {
+			int n = s.length();
+			char[] s01 = "01".toCharArray();
+			int cnt = 0;
+			for (int i = 0; i < n; i++) {
+				if (s.charAt(i) == s01[i % 2]) {
+					cnt++;
+				}
+			}
+			int ans = Math.min(cnt, n - cnt);
+			for (int i = n; i < 2 * n; i++) {
+				// 不懂这个滑动窗口的逻辑;为什么滑动之后,cnt的数量就进行相应的变化呢?101|1010
+				// 这种情况最多只会出现一次,每滑动一位后查看是否有这种情况出现
+				if (s.charAt((i - n) % n) == s01[(i - n) % 2]) {
+					cnt--;
+				}
+				if (s.charAt(i % n) == s01[i % 2]) {
+					cnt++;
+				}
+				ans = Math.min(ans, Math.min(cnt, n - cnt));
+			}
+			return ans;
+		}
+
+		public static void main(String[] args) {
+			System.out.println(minFlipsII("111000"));
 		}
 	}
 

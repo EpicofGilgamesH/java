@@ -1,6 +1,7 @@
 package test;
 
 import com.alibaba.fastjson.JSON;
+import com.sun.org.apache.xpath.internal.compiler.PsuedoNames;
 import lombok.Data;
 
 import java.util.*;
@@ -2208,6 +2209,148 @@ public class DailyQuestionCase {
 
 		public static void main(String[] args) {
 			System.out.println(minimumSubarrayLength(new int[]{2,1,8}, 10));
+		}
+	}
+
+	/**
+	 * 3097. 或值至少为 K 的最短子数组 II
+	 * 给你一个 非负 整数数组 nums 和一个整数 k 。
+	 * 如果一个数组中所有元素的按位或运算 OR 的值 至少 为 k ，那么我们称这个数组是 特别的 。
+	 * 请你返回 nums 中 最短特别非空
+	 * 子数组
+	 * 的长度，如果特别子数组不存在，那么返回 -1 。
+	 * 示例 1：
+	 * 输入：nums = [1,2,3], k = 2
+	 * 输出：1
+	 * 解释：
+	 * 子数组 [3] 的按位 OR 值为 3 ，所以我们返回 1 。
+	 * 示例 2：
+	 * 输入：nums = [2,1,8], k = 10
+	 * 输出：3
+	 * 解释：
+	 * 子数组 [2,1,8] 的按位 OR 值为 11 ，所以我们返回 3 。
+	 * 示例 3：
+	 * 输入：nums = [1,2], k = 0
+	 * 输出：1
+	 * 解释：
+	 * 子数组 [1] 的按位 OR 值为 1 ，所以我们返回 1 。
+	 * 提示：
+	 * 1 <= nums.length <= 2 * 105
+	 * 0 <= nums[i] <= 109
+	 * 0 <= k <= 109
+	 */
+	static class MinimumSubarrayLength {
+
+		/**
+		 * 思路：
+		 * 1.与运算A|B>=A 所以从左到右进行与运算时,其结果值会单调递增,所以可以使用滑动窗口
+		 * * left为窗口左端,right为窗口右端,先右移right,当有与值>=k时,那么从left-right最少有一个子数组满足情况
+		 * * 本题要求找到子数组中长度最小的满足与值>=k的情况,所以右移left,找到以right为窗口右端点最小的子数组
+		 * 2.如何解决与运算的窗口滑动呢? 二进制与,当有一位上有一个1,则该位为1;如果有一位上都是0,则该位为0
+		 * * 统计每一位上0的个数即可,题中nums[i]最大为10^9 转换成二进制为30位
+		 *
+		 * @param nums
+		 * @param k
+		 * @return
+		 */
+		public static int minimumSubarrayLength(int[] nums, int k) {
+			int n = nums.length, res = Integer.MAX_VALUE;
+			int[] arr = new int[30];
+			for (int l = 0, r = 0; r < n; r++) {
+				// r右移,此时需要计算每位上1的个数,从0位开始
+				for (int i = 0; i < 30; i++) {
+					if (((nums[r] >> i) & 1) == 1) {
+						arr[i]++;
+					}
+				}
+				// r右移后判断窗口内与值是否小于等于k,同时让l右移
+				while (l <= r && calc(arr) >= k) {
+					// 如果直接能进入while循环,则说明r右移后满足条件,记录子数组长度,然后l右移
+					res = Math.min(res, r - l + 1);
+					for (int i = 0; i < 30; i++) {
+						if (((nums[l] >> i) & 1) == 1) {
+							arr[i]--;
+						}
+					}
+					l++;
+				}
+			}
+			return res == Integer.MAX_VALUE ? -1 : res;
+		}
+
+		/**
+		 * 通过每位上1的个数计算与值
+		 *
+		 * @param arr
+		 * @return
+		 */
+		private static int calc(int[] arr) {
+			int s = 0;
+			for (int i = 0; i < 30; i++) {
+				if (arr[i] > 0) {
+					// s|=(1<<i); //这里或运算和加运算结果一样,都是统计每位上为1的值的和
+					s += (1 << i);
+				}
+			}
+			return s;
+		}
+
+		public static void main(String[] args) {
+			System.out.println(minimumSubarrayLength(new int[]{2, 1, 8}, 10));
+		}
+	}
+
+	/**
+	 * 2239. 找到最接近 0 的数字
+	 * 给你一个长度为 n 的整数数组 nums ，请你返回 nums 中最 接近 0 的数字。如果有多个答案，请你返回它们中的 最大值 。
+	 * 示例 1：
+	 * 输入：nums = [-4,-2,1,4,8]
+	 * 输出：1
+	 * 解释：
+	 * -4 到 0 的距离为 |-4| = 4 。
+	 * -2 到 0 的距离为 |-2| = 2 。
+	 * 1 到 0 的距离为 |1| = 1 。
+	 * 4 到 0 的距离为 |4| = 4 。
+	 * 8 到 0 的距离为 |8| = 8 。
+	 * 所以，数组中距离 0 最近的数字为 1 。
+	 * 示例 2：
+	 * 输入：nums = [2,-1,1]
+	 * 输出：1
+	 * 解释：1 和 -1 都是距离 0 最近的数字，所以返回较大值 1 。
+	 * 提示：
+	 * 1 <= n <= 1000
+	 * -105 <= nums[i] <= 105
+	 */
+	static class FindClosestNumber {
+
+		/**
+		 * 思路:
+		 * 简单的办法是,算平均值,比较平均值最小的元素 ;如果平均值一样返回正数
+		 *
+		 * @param nums
+		 * @return
+		 */
+		public static int findClosestNumber(int[] nums) {
+			int n = nums.length, abs = Integer.MAX_VALUE;
+			boolean symbol = false;
+			for (int i = 0; i < n; i++) {
+				if (nums[i] > 0) {  // 整数
+					if (nums[i] <= abs) {
+						abs = nums[i];
+						symbol = true;
+					}
+				} else {  // 负数
+					if (-nums[i] < abs) {
+						abs = -nums[i];
+						symbol = false;
+					}
+				}
+			}
+			return symbol ? abs : -abs;
+		}
+
+		public static void main(String[] args) {
+			System.out.println(findClosestNumber(new int[]{-10000,10000}));
 		}
 	}
 
