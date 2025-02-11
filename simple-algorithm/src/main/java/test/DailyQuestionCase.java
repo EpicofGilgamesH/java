@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.sun.org.apache.xpath.internal.compiler.PsuedoNames;
 import lombok.Data;
 
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -2353,5 +2354,78 @@ public class DailyQuestionCase {
 			System.out.println(findClosestNumber(new int[]{-10000,10000}));
 		}
 	}
+
+	/**
+	 * 1561. 你可以获得的最大硬币数目
+	 * 有 3n 堆数目不一的硬币，你和你的朋友们打算按以下方式分硬币：
+	 * 每一轮中，你将会选出 任意 3 堆硬币（不一定连续）。
+	 * Alice 将会取走硬币数量最多的那一堆。
+	 * 你将会取走硬币数量第二多的那一堆。
+	 * Bob 将会取走最后一堆。
+	 * 重复这个过程，直到没有更多硬币。
+	 * 给你一个整数数组 piles ，其中 piles[i] 是第 i 堆中硬币的数目。
+	 * 返回你可以获得的最大硬币数目。
+	 * 示例 1：
+	 * 输入：piles = [2,4,1,2,7,8]
+	 * 输出：9
+	 * 解释：选出 (2, 7, 8) ，Alice 取走 8 枚硬币的那堆，你取走 7 枚硬币的那堆，Bob 取走最后一堆。
+	 * 选出 (1, 2, 4) , Alice 取走 4 枚硬币的那堆，你取走 2 枚硬币的那堆，Bob 取走最后一堆。
+	 * 你可以获得的最大硬币数目：7 + 2 = 9.
+	 * 考虑另外一种情况，如果选出的是 (1, 2, 8) 和 (2, 4, 7) ，你就只能得到 2 + 4 = 6 枚硬币，这不是最优解。
+	 * 示例 2：
+	 * 输入：piles = [2,4,5]
+	 * 输出：4
+	 * 示例 3：
+	 * 输入：piles = [9,8,7,6,5,1,2,3,4]
+	 * 输出：18
+	 * 提示：
+	 * 3 <= piles.length <= 10^5
+	 * piles.length % 3 == 0
+	 * 1 <= piles[i] <= 10^4
+	 */
+	static class MaxCoins {
+
+		/**
+		 * 从题意来看,贪心比较合适,分层的三堆中,每次拿第二大的数字;希望每次都是拿到第二大的数
+		 * [9,8,7,6,5,1,2,3,4] 排序后[9,8,7,6,5,4,3,2,1] 期望拿到 8,6,4 才是最大
+		 *
+		 * @param piles
+		 * @return
+		 */
+		public static int maxCoins(int[] piles) {
+			int n = piles.length, v = n / 3;
+			Integer[] arr = new Integer[n];
+			for (int i = 0; i < n; i++) {
+				arr[i] = piles[i];
+			}
+			Arrays.sort(arr, (o1, o2) -> o2 - o1);
+			int sum = 0;
+			for (int i = 1; i < 2 * v; i += 2) {
+				sum += arr[i];
+			}
+			return sum;
+		}
+
+		/**
+		 * 本题可以不需要逆序,正序之后反着遍历
+		 *
+		 * @param piles
+		 * @return
+		 */
+		public static int maxCoinsII(int[] piles) {
+			int n = piles.length;
+			Arrays.sort(piles);
+			int sum = 0, v = n - (n / 3) * 2;
+			for (int i = n - 2; i >= v; i -= 2) {
+				sum += piles[i];
+			}
+			return sum;
+		}
+
+		public static void main(String[] args) {
+			System.out.println(maxCoinsII(new int[]{9, 8, 7, 6, 5, 1, 2, 3, 4}));
+		}
+	}
+
 
 }
