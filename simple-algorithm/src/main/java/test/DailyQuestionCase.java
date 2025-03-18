@@ -1,10 +1,8 @@
 package test;
 
 import com.alibaba.fastjson.JSON;
-import com.sun.org.apache.xpath.internal.compiler.PsuedoNames;
 import lombok.Data;
 
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -2427,5 +2425,90 @@ public class DailyQuestionCase {
 		}
 	}
 
+	/**
+	 * 2269. 找到一个数字的 K 美丽值
+	 * 一个整数 num 的 k 美丽值定义为 num 中符合以下条件的 子字符串 数目：
+	 * 子字符串长度为 k 。
+	 * 子字符串能整除 num 。
+	 * 给你整数 num 和 k ，请你返回 num 的 k 美丽值。
+	 * 注意：
+	 * 允许有 前缀 0 。
+	 * 0 不能整除任何值。
+	 * 一个 子字符串 是一个字符串里的连续一段字符序列。
+	 * 示例 1：
+	 * 输入：num = 240, k = 2
+	 * 输出：2
+	 * 解释：以下是 num 里长度为 k 的子字符串：
+	 * - "240" 中的 "24" ：24 能整除 240 。
+	 * - "240" 中的 "40" ：40 能整除 240 。
+	 * 所以，k 美丽值为 2 。
+	 * 示例 2：
+	 * 输入：num = 430043, k = 2
+	 * 输出：2
+	 * 解释：以下是 num 里长度为 k 的子字符串：
+	 * - "430043" 中的 "43" ：43 能整除 430043 。
+	 * - "430043" 中的 "30" ：30 不能整除 430043 。
+	 * - "430043" 中的 "00" ：0 不能整除 430043 。
+	 * - "430043" 中的 "04" ：4 不能整除 430043 。
+	 * - "430043" 中的 "43" ：43 能整除 430043 。
+	 * 所以，k 美丽值为 2 。
+	 * 提示：
+	 * 1 <= num <= 109
+	 * 1 <= k <= num.length （将 num 视为字符串）
+	 */
+	static class DivisorSubstrings {
 
+		/**
+		 * 思路:
+		 * 根据子数组的长度,一次遍历;涉及字符串转int类型,有没有更好的转换方法呢?
+		 * 直接计算子数组的值,定长滑动窗口,计算下一个子数组的值
+		 *
+		 * @param num
+		 * @param k
+		 * @return
+		 */
+		public static int divisorSubstrings(int num, int k) {
+			String s = String.valueOf(num);
+			int[] arr = new int[s.length()];
+			for (int i = 0; i < s.length(); i++) {
+				arr[i] = s.charAt(i) - '0';
+			}
+			int n = arr.length, res = 0, v = 0;
+			int r = (int) Math.pow(10, k - 1), r1 = r;
+			for (int i = 0; i < k; i++) {
+				v += arr[i] * r;
+				r /= 10;
+			}
+			if (v != 0 && num % v == 0) res++;
+			for (int i = 1; i <= n - k; i++) {
+				v -= arr[i - 1] * r1;
+				v = v * 10 + arr[i + k - 1];
+				if (v != 0 && num % v == 0) res++;
+			}
+			return res;
+		}
+
+		/**
+		 * 直接字符串转int值
+		 *
+		 * @param num
+		 * @param k
+		 * @return
+		 */
+		public static int divisorSubstringsI(int num, int k) {
+			String s = String.valueOf(num);
+			int n = s.length(), res = 0;
+			for (int i = 0; i <= n-k; i++) {
+				String sv = s.substring(i, i + k);
+				int v = Integer.parseInt(sv);
+				if (v != 0 && num % v == 0) res++;
+			}
+			return res;
+		}
+
+		public static void main(String[] args) {
+			int i = divisorSubstringsI(430043, 2);
+			System.out.println(i);
+		}
+	}
 }
