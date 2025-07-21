@@ -65,7 +65,7 @@ public class PressureTest1 {
 		System.out.println("单次耗时:" + (System.currentTimeMillis() - l));*/
 
 
-		long l1 = System.currentTimeMillis();
+/*		long l1 = System.currentTimeMillis();
 		HttpClient httpClient = HttpClients.createDefault();
 		RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(5000)
 				.setConnectionRequestTimeout(5000)
@@ -79,7 +79,7 @@ public class PressureTest1 {
 		HttpResponse execute = httpClient.execute(get);
 		System.out.println("单次耗时:" + (System.currentTimeMillis() - l1));
 		httpClient.execute(get);
-		System.out.println();
+		System.out.println();*/
 
 		// 初始化线程池
 		ExecutorService pool = new ThreadPoolExecutor(24 * 40 + 1, 24 * 40 + 1, 120,

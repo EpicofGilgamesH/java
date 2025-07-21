@@ -1,5 +1,7 @@
 package test.slidingWindow;
 
+import com.sun.codemodel.internal.JArray;
+
 import java.util.*;
 
 /**
@@ -885,6 +887,44 @@ public class LeetCodeCaseII {
 				}
 			}
 			return 0;
+		}
+	}
+
+	/**
+	 * 2271. 毯子覆盖的最多白色砖块数
+	 */
+	static class MaximumWhiteTiles {
+
+		/**
+		 * 思路:
+		 * 1.首先证明毯子覆盖的起点,肯定是瓷砖的左端点
+		 * 2.设毯子完全覆盖瓷砖的数量是cnt,部分覆盖的数量是extra
+		 * 3.双指针l表示毯子的覆盖的左端点,r表示毯子覆盖的右端点,l和r都是指第几块连续的瓷砖;
+		 *
+		 * @param tiles
+		 * @param carpetLen
+		 * @return
+		 */
+		public static int maximumWhiteTiles(int[][] tiles, int carpetLen) {
+			Arrays.sort(tiles, Comparator.comparingInt(a -> a[0]));
+			int n = tiles.length;
+			int res = 0, cnt = 0, r = 0;
+			for (int l = 0; l < n; ++l) {
+				if (l > 0) {
+					cnt -= tiles[l - 1][1] - tiles[l - 1][0] + 1;
+				}
+				while (r < n && tiles[l][0] + carpetLen > tiles[l][1]) {  // 完全覆盖后面的瓷砖
+					cnt += tiles[r][1] - tiles[r][0] + 1;
+					++r;
+				}
+				if (r == n) {
+					res = Math.max(res, cnt);
+					return res;
+				}
+				int extra = Math.max(0, tiles[l][0] + carpetLen - tiles[r][0]);
+				res = Math.max(res, cnt + extra);
+			}
+			return res;
 		}
 	}
 }

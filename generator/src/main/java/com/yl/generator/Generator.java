@@ -53,8 +53,9 @@ public class Generator {
 
 		// 数据源配置
 		DataSourceConfig dsc = new DataSourceConfig();
-		dsc.setUrl("jdbc:mysql://10.250.160.100:3306/pay");
+		dsc.setUrl("jdbc:mysql://10.250.160.110:3306/quickbiz_business");
 		//dsc.setSchemaName("public");
+
 		dsc.setDriverName("com.mysql.cj.jdbc.Driver");
 		dsc.setUsername("admin");
 		dsc.setPassword("pmostc@123");

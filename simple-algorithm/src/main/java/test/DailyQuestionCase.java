@@ -2511,4 +2511,100 @@ public class DailyQuestionCase {
 			System.out.println(i);
 		}
 	}
+
+	/**
+	 * 3396. 使数组元素互不相同所需的最少操作次数
+	 * 给你一个整数数组 nums，你需要确保数组中的元素 互不相同 。为此，你可以执行以下操作任意次：
+	 * <p>
+	 * 从数组的开头移除 3 个元素。如果数组中元素少于 3 个，则移除所有剩余元素。
+	 * 注意：空数组也视作为数组元素互不相同。返回使数组元素互不相同所需的 最少操作次数 。
+	 * <p>
+	 * <p>
+	 * <p>
+	 * <p>
+	 * <p>
+	 * 示例 1：
+	 * <p>
+	 * 输入： nums = [1,2,3,4,2,3,3,5,7]
+	 * <p>
+	 * 输出： 2
+	 * <p>
+	 * 解释：
+	 * <p>
+	 * 第一次操作：移除前 3 个元素，数组变为 [4, 2, 3, 3, 5, 7]。
+	 * 第二次操作：再次移除前 3 个元素，数组变为 [3, 5, 7]，此时数组中的元素互不相同。
+	 * 因此，答案是 2。
+	 * <p>
+	 * 示例 2：
+	 * <p>
+	 * 输入： nums = [4,5,6,4,4]
+	 * <p>
+	 * 输出： 2
+	 * <p>
+	 * 解释：
+	 * <p>
+	 * 第一次操作：移除前 3 个元素，数组变为 [4, 4]。
+	 * 第二次操作：移除所有剩余元素，数组变为空。
+	 * 因此，答案是 2。
+	 * <p>
+	 * 示例 3：
+	 * <p>
+	 * 输入： nums = [6,7,8,9]
+	 * <p>
+	 * 输出： 0
+	 * <p>
+	 * 解释：
+	 * <p>
+	 * 数组中的元素已经互不相同，因此不需要进行任何操作，答案是 0。
+	 * <p>
+	 * <p>
+	 * <p>
+	 * 提示：
+	 * <p>
+	 * 1 <= nums.length <= 100
+	 * 1 <= nums[i] <= 100
+	 */
+	static class MinimumOperations {
+
+		/**
+		 * 思路:
+		 * 使用HashMap计数,然后判断每个数字的计数是否为1
+		 * 当某个数的计数等于0时,删除key,那么只用判断HashMap的key数量是否等于数组剩余元素的长度
+		 *
+		 * @param nums
+		 * @return
+		 */
+		public static int minimumOperations(int[] nums) {
+			HashMap<Integer, Integer> map = new HashMap<>();
+			int l = nums.length, operate = 0, n = l;
+			for (int i = 0; i < l; i++) {
+				map.put(nums[i], map.getOrDefault(nums[i], 0) + 1);
+			}
+			if (map.size() == n) return operate;
+			int m = l / 3;
+			for (; operate < m; operate++) {
+				for (int i = 0; i < 3; i++) {
+					int idx = operate * 3 + i;
+					int c = map.get(nums[idx]) - 1;
+					if (c == 0) {
+						map.remove(nums[idx]);
+					} else {
+						map.put(nums[idx], c);
+					}
+
+				}
+				n -= 3;
+				if (map.size() == n) return operate + 1;
+			}
+			return m + 1;
+		}
+
+		public static void main(String[] args) {
+			String jsonString = JSON.toJSONString(1);
+			String js = JSON.toJSONString("1233");
+
+			System.out.println(jsonString);
+			System.out.println(js);
+		}
+	}
 }

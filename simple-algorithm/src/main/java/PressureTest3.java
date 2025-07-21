@@ -1,5 +1,6 @@
 import cn.hutool.http.HttpRequest;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.taobao.diamond.utils.TimeUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
@@ -9,6 +10,9 @@ import org.apache.http.impl.client.HttpClients;
 import java.io.IOException;
 import java.util.concurrent.*;
 
+/**
+ * 每隔一段时间,并发请求一次,测试流量控制
+ */
 public class PressureTest3 {
 
 
@@ -24,12 +28,12 @@ public class PressureTest3 {
 		public void run() {
 			try {
 				start.await();
-				// System.out.println(Thread.currentThread().getName() + "开始执行:" + System.currentTimeMillis());
+				System.out.println(Thread.currentThread().getName() + "开始执行:" + System.currentTimeMillis());
 				execute();
 			} catch (InterruptedException e) {
-				// throw new RuntimeException(e);
+				throw new RuntimeException(e);
 			} finally {
-				// System.out.println(Thread.currentThread().getName() + "执行完成:" + System.currentTimeMillis());
+				System.out.println(Thread.currentThread().getName() + "执行完成:" + System.currentTimeMillis());
 				latch2.countDown();
 			}
 		}
@@ -38,48 +42,21 @@ public class PressureTest3 {
 
 			try {
 				String response = HttpRequest
-						.get("http://10.250.160.40:8101/buyer/info")
-						.header("authorization", "Bearer 76836e89-af3e-4976-ac00-b296627bb0cf")
-						.body("")
+						.post("http://10.240.65.240:8900/smsNotify/inner/sendSms")
+						//.header("authorization", "Bearer 76836e89-af3e-4976-ac00-b296627bb0cf")
+						.body("{\"countryCode\":\"NG\",\"sendType\":1,\"phoneNumber\":\"081025632010\",\"content\":\"123\",\"verificationCOde\":\"111\"}")
 						.execute().body();
-
+				System.out.println(response);
 			} catch (Exception exception) {
 
 			}
 		}
 	}
 
-	public static CountDownLatch latch1 = new CountDownLatch(3000);
-	public static CountDownLatch latch2 = new CountDownLatch(3000);
+	public static CountDownLatch latch1 = new CountDownLatch(4);
+	public static CountDownLatch latch2 = new CountDownLatch(4);
 
 	public static void main(String[] args) throws InterruptedException, IOException {
-
-		/*long l = System.currentTimeMillis();
-		String response = HttpRequest
-				.get("https://country2.test.egatee.cn/api/user/buyer/info")
-				.header("authorization", "Bearer 53a41e2c-72d5-4257-a707-bef71084692b")
-				.timeout(6000)
-				.execute().body();
-
-		// System.out.println(JSON.toJSONString(response));
-		System.out.println("单次耗时:" + (System.currentTimeMillis() - l));*/
-
-
-		long l1 = System.currentTimeMillis();
-		HttpClient httpClient = HttpClients.createDefault();
-		RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(5000)
-				.setConnectionRequestTimeout(5000)
-				.setSocketTimeout(5000)
-				.setRedirectsEnabled(true)
-				.build();
-
-		HttpGet get = new HttpGet("http://10.250.160.40:8101/buyer/info");
-		get.setHeader("authorization", "Bearer 76836e89-af3e-4976-ac00-b296627bb0cf");
-		get.setConfig(requestConfig);
-		HttpResponse execute = httpClient.execute(get);
-		System.out.println("单次耗时:" + (System.currentTimeMillis() - l1));
-		httpClient.execute(get);
-		System.out.println();
 
 		// 初始化线程池
 		ExecutorService pool = new ThreadPoolExecutor(24 * 40 + 1, 24 * 40 + 1, 120,
@@ -89,22 +66,20 @@ public class PressureTest3 {
 				new ThreadPoolExecutor.DiscardPolicy()  // 丢弃任务  策略设置交给当前线程处理时,导致主线程阻塞,任务没法继续,所以策略设置必须要考虑使用场景
 
 		);
-		long cast = 0;
 
-		long s = System.currentTimeMillis();
-		for (int j = 0; j < 3000; j++) {
-			try {
-				pool.submit(new RequestTask(latch1));
-			} finally {
-				latch1.countDown();
+		for (int i = 0; i < 10; i++) {
+			for (int j = 0; j < 4; j++) {
+				try {
+					pool.submit(new RequestTask(latch1));
+				} finally {
+					latch1.countDown();
+				}
 			}
+			System.out.println();
+			latch2.await(); // 主线程阻塞
+			TimeUnit.MILLISECONDS.sleep(20);
 		}
-		System.out.println();
-
-		latch2.await(); // 主线程阻塞
 		pool.shutdown();
-		long s1 = System.currentTimeMillis() - s;
 
-		System.out.println("压测100次耗时为:" + s1);
 	}
 }
