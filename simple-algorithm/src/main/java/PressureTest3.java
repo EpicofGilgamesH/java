@@ -8,6 +8,9 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClients;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
 import java.util.concurrent.*;
 
 /**
@@ -17,6 +20,8 @@ public class PressureTest3 {
 
 
 	static class RequestTask implements Runnable {
+
+		static final List<String> countryCode = Arrays.asList("CN", "NG", "KE", "AO");
 
 		final CountDownLatch start;
 
@@ -38,23 +43,34 @@ public class PressureTest3 {
 			}
 		}
 
+		private static String getCountryCode() {
+			Random random = new Random();
+			int index = random.nextInt(countryCode.size());
+			return countryCode.get(index);
+		}
+
 		private static void execute() {
+			String countryCode = getCountryCode();
+			String phone = ThreadLocalRandom.current().ints(10, 0, 10)
+					.collect(StringBuilder::new, StringBuilder::append, StringBuilder::append).toString();
+			String body = String.format("{\"countryCode\":\"%s\",\"sendType\":1,\"phoneNumber\":" +
+					"\"%s\",\"content\":\"123\",\"verificationCOde\":\"111\"}", countryCode, phone);
 
 			try {
 				String response = HttpRequest
-						.post("http://10.240.65.240:8900/smsNotify/inner/sendSms")
+						.post("http://localhost:8900/smsNotify/inner/sendSms")
 						//.header("authorization", "Bearer 76836e89-af3e-4976-ac00-b296627bb0cf")
-						.body("{\"countryCode\":\"NG\",\"sendType\":1,\"phoneNumber\":\"081025632010\",\"content\":\"123\",\"verificationCOde\":\"111\"}")
+						.body(body)
 						.execute().body();
 				System.out.println(response);
 			} catch (Exception exception) {
-
+				System.out.println(exception.getMessage());
 			}
 		}
 	}
 
-	public static CountDownLatch latch1 = new CountDownLatch(4);
-	public static CountDownLatch latch2 = new CountDownLatch(4);
+	public static CountDownLatch latch1 = new CountDownLatch(10);
+	public static CountDownLatch latch2 = new CountDownLatch(10);
 
 	public static void main(String[] args) throws InterruptedException, IOException {
 
@@ -67,7 +83,7 @@ public class PressureTest3 {
 
 		);
 
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 1000 ; i++) {
 			for (int j = 0; j < 4; j++) {
 				try {
 					pool.submit(new RequestTask(latch1));
@@ -75,10 +91,10 @@ public class PressureTest3 {
 					latch1.countDown();
 				}
 			}
-			System.out.println();
-			latch2.await(); // 主线程阻塞
-			TimeUnit.MILLISECONDS.sleep(20);
 		}
+		System.out.println();
+		latch2.await(); // 主线程阻塞
+		TimeUnit.MILLISECONDS.sleep(20);
 		pool.shutdown();
 
 	}
