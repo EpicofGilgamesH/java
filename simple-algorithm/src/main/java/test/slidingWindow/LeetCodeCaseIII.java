@@ -175,4 +175,91 @@ public class LeetCodeCaseIII {
 			System.out.println(shortestBeautifulSubstring("001", 1));
 		}
 	}
+
+
+	/**
+	 * 713. 乘积小于 K 的子数组
+	 * 给你一个整数数组 nums 和一个整数 k ，请你返回子数组内所有元素的乘积严格小于 k 的连续子数组的数目。
+	 * <p>
+	 * <p>
+	 * 示例 1：
+	 * <p>
+	 * 输入：nums = [10,5,2,6], k = 100
+	 * 输出：8
+	 * 解释：8 个乘积小于 100 的子数组分别为：[10]、[5]、[2]、[6]、[10,5]、[5,2]、[2,6]、[5,2,6]。
+	 * 需要注意的是 [10,5,2] 并不是乘积小于 100 的子数组。
+	 * 示例 2：
+	 * <p>
+	 * 输入：nums = [1,2,3], k = 0
+	 * 输出：0
+	 * <p>
+	 * <p>
+	 * 提示:
+	 * <p>
+	 * 1 <= nums.length <= 3 * 104
+	 * 1 <= nums[i] <= 1000
+	 * 0 <= k <= 106
+	 */
+	static class NumSubarrayProductLessThanK {
+
+		/**
+		 * 本题的关键点在于
+		 * 1.构建出满足情况的子数组[left,right]
+		 * 2.每次找到满足情况的子数组后,记录新增的子数组个数
+		 * 比如[1,2,3] 此时right右移以为变成 [1,2,3,4] 那么新增的满足情况的子数组为: [1,2,3,4],[2,3,4],[3,4],[4]
+		 * 实际上就是这个子数组元素的个数num =right-left+1
+		 *
+		 * @param nums
+		 * @param k
+		 * @return
+		 */
+		public static int numSubarrayProductLessThanK(int[] nums, int k) {
+			if (k <= 1) return 0;
+			int left = 0, mul = 1, count = 0;
+			for (int right = 0; right < nums.length; right++) {
+				mul *= nums[right];
+				while (mul >= k && left <= right) {  // left不能大于right
+					mul /= nums[left];
+					left++;
+				}
+				count += right - left + 1;
+			}
+			return count;
+		}
+
+
+		public static int numSubarrayProductLessThanKII(int[] nums, int k) {
+			//同样排除k为1的情况比如  [1,1,1] k=1
+			if (k <= 1) {
+				return 0;
+			}
+			int left = 0;
+			int right = 0;
+			//创建一个变量记录路上的乘积
+			int mul = 1;
+			//记录连续数组的组合个数
+			int ans = 0;
+
+			//用右指针遍历整个数组，每次循环右指针右移一次
+			while(right<nums.length) {
+				//记录乘积
+				mul *= nums[right];
+				//当大于等于k，左指针右移并把之前左指针的数除掉
+				while (mul >= k) {
+					mul /= nums[left];
+					left++;
+				}
+				//每次右指针位移到一个新位置，应该加上 x 种数组组合：
+				ans += right - left + 1;
+
+				//右指针右移
+				right++;
+			}
+			return ans;
+		}
+
+		public static void main(String[] args) {
+			System.out.println(numSubarrayProductLessThanKII(new int[]{1, 2, 3}, 0));
+		}
+	}
 }
