@@ -1,8 +1,6 @@
 package test.slidingWindow;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * 不定长滑动窗口-求最小/最大
@@ -553,10 +551,155 @@ public class LeetCodeCaseIII {
 			return res;
 		}
 
+		/**
+		 * 维护两个单调队列,分别存放窗口中最大元素和最小元素的下标值
+		 *
+		 * @param nums
+		 * @return
+		 */
+		public static long continuousSubarraysIV(int[] nums) {
+			int l = nums.length, left = 0;
+			long res = 0;
+			Deque<Integer> minDeque = new ArrayDeque<>();
+			Deque<Integer> maxDeque = new ArrayDeque<>();
+			for (int right = 0; right < l; right++) {
+				int r = nums[right];
+				while (!minDeque.isEmpty() && r <= nums[minDeque.peekLast()]) {
+					minDeque.pollLast();
+				}
+				minDeque.addLast(right);
+
+				while (!maxDeque.isEmpty() && r >= nums[maxDeque.peekLast()]) {
+					maxDeque.pollLast();
+				}
+				maxDeque.addLast(right);
+
+				while (nums[maxDeque.peekFirst()] - nums[minDeque.peekFirst()] > 2) {
+					left++;
+					if (minDeque.peekFirst() < left) {
+						minDeque.pollFirst();
+					}
+					if (maxDeque.peekFirst() < left) {
+						maxDeque.pollFirst();
+					}
+				}
+				res += right - left + 1;
+			}
+			return res;
+		}
+
+
+
 		public static void main(String[] args) {
 			// System.out.println(continuousSubarrays(new int[]{5, 4, 2, 4}));
-			System.out.println(continuousSubarraysIII(new int[]{345, 345, 344, 345
+			System.out.println(continuousSubarraysIV(new int[]{345, 345, 344, 345
 					, 345, 344, 345, 345, 345, 345, 345, 345, 344, 344, 344, 344, 343, 344, 344, 343, 344, 343, 342, 343, 344, 345, 346, 347, 347, 346, 345, 345, 346}));
+		}
+	}
+
+	/**
+	 * LCP 68. 美观的花束
+	 * 力扣嘉年华的花店中从左至右摆放了一排鲜花，记录于整型一维矩阵 flowers 中每个数字表示该位置所种鲜花的品种编号。你可以选择一段区间的鲜花做成插花，且不能丢弃。 在你选择的插花中，如果每一品种的鲜花数量都不超过 cnt 朵，那么我们认为这束插花是 「美观的」。
+	 * 例如：[5,5,5,6,6] 中品种为 5 的花有 3 朵， 品种为 6 的花有 2 朵，每一品种 的数量均不超过 3
+	 * 请返回在这一排鲜花中，共有多少种可选择的区间，使得插花是「美观的」。
+	 * 注意：
+	 * 结果无需取模，用例保证输出为 int32 范围内的整数。
+	 * 示例 1：
+	 * 输入：flowers = [1,2,3,2], cnt = 1
+	 * 输出：8
+	 * 解释：相同的鲜花不超过 1 朵，共有 8 种花束是美观的； 长度为 1 的区间 [1]、[2]、[3]、[2] 均满足条件，共 4 种可选择区间 长度为 2 的区间 [1,2]、[2,3]、[3,2] 均满足条件，共 3 种可选择区间 长度为 3 的区间 [1,2,3] 满足条件，共 1 种可选择区间。 区间 [2,3,2],[1,2,3,2] 都包含了 2 朵鲜花 2 ，不满足条件。 返回总数 4+3+1 = 8
+	 * 示例 2：
+	 * 输入：flowers = [5,3,3,3], cnt = 2
+	 * 输出：8
+	 * 提示：
+	 * 1 <= flowers.length <= 10^5
+	 * 1 <= flowers[i] <= 10^5
+	 * 1 <= cnt <= 10^5
+	 */
+	static class BeautifulBouquet {
+
+		/**
+		 * 思路:
+		 * 1.不定长滑动窗口,窗口右侧和左侧的滑动规则
+		 * 2.窗口右侧滑动时,会新生成子数组,这个是思路关键-即窗口中新增元素时,新增子数组场景
+		 * @param flowers
+		 * @param cnt
+		 * @return
+		 */
+		public static int beautifulBouquet(int[] flowers, int cnt) {
+			int l = flowers.length, left = 0, right = 0, cate = 0, res = 0;
+			Map<Integer, Integer> map = new HashMap<>();
+			for (; right < l; right++) {
+				int a = map.getOrDefault(flowers[right], 0);
+				map.put(flowers[right], a + 1);
+				if (a == cnt) {
+					cate++;
+				}
+
+				while (left <= right && cate > 0) {
+					int b = map.getOrDefault(flowers[left], 0);
+					map.put(flowers[left], b - 1);
+					if (b == cnt + 1) {
+						cate--;
+					}
+					left++;
+				}
+				res += right - left + 1;
+			}
+			return res;
+		}
+
+		/**
+		 * 在用HashMap维护每种花的实际数量时,也可以直接通过计算HashMap中value是否存在大于cnt的场景
+		 * 会循环map的values集合,时间复杂度更高从O(n) 直接变成 O(n^2)
+		 * @param flowers
+		 * @param cnt
+		 * @return
+		 */
+		public static int beautifulBouquetII(int[] flowers, int cnt) {
+			int l = flowers.length, left = 0, right = 0, res = 0;
+			Map<Integer, Integer> map = new HashMap<>();
+			for (; right < l; right++) {
+				int a = map.getOrDefault(flowers[right], 0);
+				map.put(flowers[right], a + 1);
+
+				while (left <= right && map.values().stream().anyMatch(x -> x > cnt)) {
+					int b = map.getOrDefault(flowers[left], 0);
+					map.put(flowers[left], b - 1);
+					left++;
+				}
+				res += right - left + 1;
+			}
+			return res;
+		}
+
+		/**
+		 * 既然flowers数据的长度和范围都在10^5,那么我们可以直接通过数组来处理
+		 * 数组的下标即表示flowers[i],数组的值即表示count(flowers[i]),同时记录数组的值大于cnt的个数
+		 * @param flowers
+		 * @param cnt
+		 * @return
+		 */
+		public static int beautifulBouquetIII(int[] flowers, int cnt) {
+			int l = flowers.length, left = 0, right = 0, cate = 0, res = 0;
+			int[] arr = new int[100001];
+			for (; right < l; right++) {
+				if (arr[flowers[right]]++ == cnt) {
+					cate++;
+				}
+				while (left <= right && cate > 0) {
+					if (arr[flowers[left]]-- == cnt + 1) {
+						cate--;
+					}
+					left++;
+				}
+				res += right - left + 1;
+			}
+			return res;
+		}
+
+		public static void main(String[] args) {
+			System.out.println(beautifulBouquetIII(new int[]{1,2,3,2},1));
 		}
 	}
 }
