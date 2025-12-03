@@ -1,6 +1,9 @@
 package file;
 
 import cn.hutool.core.util.StrUtil;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -19,13 +22,19 @@ import java.util.stream.Stream;
 public class GeneratorInsertSql {
 
 
-	private static List<Long> readTxt() {
-		List<Long> list = new ArrayList<>();
+	private static List<Vo> readTxt() {
+		List<Vo> list = new ArrayList<>();
 		Path path = Paths.get("D:\\Users\\Desktop", "id.txt");
 		try (Stream<String> lines = Files.lines(path)) {
 			list = lines.filter(StrUtil::isNotBlank)
-					.map(x -> Long.valueOf(x.trim()))
-					.collect(Collectors.toList());
+					.map(x -> {
+						Vo vo = new Vo();
+						String[] split = x.split("\t");
+						if (split.length > 0) {
+							vo = new Vo(split[2], split[3], split[4], split[5]);
+						}
+						return vo;
+					}).collect(Collectors.toList());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -33,11 +42,11 @@ public class GeneratorInsertSql {
 	}
 
 
-	private static List<String> getSql(List<Long> list) {
+	private static List<String> getSql(List<Vo> list) {
 		List<String> res = new ArrayList<>();
-		String sql = "INSERT INTO user_center.uc_country_setting (country_id, item_key, label, remark, item_value, value_type, value_rule, is_hidden, dependency, sort, is_deleted, gmt_create, gmt_modified) VALUES(%s, 'sms_signature_salt', '短信接口签名盐', '指定index', '%s', 2, NULL, 0, NULL, 0, 0, now(),now());";
-		for (Long l : list) {
-			res.add(String.format(sql, l, generateSalt(13)));
+		String sql = "INSERT INTO `quickbiz_base`.`gd_stock_alert_info_1` (`enterprise_id`, `company_id`, `type`, `goods_id`, `sku_id`, `warehouse_id`, `min_inventory_qty`, `gmt_create`, `gmt_modified`, `is_deleted`) VALUES (6046, 2719, 100023, 1, %s, %s, %s, %s, '2025-12-03 18:03:37', '2025-12-03 18:06:09', 0);";
+		for (Vo l : list) {
+			res.add(String.format(sql, l.getSpuId(), l.getSkuId(), l.getWareId(), l.getMiq()));
 		}
 		return res;
 	}
@@ -85,9 +94,19 @@ public class GeneratorInsertSql {
 		return sb.toString();
 	}
 
+	@Data
+	@AllArgsConstructor
+	@NoArgsConstructor
+	static class Vo {
+		private String spuId;
+		private String skuId;
+		private String wareId;
+		private String miq;
+	}
+
 
 	public static void main(String[] args) {
-		List<Long> ids = readTxt();
+		List<Vo> ids = readTxt();
 		List<String> sqls = getSql(ids);
 		write(sqls);
 	}
